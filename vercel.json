@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "name": "mm-financial-demo",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/calculators/?$",
+      "dest": "/calculators/index.html"
+    },
+    {
+      "src": "^/calculators/([a-zA-Z0-9_-]+)/?$",
+      "dest": "/calculators/$1.html"
+    },
+    {
+      "src": "^/loans/?$",
+      "dest": "/loans.html"
+    },
+    {
+      "src": "^/mutual-funds/?$",
+      "dest": "/mutual-funds.html"
+    },
+    {
+      "src": "^/insurance/?$",
+      "dest": "/insurance.html"
+    },
+    {
+      "src": "^/api/(.*)$",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/index.html"
+    }
+  ]
+}
