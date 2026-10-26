@@ -275,35 +275,22 @@
                             <!-- Left: Interactive Controls -->
                             <div class="calc-card inputs-card">
                                 <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--color-navy); margin-bottom: 16px;">Overdraft Facility &amp; Usage Controls</h4>
-                                
-                                <div class="input-group">
-                                    <div class="input-header">
-                                        <label for="lamfRateInput">Overdraft Interest Rate (% p.a.)</label>
-                                        <span class="input-badge" id="lamfRateBadge">10.50%</span>
-                                    </div>
-                                    <div class="input-with-symbol">
-                                        <span class="currency-prefix">%</span>
-                                        <input type="text" id="lamfRateInput" class="calc-input" value="10.50" inputmode="decimal" aria-label="Interest Rate">
-                                    </div>
-                                    <input type="range" id="lamfRateSlider" class="calc-slider" min="9.0" max="14.0" step="0.05" value="10.50">
-                                    <div class="slider-limits"><span>9.0%</span><span>14.0%</span></div>
-                                </div>
 
                                 <!-- Loan Tenure / Overdraft Facility Period (12 to 84 Months or 1 to 7 Years) -->
                                 <div class="input-group">
                                     <div class="input-header" style="display: flex; justify-content: space-between; align-items: center;">
                                         <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure</label>
                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div class="tenure-unit-toggle" style="display: inline-flex; background: #e2e8f0; border-radius: 6px; padding: 2px;">
-                                                <button type="button" class="lamf-unit-btn active" data-unit="months" style="padding: 2px 8px; font-size: 0.72rem; border: none; background: #ffffff; color: var(--color-navy); border-radius: 4px; font-weight: 700; cursor: pointer;">Months</button>
-                                                <button type="button" class="lamf-unit-btn" data-unit="years" style="padding: 2px 8px; font-size: 0.72rem; border: none; background: transparent; color: #64748b; border-radius: 4px; font-weight: 700; cursor: pointer;">Years</button>
+                                            <div class="tenure-unit-toggle" role="group" aria-label="Tenure Unit Option">
+                                                <button type="button" class="tenure-unit-btn lamf-unit-btn active" data-unit="months" title="Tenure in Months"><span class="unit-full">Months</span><span class="unit-short">Mo</span></button>
+                                                <button type="button" class="tenure-unit-btn lamf-unit-btn" data-unit="years" title="Tenure in Years"><span class="unit-full">Years</span><span class="unit-short">Yr</span></button>
                                             </div>
                                             <span class="input-badge" id="lamfTenureBadge">36 Months (3 Yrs)</span>
                                         </div>
                                     </div>
                                     <div class="input-with-symbol">
-                                        <span class="currency-prefix" id="lamfTenurePrefix">Mo</span>
-                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Tenure">
+                                        <span class="currency-prefix" id="lamfTenurePrefix" style="left: 12px; pointer-events: none; font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1;">Mo</span>
+                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Facility Tenure" style="padding-left: 42px;">
                                     </div>
                                     <input type="range" id="lamfTenureSlider" class="calc-slider" min="12" max="84" step="1" value="36">
                                     <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (1 Yr)</span><span id="lamfTenureMaxLimit">84 Months (7 Yrs)</span></div>

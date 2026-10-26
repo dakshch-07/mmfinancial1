@@ -2732,7 +2732,7 @@ const CONFIG = {
                   `*Estimated Credit Limit:* ₹${fmtINR(totals.totalLimit)}\n` +
                   `*Equity Sub-limit:* ₹${fmtINR(totals.equityLimit)} | *Debt Sub-limit:* ₹${fmtINR(totals.debtLimit)}\n` +
                   `*Tenure:* ${tenureVal}\n` +
-                  `*Indicative Interest Rate:* ${rate}% p.a.\n\n` +
+                  `*Indicative Interest Rate:* 10.50% p.a.\n\n` +
                   `Please guide me with the online paperless lien-marking and sanction process.`;
 
       waBtn.href = `https://wa.me/${LAMF_CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
