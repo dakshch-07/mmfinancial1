@@ -1670,7 +1670,6 @@ const CONFIG = {
     const unitToggleBtns = widget.querySelectorAll('.lamf-unit-btn');
     const elTenureSummary = document.getElementById('lamfTenureSummary');
     const elTenureTotalInterest = document.getElementById('lamfTenureTotalInterest');
-    const elStampDuty = document.getElementById('lamfStampDuty');
 
     let currentTenureUnit = 'months'; // 'months' | 'years'
 
@@ -2448,12 +2447,6 @@ const CONFIG = {
       if (elAnnualInterest) elAnnualInterest.textContent = '₹' + fmtINR(annualInterest);
       if (elMonthlyInterest) elMonthlyInterest.textContent = '₹' + fmtINR(Math.round(monthlyInterest));
       if (elDailyInterest) elDailyInterest.textContent = '₹' + fmtINR(Math.round(dailyInterest));
-
-      // Calculate Statutory Govt Stamp Duty (0.3% of Sanctioned Limit)
-      if (elStampDuty) {
-        const stampVal = Math.round(totalLimit * CONFIG.defaults.charges.stampDutyRate);
-        elStampDuty.textContent = '₹' + fmtINR(stampVal);
-      }
 
       // Stress Test: Market Fall Impact
       const stressPct = parseFloat(stressSl ? stressSl.value : 0) || 0;
