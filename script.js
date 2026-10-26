@@ -1840,6 +1840,10 @@ function initLoanForm() {
     const loanTurnoverAmountYear2 = document.getElementById('loanTurnoverAmountYear2');
     const loanAvgTurnoverDisplay = document.getElementById('loanAvgTurnoverDisplay');
     const loanTurnoverFormulaHint = document.getElementById('loanTurnoverFormulaHint');
+    const loanObligationDisplay = document.getElementById('loanObligationDisplay');
+    const loanNetCapacityDisplay = document.getElementById('loanNetCapacityDisplay');
+    const loanEmiPerLakhDisplay = document.getElementById('loanEmiPerLakhDisplay');
+    const loanMaxEligibilityDisplay = document.getElementById('loanMaxEligibilityDisplay');
 
     function updateLoansTurnoverAvg() {
         const t1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
@@ -1852,25 +1856,56 @@ function initLoanForm() {
         const annualDerived = Math.round(avg * mult);
         const monthlyDerived = Math.round(annualDerived / 12);
 
+        // Underwriting Formula:
+        // Monthly Income - Existing Obligations
+        // / EMI Per Lakh * 1,00,000 = Max Loan Eligibility
+        const obligation = parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0;
+        const netCapacity = Math.max(0, monthlyDerived - obligation);
+
+        const currentRoi = parseFloat(loanRoiInput ? loanRoiInput.value : 8.5) || 8.5;
+        const currentTenureMonths = parseTenureToMonthsLocal(tenure ? tenure.value : '20 Years');
+        const emiPerLakh = calculateEmiPerLakhLocal(currentTenureMonths, currentRoi);
+
+        let maxLoanEligible = 0;
+        if (emiPerLakh > 0 && netCapacity > 0) {
+            maxLoanEligible = Math.round((netCapacity / emiPerLakh) * 100000);
+        }
+
         if (loanAvgTurnoverDisplay) {
             loanAvgTurnoverDisplay.textContent = '₹' + formatIndianNumber(avg);
         }
         if (loanMonthlyIncomeDisplay) {
             loanMonthlyIncomeDisplay.textContent = '₹' + formatIndianNumber(monthlyDerived) + ' / month';
         }
+        if (loanObligationDisplay) {
+            loanObligationDisplay.textContent = obligation > 0 ? '- ₹' + formatIndianNumber(obligation) : '₹0';
+        }
+        if (loanNetCapacityDisplay) {
+            loanNetCapacityDisplay.textContent = '₹' + formatIndianNumber(netCapacity) + ' / mo';
+        }
+        if (loanEmiPerLakhDisplay) {
+            loanEmiPerLakhDisplay.textContent = '₹' + formatIndianNumber(emiPerLakh) + ' / Lakh';
+        }
+        if (loanMaxEligibilityDisplay) {
+            loanMaxEligibilityDisplay.textContent = '₹' + formatIndianNumber(maxLoanEligible);
+        }
+
         if (loanTurnoverFormulaHint) {
             const multPct = (mult * 100).toFixed(1) + '%';
             const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
             const optText = opt ? opt.text : '';
             const isGrossReceipt = optText.includes('Gross Receipts') || optText.includes('Doctor') || optText.includes('CA') || optText.includes('CS');
-            const term = isGrossReceipt ? '2-Year Average Receipts' : '2-Year Average Turnover';
-            loanTurnoverFormulaHint.textContent = `Formula: (${term} ₹${formatIndianNumber(avg)} × ${multPct}) ÷ 12 = ₹${formatIndianNumber(monthlyDerived)} / month`;
+            const term = isGrossReceipt ? '2-Yr Avg Receipts' : '2-Yr Avg Turnover';
+            loanTurnoverFormulaHint.textContent = `Formula: [(${term} ₹${formatIndianNumber(avg)} × ${multPct} ÷ 12 = ₹${formatIndianNumber(monthlyDerived)}) - Obligations ₹${formatIndianNumber(obligation)}] ÷ EMI Per Lakh ₹${formatIndianNumber(emiPerLakh)} = Max Loan ₹${formatIndianNumber(maxLoanEligible)}`;
         }
-        return { avg, monthlyDerived, annualDerived };
+        return { avg, monthlyDerived, annualDerived, obligation, netCapacity, emiPerLakh, maxLoanEligible };
     }
 
     if (loanTurnoverAmount) loanTurnoverAmount.addEventListener('input', updateLoansTurnoverAvg);
     if (loanTurnoverAmountYear2) loanTurnoverAmountYear2.addEventListener('input', updateLoansTurnoverAvg);
+    if (emi) emi.addEventListener('input', updateLoansTurnoverAvg);
+    if (loanRoiInput) loanRoiInput.addEventListener('input', updateLoansTurnoverAvg);
+    if (tenure) tenure.addEventListener('change', updateLoansTurnoverAvg);
 
     [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary, loanTurnoverAmount, loanTurnoverAmountYear2].forEach(el => {
         formatCurrencyInput(el);
