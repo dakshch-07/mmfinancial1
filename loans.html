@@ -12,8 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="/style.css?v=2.4">
-    <link rel="stylesheet" href="/calculators/calculators.css?v=2.3">
+    <link rel="stylesheet" href="/style.css?v=2.5">
+    <link rel="stylesheet" href="/calculators/calculators.css?v=2.5">
 </head>
 <body class="theme-light">
 
@@ -258,28 +258,41 @@
                             </div>
 
                             <!-- Turnover / Gross Receipts Multiplier Controls (Mfg, Services, Trader, CA, CS, Doctor MBBS) -->
-                            <div id="businessTurnoverRow" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <span style="font-size: 0.85rem; font-weight: 800; color: #78350f;">2-Year Turnover / Gross Receipts Underwriting</span>
-                                    <span class="input-badge" id="loanTurnoverMultiplierBadge" style="background: rgba(197, 154, 63, 0.25); color: #78350f; font-weight: 800; font-size: 0.82rem; padding: 2px 10px; border-radius: 4px;">7.5%</span>
+                            <div id="businessTurnoverRow" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 16px; width: 100%;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                                    <span style="font-size: 0.9rem; font-weight: 800; color: #78350f;">2-Year Turnover / Gross Receipts Underwriting Program</span>
+                                    <span class="input-badge" id="loanTurnoverMultiplierBadge" style="background: rgba(197, 154, 63, 0.25); color: #78350f; font-weight: 800; font-size: 0.85rem; padding: 3px 10px; border-radius: 4px;">7.5%</span>
                                 </div>
 
-                                <div class="form-row" style="margin-bottom: 12px;">
-                                    <div class="form-field" style="width: 100%;">
+                                <!-- Row 1: Category & Manual Margin % Input -->
+                                <div class="form-row" style="margin-bottom: 14px;">
+                                    <div class="form-field">
                                         <label for="loanTurnoverMultiplier" style="font-size: 0.82rem; font-weight: 700; color: #78350f;">Industry / Professional Margin Benchmark <span class="req">*</span></label>
                                         <select id="loanTurnoverMultiplier" name="loanTurnoverMultiplier" class="form-select" style="border-color: #fcd34d;">
-                                            <option value="0.12" data-min="10" data-max="15">Manufacturing (MFG 10% - 15%)</option>
-                                            <option value="0.12" data-min="10" data-max="15">Services Sector (10% - 15%)</option>
-                                            <option value="0.075" data-min="5" data-max="10" selected>Trading / Wholesale / Retail (5% - 10%)</option>
-                                            <option value="0.025" data-min="2" data-max="3">Professional CA (Gross Receipts 2% - 3%)</option>
-                                            <option value="0.015" data-min="1.5" data-max="1.5">Company Secretary (CS Gross Receipts 1.5%)</option>
-                                            <option value="0.025" data-min="2" data-max="3">Doctor MBBS (Gross Receipts 2% - 3%)</option>
-                                            <option value="0.05" data-min="1" data-max="20">Custom Margin (2% - 7% / Flexible)</option>
+                                            <option value="0.12" data-min="10" data-max="15" data-def="12">Manufacturing (MFG 10% - 15%)</option>
+                                            <option value="0.12" data-min="10" data-max="15" data-def="12">Services Sector (10% - 15%)</option>
+                                            <option value="0.075" data-min="5" data-max="10" data-def="7.5" selected>Trading / Wholesale / Retail (5% - 10%)</option>
+                                            <option value="0.025" data-min="2" data-max="3" data-def="2.5">Professional CA (Gross Receipts 2% - 3%)</option>
+                                            <option value="0.015" data-min="1.5" data-max="1.5" data-def="1.5">Company Secretary (CS Gross Receipts 1.5%)</option>
+                                            <option value="0.025" data-min="2" data-max="3" data-def="2.5">Doctor MBBS (Gross Receipts 2% - 3%)</option>
+                                            <option value="0.05" data-min="1" data-max="20" data-def="5">Custom Margin (2% - 7% / Flexible)</option>
                                         </select>
+                                    </div>
+                                    <div class="form-field">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <label for="loanTurnoverPctInput" style="font-size: 0.82rem; font-weight: 700; color: #78350f;">Manual Net Margin % (Editable) <span class="req">*</span></label>
+                                            <span id="loanTurnoverBracketTag" style="font-size: 0.72rem; font-weight: 700; color: #92400e; background: #fef3c7; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">Min 5.0% - Max 10.0%</span>
+                                        </div>
+                                        <div style="position: relative; display: flex; align-items: center;">
+                                            <span style="position: absolute; right: 12px; font-weight: 700; color: #78350f; pointer-events: none;">%</span>
+                                            <input type="text" id="loanTurnoverPctInput" name="loanTurnoverPctInput" value="7.5" class="form-input" inputmode="decimal" style="border-color: #fcd34d; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Manual Margin Percentage">
+                                        </div>
+                                        <span class="field-hint" id="loanTurnoverPctHint" style="font-size: 0.72rem; color: #92400e;">Enter accepted margin percentage within the bank benchmark bracket</span>
                                     </div>
                                 </div>
 
-                                <div class="form-row" style="margin-bottom: 8px;">
+                                <!-- Row 2: Current & Previous Financial Year Turnover / Gross Receipts -->
+                                <div class="form-row" style="margin-bottom: 12px;">
                                     <div class="form-field">
                                         <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel">Current Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
                                         <input type="text" id="loanTurnoverAmount" name="loanTurnoverAmount" placeholder="e.g. ₹1,80,00,000" class="form-input" inputmode="numeric">
@@ -292,11 +305,23 @@
                                     </div>
                                 </div>
 
-                                <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-top: 6px;">
-                                    <span style="color: #78350f; font-weight: 600;" id="loanAvgTurnoverLabel">2-Year Average Turnover / Receipts:</span>
-                                    <strong id="loanAvgTurnoverDisplay" style="color: var(--color-navy); font-size: 0.95rem;">₹2,00,00,000</strong>
+                                <!-- Row 3: 2-Year Average & Derived Monthly Income Live Card -->
+                                <div style="background: #ffffff; border: 1.5px solid #fde68a; border-radius: 8px; padding: 14px; margin-top: 6px;">
+                                    <div class="form-row" style="margin-bottom: 10px; gap: 12px;">
+                                        <div style="display: flex; flex-direction: column;">
+                                            <span style="color: #78350f; font-size: 0.78rem; font-weight: 600;" id="loanAvgTurnoverLabel">2-Year Average Turnover / Receipts:</span>
+                                            <strong id="loanAvgTurnoverDisplay" style="color: var(--color-navy); font-size: 1.15rem; font-weight: 800; margin-top: 2px;">₹2,00,00,000</strong>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px 12px;">
+                                            <span style="color: #065f46; font-size: 0.78rem; font-weight: 700;">Derived Net Monthly Income:</span>
+                                            <strong id="loanMonthlyIncomeDisplay" style="color: #047857; font-size: 1.15rem; font-weight: 800; margin-top: 2px;">₹1,25,000 / month</strong>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed #fde68a; padding-top: 8px; margin-top: 4px; flex-wrap: wrap; gap: 6px;">
+                                        <span class="field-hint" id="loanTurnoverFormulaHint" style="color: #92400e; font-size: 0.75rem; margin: 0; font-weight: 600;">Formula: (2-Year Average ₹2,00,00,000 × 7.5%) ÷ 12 = ₹1,25,000 / month</span>
+                                        <span style="font-size: 0.72rem; color: #047857; font-weight: 700; background: #d1fae5; padding: 2px 8px; border-radius: 4px;">✓ Bank Eligible Cash Flow</span>
+                                    </div>
                                 </div>
-                                <span class="field-hint" id="loanTurnoverFormulaHint" style="margin-top: 6px; display: block; color: #92400e;">Bank Norm: Derived Monthly Profit = (2-Year Average Turnover × Margin %) ÷ 12</span>
                             </div>
 
                             <!-- Required Loan Amount & Monthly Salary / Annual Profit -->

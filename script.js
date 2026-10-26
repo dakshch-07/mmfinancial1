@@ -1665,17 +1665,16 @@ function initLoanForm() {
 
         // Auto-select Doctor MBBS Gross Receipts if Doctor / Professional selected
         if (isDoctor && loanTurnoverMultiplier) {
-            // If user selected doctor, default to Doctor MBBS option
             for (let i = 0; i < loanTurnoverMultiplier.options.length; i++) {
                 if (loanTurnoverMultiplier.options[i].text.includes('Doctor MBBS')) {
                     loanTurnoverMultiplier.selectedIndex = i;
                     break;
                 }
             }
-            if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = '2.5%';
             if (bizProgramSelect && bizProgramSelect.value !== 'turnover') {
                 bizProgramSelect.value = 'turnover';
             }
+            syncBenchmarkLimits();
         }
 
         if (isSalaried) {
@@ -1691,7 +1690,7 @@ function initLoanForm() {
 
     function updateTurnoverView() {
         const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
-        if (bizTurnoverRow) bizTurnoverRow.style.display = isTurnover ? 'flex' : 'none';
+        if (bizTurnoverRow) bizTurnoverRow.style.display = isTurnover ? 'block' : 'none';
         if (loanIncomeField) loanIncomeField.style.display = isTurnover ? 'none' : 'block';
 
         const empVal = (empType ? empType.value : '').toLowerCase();
@@ -1720,7 +1719,6 @@ function initLoanForm() {
             const amtLabelYear2 = document.getElementById('loanTurnoverAmountYear2Label');
             const avgLabel = document.getElementById('loanAvgTurnoverLabel');
             const amtHint = document.getElementById('loanTurnoverAmountHint');
-            const formulaHint = document.getElementById('loanTurnoverFormulaHint');
 
             if (amtLabel) {
                 amtLabel.innerHTML = isGrossReceipt 
@@ -1735,31 +1733,92 @@ function initLoanForm() {
             if (avgLabel) {
                 avgLabel.textContent = isGrossReceipt
                     ? '2-Year Average Gross Receipts / Fees:'
-                    : '2-Year Average Turnover:';
+                    : '2-Year Average Turnover / Receipts:';
             }
             if (amtHint) {
                 amtHint.textContent = isGrossReceipt
                     ? 'Gross professional receipts/fees credited as per Form 26AS / Bank Statements'
                     : 'Annual business turnover as per GST returns / Audited P&L';
             }
-            if (formulaHint) {
-                formulaHint.textContent = isGrossReceipt
-                    ? 'Formula: Derived Net Monthly Income = (2-Year Average Receipts × Multiplier %) ÷ 12'
-                    : 'Formula: Derived Net Monthly Profit = (2-Year Average Turnover × Multiplier %) ÷ 12';
-            }
         }
+        updateLoansTurnoverAvg();
     }
 
-    if (bizProgramSelect) {
-        bizProgramSelect.addEventListener('change', updateTurnoverView);
+    const loanTurnoverPctInput = document.getElementById('loanTurnoverPctInput');
+    const loanTurnoverBracketTag = document.getElementById('loanTurnoverBracketTag');
+    const loanTurnoverPctHint = document.getElementById('loanTurnoverPctHint');
+    const loanMonthlyIncomeDisplay = document.getElementById('loanMonthlyIncomeDisplay');
+
+    function syncBenchmarkLimits() {
+        if (!loanTurnoverMultiplier) return;
+        const opt = loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex];
+        const minVal = parseFloat(opt.dataset.min) || 1.0;
+        const maxVal = parseFloat(opt.dataset.max) || 20.0;
+        const defVal = parseFloat(opt.dataset.def) || (minVal === maxVal ? minVal : (minVal + maxVal) / 2);
+
+        if (loanTurnoverBracketTag) {
+            loanTurnoverBracketTag.textContent = minVal === maxVal 
+                ? `${minVal.toFixed(1)}% Fixed` 
+                : `Min ${minVal.toFixed(1)}% - Max ${maxVal.toFixed(1)}%`;
+        }
+        if (loanTurnoverPctHint) {
+            loanTurnoverPctHint.textContent = minVal === maxVal
+                ? `Standard bank benchmark: ${minVal.toFixed(1)}% of gross revenue`
+                : `Allowed range: ${minVal.toFixed(1)}% to ${maxVal.toFixed(1)}% (Bank benchmark)`;
+        }
+        if (loanTurnoverPctInput) {
+            loanTurnoverPctInput.value = defVal.toFixed(1);
+        }
+        if (loanTurnoverMultiplierBadge) {
+            loanTurnoverMultiplierBadge.textContent = defVal.toFixed(1) + '%';
+        }
+        updateLoansTurnoverAvg();
+    }
+
+    function getAndValidatePct() {
+        const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
+        const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        
+        let rawVal = parseFloat(String(loanTurnoverPctInput ? loanTurnoverPctInput.value : '').replace(/[^0-9.]/g, ''));
+        if (isNaN(rawVal)) rawVal = minVal;
+        
+        // Clamp maximum immediately if user exceeds limit
+        if (rawVal > maxVal) {
+            rawVal = maxVal;
+            if (loanTurnoverPctInput) loanTurnoverPctInput.value = maxVal.toFixed(1);
+        }
+        
+        if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = rawVal.toFixed(1) + '%';
+        return rawVal / 100;
     }
 
     if (loanTurnoverMultiplier) {
         loanTurnoverMultiplier.addEventListener('change', () => {
-            const pct = (parseFloat(loanTurnoverMultiplier.value) * 100).toFixed(1) + '%';
-            if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = pct;
+            syncBenchmarkLimits();
             updateTurnoverView();
         });
+    }
+
+    if (loanTurnoverPctInput) {
+        loanTurnoverPctInput.addEventListener('input', () => {
+            getAndValidatePct();
+            updateLoansTurnoverAvg();
+        });
+        loanTurnoverPctInput.addEventListener('blur', () => {
+            const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
+            const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
+            const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+            let v = parseFloat(loanTurnoverPctInput.value);
+            if (isNaN(v) || v < minVal) v = minVal;
+            if (v > maxVal) v = maxVal;
+            loanTurnoverPctInput.value = v.toFixed(1);
+            updateLoansTurnoverAvg();
+        });
+    }
+
+    if (bizProgramSelect) {
+        bizProgramSelect.addEventListener('change', updateTurnoverView);
     }
 
     if (empType) {
@@ -1780,6 +1839,7 @@ function initLoanForm() {
 
     const loanTurnoverAmountYear2 = document.getElementById('loanTurnoverAmountYear2');
     const loanAvgTurnoverDisplay = document.getElementById('loanAvgTurnoverDisplay');
+    const loanTurnoverFormulaHint = document.getElementById('loanTurnoverFormulaHint');
 
     function updateLoansTurnoverAvg() {
         const t1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
@@ -1788,10 +1848,25 @@ function initLoanForm() {
         if (t1 > 0 && t2 > 0) avg = Math.round((t1 + t2) / 2);
         else avg = t1 || t2;
 
+        const mult = getAndValidatePct();
+        const annualDerived = Math.round(avg * mult);
+        const monthlyDerived = Math.round(annualDerived / 12);
+
         if (loanAvgTurnoverDisplay) {
             loanAvgTurnoverDisplay.textContent = '₹' + formatIndianNumber(avg);
         }
-        return avg;
+        if (loanMonthlyIncomeDisplay) {
+            loanMonthlyIncomeDisplay.textContent = '₹' + formatIndianNumber(monthlyDerived) + ' / month';
+        }
+        if (loanTurnoverFormulaHint) {
+            const multPct = (mult * 100).toFixed(1) + '%';
+            const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
+            const optText = opt ? opt.text : '';
+            const isGrossReceipt = optText.includes('Gross Receipts') || optText.includes('Doctor') || optText.includes('CA') || optText.includes('CS');
+            const term = isGrossReceipt ? '2-Year Average Receipts' : '2-Year Average Turnover';
+            loanTurnoverFormulaHint.textContent = `Formula: (${term} ₹${formatIndianNumber(avg)} × ${multPct}) ÷ 12 = ₹${formatIndianNumber(monthlyDerived)} / month`;
+        }
+        return { avg, monthlyDerived, annualDerived };
     }
 
     if (loanTurnoverAmount) loanTurnoverAmount.addEventListener('input', updateLoansTurnoverAvg);
@@ -1929,7 +2004,8 @@ function initLoanForm() {
             const rawT1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
             const rawT2 = parseFloat(String(loanTurnoverAmountYear2 ? loanTurnoverAmountYear2.value : '').replace(/[^0-9.]/g, '')) || 0;
             const avgTurnover = (rawT1 > 0 && rawT2 > 0) ? Math.round((rawT1 + rawT2) / 2) : (rawT1 || rawT2);
-            const mult = parseFloat(loanTurnoverMultiplier ? loanTurnoverMultiplier.value : 0.05) || 0.05;
+            const pctVal = parseFloat(loanTurnoverPctInput ? loanTurnoverPctInput.value : 7.5) || 7.5;
+            const mult = pctVal / 100;
 
             if (!validateField(loanTurnoverAmount, rawT1 >= 500000 || avgTurnover >= 500000)) isValid = false;
             effectiveIncome = avgTurnover * mult; // Equivalent annual derived income from 2-year average

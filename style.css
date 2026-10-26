@@ -4001,6 +4001,34 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 16px;
 }
 
+/* 2-Year Turnover Program Card Styling in Loan Assessment */
+#businessTurnoverRow {
+    background: #fffbeb !important;
+    border: 1.5px solid #fde68a !important;
+    border-radius: 10px !important;
+    padding: 18px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.08);
+}
+
+#businessTurnoverRow .form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+@media (max-width: 768px) {
+    #businessTurnoverRow {
+        padding: 14px 12px !important;
+    }
+    #businessTurnoverRow .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+    }
+}
+
 .form-field {
     display: flex;
     flex-direction: column;

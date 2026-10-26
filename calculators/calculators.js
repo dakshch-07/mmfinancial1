@@ -476,8 +476,27 @@ const CONFIG = {
     if (bizTurnoverYear2In && bizTurnoverYear2Sl) {
       bindSync(bizTurnoverYear2In, bizTurnoverYear2Sl, 1000000, 500000000, 500000, recalc);
     }
-    if (bizTurnoverPctIn && bizTurnoverPctSl) {
-      bindSync(bizTurnoverPctIn, bizTurnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+    if (bizTurnoverPctIn) {
+      if (bizTurnoverPctSl) bindSync(bizTurnoverPctIn, bizTurnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+      bizTurnoverPctIn.addEventListener('input', () => {
+        const opt = bizIndustrySel ? bizIndustrySel.options[bizIndustrySel.selectedIndex] : null;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        let v = parseFloat(bizTurnoverPctIn.value);
+        if (!isNaN(v) && v > maxVal) {
+          bizTurnoverPctIn.value = maxVal.toFixed(1);
+        }
+        recalc();
+      });
+      bizTurnoverPctIn.addEventListener('blur', () => {
+        const opt = bizIndustrySel ? bizIndustrySel.options[bizIndustrySel.selectedIndex] : null;
+        const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        let v = parseFloat(bizTurnoverPctIn.value);
+        if (isNaN(v) || v < minVal) v = minVal;
+        if (v > maxVal) v = maxVal;
+        bizTurnoverPctIn.value = v.toFixed(1);
+        recalc();
+      });
     }
 
     const bizIndustrySel = document.getElementById('bizIndustrySelect');
@@ -1212,8 +1231,27 @@ const CONFIG = {
     if (lapTurnoverYear2In && lapTurnoverYear2Sl) {
       bindSync(lapTurnoverYear2In, lapTurnoverYear2Sl, 1000000, 500000000, 500000, recalc);
     }
-    if (turnoverPctIn && turnoverPctSl) {
-      bindSync(turnoverPctIn, turnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+    if (turnoverPctIn) {
+      if (turnoverPctSl) bindSync(turnoverPctIn, turnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+      turnoverPctIn.addEventListener('input', () => {
+        const opt = lapIndustrySel ? lapIndustrySel.options[lapIndustrySel.selectedIndex] : null;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        let v = parseFloat(turnoverPctIn.value);
+        if (!isNaN(v) && v > maxVal) {
+          turnoverPctIn.value = maxVal.toFixed(1);
+        }
+        recalc();
+      });
+      turnoverPctIn.addEventListener('blur', () => {
+        const opt = lapIndustrySel ? lapIndustrySel.options[lapIndustrySel.selectedIndex] : null;
+        const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        let v = parseFloat(turnoverPctIn.value);
+        if (isNaN(v) || v < minVal) v = minVal;
+        if (v > maxVal) v = maxVal;
+        turnoverPctIn.value = v.toFixed(1);
+        recalc();
+      });
     }
 
     const lapIndustrySel = document.getElementById('lapIndustrySelect');

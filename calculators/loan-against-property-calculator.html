@@ -284,6 +284,23 @@
                         </select>
                     </div>
 
+                    <!-- Manual Percentage Margin Field with bracket limits -->
+                    <div class="input-group">
+                        <div class="input-header">
+                            <label for="lapTurnoverPctInput" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Manual Net Cash Margin % (Editable)</label>
+                            <span class="input-badge" id="lapTurnoverPctBadge">7.5%</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">%</span>
+                            <input type="text" id="lapTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage" style="border-color: #fcd34d; font-weight: 700;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #78350f; font-weight: 700; margin-top: 3px;">
+                            <span id="lapTurnoverMinLimit">5.0% (Min)</span>
+                            <span id="lapTurnoverMaxLimit">10.0% (Max)</span>
+                        </div>
+                        <span id="lapTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 3px; display: block;">Trading benchmark accepted by leading banks: 5% to 10% of gross turnover.</span>
+                    </div>
+
                     <!-- Current & Previous Year Turnover Inputs for LAP -->
                     <div class="input-group">
                         <div class="input-header">
@@ -294,8 +311,7 @@
                             <span class="currency-prefix">₹</span>
                             <input type="text" id="lapTurnoverInput" class="calc-input" value="3,00,00,000" inputmode="numeric">
                         </div>
-                        <input type="range" id="lapTurnoverSlider" class="calc-slider" min="1000000" max="500000000" step="500000" value="30000000">
-                        <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
+                        <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Latest / Current FY revenue as per GST returns / Audited P&amp;L.</span>
                     </div>
 
                     <div class="input-group">
@@ -307,26 +323,20 @@
                             <span class="currency-prefix">₹</span>
                             <input type="text" id="lapTurnoverYear2Input" class="calc-input" value="2,80,00,000" inputmode="numeric">
                         </div>
-                        <input type="range" id="lapTurnoverYear2Slider" class="calc-slider" min="1000000" max="500000000" step="500000" value="28000000">
-                        <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
-                    </div>
-                    <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 12px;">
-                        <span style="color: #78350f; font-weight: 600;" id="lapAvgTurnoverLabel">2-Year Average Turnover:</span>
-                        <strong id="lapAvgTurnoverBadge" style="color: var(--color-navy); font-size: 0.95rem;">₹2,90,00,000</strong>
+                        <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Previous FY revenue as per GST returns / Audited P&amp;L.</span>
                     </div>
 
-                    <div class="input-group" style="margin-bottom: 0;">
-                        <div class="input-header">
-                            <label for="lapTurnoverPctInput">Turnover Multiplier (% Margin Applied)</label>
-                            <span class="input-badge" id="lapTurnoverPctBadge">7.5%</span>
+                    <!-- 2-Year Average & Derived Monthly Cash Flow Card -->
+                    <div style="background: #ffffff; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px;">
+                            <span style="color: #78350f; font-weight: 600;" id="lapAvgTurnoverLabel">2-Year Average Turnover:</span>
+                            <strong id="lapAvgTurnoverBadge" style="color: var(--color-navy); font-size: 1.05rem; font-weight: 800;">₹2,90,00,000</strong>
                         </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">%</span>
-                            <input type="text" id="lapTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px; background: #ecfdf5; border: 1px solid #a7f3d0;">
+                            <span style="color: #065f46; font-weight: 700;">Derived Net Monthly Income:</span>
+                            <strong id="lapMonthlyIncomeBadge" style="color: #047857; font-size: 1.05rem; font-weight: 800;">₹1,81,250 / mo</strong>
                         </div>
-                        <input type="range" id="lapTurnoverPctSlider" class="calc-slider" min="1.0" max="20.0" step="0.1" value="7.5">
-                        <div class="slider-limits"><span id="lapTurnoverMinLimit">5.0% (Min)</span><span id="lapTurnoverMaxLimit">10.0% (Max)</span></div>
-                        <span id="lapTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Turnover Program: Derived Net Monthly Profit = (Turnover × Multiplier %) ÷ 12.</span>
+                        <span id="lapTurnoverFormulaText" style="display: block; font-size: 0.72rem; color: #92400e; margin-top: 6px; font-weight: 600;">Formula: (2-Year Average ₹2,90,00,000 × 7.5%) ÷ 12 = ₹1,81,250 / month</span>
                     </div>
                 </div>
 

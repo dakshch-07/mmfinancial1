@@ -322,6 +322,23 @@
                             </select>
                         </div>
 
+                        <!-- Manual Percentage Margin Field with bracket limits -->
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizTurnoverPctInput" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Manual Net Cash Margin % (Editable)</label>
+                                <span class="input-badge" id="bizTurnoverPctBadge">7.5%</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">%</span>
+                                <input type="text" id="bizTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage" style="border-color: #fcd34d; font-weight: 700;">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #78350f; font-weight: 700; margin-top: 3px;">
+                                <span id="bizTurnoverMinLimit">5.0% (Min)</span>
+                                <span id="bizTurnoverMaxLimit">10.0% (Max)</span>
+                            </div>
+                            <span id="bizTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 3px; display: block;">Trading benchmark accepted by leading banks: 5% to 10% of gross turnover.</span>
+                        </div>
+
                         <!-- Current & Previous Year Turnover Inputs -->
                         <div class="input-group">
                             <div class="input-header">
@@ -332,8 +349,6 @@
                                 <span class="currency-prefix">₹</span>
                                 <input type="text" id="bizTurnoverInput" class="calc-input" value="2,00,00,000" inputmode="numeric" aria-label="Current Year Turnover">
                             </div>
-                            <input type="range" id="bizTurnoverSlider" class="calc-slider" min="1000000" max="500000000" step="500000" value="20000000">
-                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
                             <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Latest / Current FY revenue as per GST returns / Audited P&amp;L.</span>
                         </div>
 
@@ -346,27 +361,20 @@
                                 <span class="currency-prefix">₹</span>
                                 <input type="text" id="bizTurnoverYear2Input" class="calc-input" value="1,80,00,000" inputmode="numeric" aria-label="Previous Year Turnover">
                             </div>
-                            <input type="range" id="bizTurnoverYear2Slider" class="calc-slider" min="1000000" max="500000000" step="500000" value="18000000">
-                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
                             <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Previous FY revenue as per GST returns / Audited P&amp;L.</span>
                         </div>
-                        <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 12px;">
-                            <span style="color: #78350f; font-weight: 600;" id="bizAvgTurnoverLabel">2-Year Average Turnover:</span>
-                            <strong id="bizAvgTurnoverBadge" style="color: var(--color-navy); font-size: 0.95rem;">₹1,90,00,000</strong>
-                        </div>
 
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <div class="input-header">
-                                <label for="bizTurnoverPctInput">Turnover Multiplier (% Assumed Net Cash Margin)</label>
-                                <span class="input-badge" id="bizTurnoverPctBadge">7.5%</span>
+                        <!-- 2-Year Average & Derived Monthly Cash Flow Card -->
+                        <div style="background: #ffffff; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px;">
+                                <span style="color: #78350f; font-weight: 600;" id="bizAvgTurnoverLabel">2-Year Average Turnover:</span>
+                                <strong id="bizAvgTurnoverBadge" style="color: var(--color-navy); font-size: 1.05rem; font-weight: 800;">₹1,90,00,000</strong>
                             </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix">%</span>
-                                <input type="text" id="bizTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px; background: #ecfdf5; border: 1px solid #a7f3d0;">
+                                <span style="color: #065f46; font-weight: 700;">Derived Net Monthly Income:</span>
+                                <strong id="bizMonthlyIncomeBadge" style="color: #047857; font-size: 1.05rem; font-weight: 800;">₹1,18,750 / mo</strong>
                             </div>
-                            <input type="range" id="bizTurnoverPctSlider" class="calc-slider" min="1.0" max="20.0" step="0.1" value="7.5">
-                            <div class="slider-limits"><span id="bizTurnoverMinLimit">5.0% (Min)</span><span id="bizTurnoverMaxLimit">10.0% (Max)</span></div>
-                            <span id="bizTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Trading benchmark accepted by leading banks: 5% to 10% of gross turnover.</span>
+                            <span id="bizTurnoverFormulaText" style="display: block; font-size: 0.72rem; color: #92400e; margin-top: 6px; font-weight: 600;">Formula: (2-Year Average ₹1,90,00,000 × 7.5%) ÷ 12 = ₹1,18,750 / month</span>
                         </div>
                     </div>
 
