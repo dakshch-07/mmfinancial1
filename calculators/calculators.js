@@ -468,10 +468,52 @@ const CONFIG = {
     const bizTurnoverPctSl = document.getElementById('bizTurnoverPctSlider');
 
     if (bizTurnoverIn && bizTurnoverSl) {
-      bindSync(bizTurnoverIn, bizTurnoverSl, 5000000, 500000000, 500000, recalc);
+      bindSync(bizTurnoverIn, bizTurnoverSl, 1000000, 500000000, 500000, recalc);
     }
     if (bizTurnoverPctIn && bizTurnoverPctSl) {
-      bindSync(bizTurnoverPctIn, bizTurnoverPctSl, 2.0, 7.0, 0.5, recalc, true);
+      bindSync(bizTurnoverPctIn, bizTurnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+    }
+
+    const bizIndustrySel = document.getElementById('bizIndustrySelect');
+    const bizTurnoverMinLim = document.getElementById('bizTurnoverMinLimit');
+    const bizTurnoverMaxLim = document.getElementById('bizTurnoverMaxLimit');
+    const bizTurnoverNote = document.getElementById('bizTurnoverNote');
+
+    if (bizIndustrySel) {
+      bizIndustrySel.addEventListener('change', () => {
+        const opt = bizIndustrySel.options[bizIndustrySel.selectedIndex];
+        const minVal = parseFloat(opt.dataset.min) || 1.0;
+        const maxVal = parseFloat(opt.dataset.max) || 20.0;
+        const defVal = parseFloat(opt.dataset.def) || 5.0;
+
+        if (bizTurnoverPctSl) {
+          bizTurnoverPctSl.min = minVal;
+          bizTurnoverPctSl.max = maxVal;
+          bizTurnoverPctSl.step = (minVal === maxVal) ? 0.1 : 0.1;
+          bizTurnoverPctSl.value = defVal;
+          updateSliderFill(bizTurnoverPctSl);
+        }
+        if (bizTurnoverPctIn) {
+          bizTurnoverPctIn.value = defVal.toFixed(1);
+        }
+        if (bizTurnoverMinLim && bizTurnoverMaxLim) {
+          bizTurnoverMinLim.textContent = minVal.toFixed(1) + '% (Min)';
+          bizTurnoverMaxLim.textContent = maxVal.toFixed(1) + '% (Max)';
+        }
+        if (bizTurnoverNote) {
+          const notes = {
+            mfg: 'Manufacturing norm: 10% to 15% of annual turnover treated as derived cash profit.',
+            services: 'Services sector norm: 10% to 15% of annual turnover treated as derived cash profit.',
+            trader: 'Trading / Retail norm: 5% to 10% of annual turnover treated as derived cash profit.',
+            ca: 'Chartered Accountant (CA): 2% to 3% of annual gross professional receipts.',
+            cs: 'Company Secretary (CS): 1.5% of annual gross professional receipts.',
+            doctor: 'Doctor (MBBS / Specialist): 2% to 3% of annual gross professional receipts.',
+            custom: 'Custom multiplier applied to annual turnover as accepted by specific lender.'
+          };
+          bizTurnoverNote.textContent = notes[bizIndustrySel.value] || 'Bank benchmark applied.';
+        }
+        recalc();
+      });
     }
 
     if (bizProgSel) {
@@ -1143,10 +1185,52 @@ const CONFIG = {
     bindSync(incIn, incSl, 30000, 2000000, 5000, recalc);
 
     if (turnoverIn && turnoverSl) {
-      bindSync(turnoverIn, turnoverSl, 5000000, 500000000, 500000, recalc);
+      bindSync(turnoverIn, turnoverSl, 1000000, 500000000, 500000, recalc);
     }
     if (turnoverPctIn && turnoverPctSl) {
-      bindSync(turnoverPctIn, turnoverPctSl, 2.0, 7.0, 0.5, recalc, true);
+      bindSync(turnoverPctIn, turnoverPctSl, 1.0, 20.0, 0.1, recalc, true);
+    }
+
+    const lapIndustrySel = document.getElementById('lapIndustrySelect');
+    const lapTurnoverMinLim = document.getElementById('lapTurnoverMinLimit');
+    const lapTurnoverMaxLim = document.getElementById('lapTurnoverMaxLimit');
+    const lapTurnoverNote = document.getElementById('lapTurnoverNote');
+
+    if (lapIndustrySel) {
+      lapIndustrySel.addEventListener('change', () => {
+        const opt = lapIndustrySel.options[lapIndustrySel.selectedIndex];
+        const minVal = parseFloat(opt.dataset.min) || 1.0;
+        const maxVal = parseFloat(opt.dataset.max) || 20.0;
+        const defVal = parseFloat(opt.dataset.def) || 5.0;
+
+        if (turnoverPctSl) {
+          turnoverPctSl.min = minVal;
+          turnoverPctSl.max = maxVal;
+          turnoverPctSl.step = (minVal === maxVal) ? 0.1 : 0.1;
+          turnoverPctSl.value = defVal;
+          updateSliderFill(turnoverPctSl);
+        }
+        if (turnoverPctIn) {
+          turnoverPctIn.value = defVal.toFixed(1);
+        }
+        if (lapTurnoverMinLim && lapTurnoverMaxLim) {
+          lapTurnoverMinLim.textContent = minVal.toFixed(1) + '% (Min)';
+          lapTurnoverMaxLim.textContent = maxVal.toFixed(1) + '% (Max)';
+        }
+        if (lapTurnoverNote) {
+          const notes = {
+            mfg: 'Manufacturing norm: 10% to 15% of annual turnover treated as derived cash profit.',
+            services: 'Services sector norm: 10% to 15% of annual turnover treated as derived cash profit.',
+            trader: 'Trading / Retail norm: 5% to 10% of annual turnover treated as derived cash profit.',
+            ca: 'Chartered Accountant (CA): 2% to 3% of annual gross professional receipts.',
+            cs: 'Company Secretary (CS): 1.5% of annual gross professional receipts.',
+            doctor: 'Doctor (MBBS / Specialist): 2% to 3% of annual gross professional receipts.',
+            custom: 'Custom multiplier applied to annual turnover as accepted by specific lender.'
+          };
+          lapTurnoverNote.textContent = notes[lapIndustrySel.value] || 'Bank benchmark applied.';
+        }
+        recalc();
+      });
     }
 
     if (progSel) {
