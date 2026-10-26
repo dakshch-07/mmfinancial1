@@ -1710,47 +1710,95 @@ const CONFIG = {
       return s.includes('elss') || s.includes('tax saver') || s.includes('lock-in') || s.includes('retirement');
     }
 
-    // Fetch search query with debounce
+    // Fetch search query with debounce, phonetic/fuzzy normalization & multi-stage fallback
     async function searchSchemes(query) {
-      const q = query.trim().toLowerCase();
-      if (searchCache.has(q)) return searchCache.get(q);
+      const rawQ = query.trim().toLowerCase();
+      if (searchCache.has(rawQ)) return searchCache.get(rawQ);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      try {
-        const res = await fetch(LAMF_CONFIG.navApi.search + encodeURIComponent(query), { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (!res.ok) throw new Error('Search failed');
-        const list = await res.json();
-        let results = Array.isArray(list) ? list : [];
+      // Common typos & Indian MF AMC phonetic mapping dictionary
+      const corrections = [
+        [/\bprudencial\b/g, 'prudential'],
+        [/\bnipon\b/g, 'nippon'],
+        [/\bnipoon\b/g, 'nippon'],
+        [/\bfranklin templeton\b/g, 'franklin'],
+        [/\bparag parik\b/g, 'parag parikh'],
+        [/\bmirai\b/g, 'mirae'],
+        [/\bmiraey\b/g, 'mirae'],
+        [/\baxiss\b/g, 'axis'],
+        [/\bsbii\b/g, 'sbi'],
+        [/\bhdf\b/g, 'hdfc'],
+        [/\bkotak mahindra\b/g, 'kotak']
+      ];
 
-        // Sort so active, modern Growth and Direct/Regular plans appear first ahead of ancient/discontinued plans
-        results.sort((a, b) => {
-          const aName = (a.schemeName || '').toLowerCase();
-          const bName = (b.schemeName || '').toLowerCase();
-
-          // Penalize old discontinued or bonus/premium-plus suffixes
-          const aOld = aName.includes('dividend') || aName.includes('premium') || aName.includes('bonus');
-          const bOld = bName.includes('dividend') || bName.includes('premium') || bName.includes('bonus');
-          if (aOld && !bOld) return 1;
-          if (!aOld && bOld) return -1;
-
-          // Prioritize Growth options
-          const aGrowth = aName.includes('growth');
-          const bGrowth = bName.includes('growth');
-          if (aGrowth && !bGrowth) return -1;
-          if (!aGrowth && bGrowth) return 1;
-
-          return 0;
-        });
-
-        results = results.slice(0, 12);
-        searchCache.set(q, results);
-        return results;
-      } catch (err) {
-        clearTimeout(timeoutId);
-        return [];
+      let normalizedQ = rawQ;
+      for (const [pattern, repl] of corrections) {
+        normalizedQ = normalizedQ.replace(pattern, repl);
       }
+
+      async function queryApi(term) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        try {
+          const res = await fetch(LAMF_CONFIG.navApi.search + encodeURIComponent(term), { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (!res.ok) return [];
+          const list = await res.json();
+          return Array.isArray(list) ? list : [];
+        } catch (err) {
+          clearTimeout(timeoutId);
+          return [];
+        }
+      }
+
+      // Step 1: Query with normalized text (e.g. "prudential" instead of "prudencial")
+      let results = await queryApi(normalizedQ);
+
+      // Step 2: If no results, try stripping redundant filler words like "fund", "mutual fund"
+      if (!results || results.length === 0) {
+        const stripped = normalizedQ.replace(/\bmutual\s+fund\b/g, '').replace(/\bfund\b/g, '').replace(/\s+/g, ' ').trim();
+        if (stripped && stripped !== normalizedQ && stripped.length >= 3) {
+          results = await queryApi(stripped);
+        }
+      }
+
+      // Step 3: If still no results, fallback to first 2-3 prominent keywords (e.g. "icici prudential")
+      if (!results || results.length === 0) {
+        const words = normalizedQ.split(/\s+/).filter(w => w.length > 2 && w !== 'fund');
+        if (words.length >= 2) {
+          const fallbackTerm = words.slice(0, 2).join(' ');
+          results = await queryApi(fallbackTerm);
+        }
+      }
+
+      // Sort results: Modern Regular/Direct Growth options appear first
+      results.sort((a, b) => {
+        const aName = (a.schemeName || '').toLowerCase();
+        const bName = (b.schemeName || '').toLowerCase();
+
+        // Direct / Regular Plan prioritization
+        const aPlan = aName.includes('regular plan') || aName.includes('direct plan');
+        const bPlan = bName.includes('regular plan') || bName.includes('direct plan');
+        if (aPlan && !bPlan) return -1;
+        if (!aPlan && bPlan) return 1;
+
+        // Prioritize Growth options
+        const aGrowth = aName.includes('growth');
+        const bGrowth = bName.includes('growth');
+        if (aGrowth && !bGrowth) return -1;
+        if (!aGrowth && bGrowth) return 1;
+
+        // Penalize old discontinued or bonus/premium-plus suffixes
+        const aOld = aName.includes('dividend') || aName.includes('premium') || aName.includes('bonus');
+        const bOld = bName.includes('dividend') || bName.includes('premium') || bName.includes('bonus');
+        if (aOld && !bOld) return 1;
+        if (!aOld && bOld) return -1;
+
+        return 0;
+      });
+
+      results = results.slice(0, 15);
+      searchCache.set(rawQ, results);
+      return results;
     }
 
     // Fetch latest NAV
