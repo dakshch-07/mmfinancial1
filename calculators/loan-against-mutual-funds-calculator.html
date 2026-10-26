@@ -279,22 +279,16 @@
                                 <!-- Loan Tenure / Overdraft Facility Period (12 to 84 Months or 1 to 7 Years) -->
                                 <div class="input-group">
                                     <div class="input-header" style="display: flex; justify-content: space-between; align-items: center;">
-                                        <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure</label>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div class="tenure-unit-toggle" role="group" aria-label="Tenure Unit Option">
-                                                <button type="button" class="tenure-unit-btn lamf-unit-btn active" data-unit="months" title="Tenure in Months"><span class="unit-full">Months</span><span class="unit-short">Mo</span></button>
-                                                <button type="button" class="tenure-unit-btn lamf-unit-btn" data-unit="years" title="Tenure in Years"><span class="unit-full">Years</span><span class="unit-short">Yr</span></button>
-                                            </div>
-                                            <span class="input-badge" id="lamfTenureBadge">36 Months (3 Yrs)</span>
-                                        </div>
+                                        <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure (12 to 84 Months)</label>
+                                        <span class="input-badge" id="lamfTenureBadge">36 Months</span>
                                     </div>
                                     <div class="input-with-symbol">
-                                        <span class="currency-prefix" id="lamfTenurePrefix" style="left: 12px; pointer-events: none; font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1;">Mo</span>
-                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Facility Tenure" style="padding-left: 42px;">
+                                        <span class="currency-prefix" id="lamfTenurePrefix" style="left: 12px; pointer-events: none; font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1;">Months</span>
+                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Facility Tenure in Months" style="padding-left: 68px;">
                                     </div>
                                     <input type="range" id="lamfTenureSlider" class="calc-slider" min="12" max="84" step="1" value="36">
-                                    <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (1 Yr)</span><span id="lamfTenureMaxLimit">84 Months (7 Yrs)</span></div>
-                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Annual renewal or repayment window from 12 to 84 months (1 to 7 years).</span>
+                                    <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (Min)</span><span id="lamfTenureMaxLimit">84 Months (Max)</span></div>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Flexible overdraft tenure from 12 Months to 84 Months. Interest billed only for days used.</span>
                                 </div>
 
                                 <div class="input-group">

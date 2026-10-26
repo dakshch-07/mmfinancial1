@@ -2599,17 +2599,11 @@ const CONFIG = {
       const tenureYears = tenureMonths / 12;
 
       if (tenureBadge) {
-        if (currentTenureUnit === 'months') {
-          const yrs = (rawTenure / 12).toFixed(1).replace(/\.0$/, '');
-          tenureBadge.textContent = `${rawTenure} Months (${yrs} Yrs)`;
-        } else {
-          const mos = Math.round(rawTenure * 12);
-          tenureBadge.textContent = `${rawTenure} ${rawTenure === 1 ? 'Year' : 'Years'} (${mos} Mo)`;
-        }
+        tenureBadge.textContent = `${rawTenure} Months`;
       }
 
       if (elTenureSummary) {
-        elTenureSummary.textContent = `${tenureMonths} Mo`;
+        elTenureSummary.textContent = `${tenureMonths} Months`;
       }
 
       const totalTenureInterest = Math.round(annualInterest * (tenureMonths / 12));
@@ -2724,7 +2718,7 @@ const CONFIG = {
         schemeText = 'Not specified yet';
       }
 
-      const tenureVal = (tenureIn ? tenureIn.value : 36) + (currentTenureUnit === 'months' ? ' Months' : ' Years');
+      const tenureVal = (tenureIn ? tenureIn.value : 36) + ' Months';
 
       const msg = `Hello Mukesh ji,\nI evaluated Loan Against Mutual Funds (LAMF) on your website.\n\n` +
                   `*Schemes:* ${schemeText}\n` +
