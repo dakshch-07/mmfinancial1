@@ -1766,7 +1766,26 @@ function initLoanForm() {
         });
     }
 
-    [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary, loanTurnoverAmount].forEach(el => {
+    const loanTurnoverAmountYear2 = document.getElementById('loanTurnoverAmountYear2');
+    const loanAvgTurnoverDisplay = document.getElementById('loanAvgTurnoverDisplay');
+
+    function updateLoansTurnoverAvg() {
+        const t1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
+        const t2 = parseFloat(String(loanTurnoverAmountYear2 ? loanTurnoverAmountYear2.value : '').replace(/[^0-9.]/g, '')) || 0;
+        let avg = 0;
+        if (t1 > 0 && t2 > 0) avg = Math.round((t1 + t2) / 2);
+        else avg = t1 || t2;
+
+        if (loanAvgTurnoverDisplay) {
+            loanAvgTurnoverDisplay.textContent = '₹' + formatIndianNumber(avg);
+        }
+        return avg;
+    }
+
+    if (loanTurnoverAmount) loanTurnoverAmount.addEventListener('input', updateLoansTurnoverAvg);
+    if (loanTurnoverAmountYear2) loanTurnoverAmountYear2.addEventListener('input', updateLoansTurnoverAvg);
+
+    [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary, loanTurnoverAmount, loanTurnoverAmountYear2].forEach(el => {
         formatCurrencyInput(el);
     });
 
@@ -1895,10 +1914,13 @@ function initLoanForm() {
 
         let effectiveIncome = 0;
         if (isTurnover) {
-            const rawTurnover = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
+            const rawT1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
+            const rawT2 = parseFloat(String(loanTurnoverAmountYear2 ? loanTurnoverAmountYear2.value : '').replace(/[^0-9.]/g, '')) || 0;
+            const avgTurnover = (rawT1 > 0 && rawT2 > 0) ? Math.round((rawT1 + rawT2) / 2) : (rawT1 || rawT2);
             const mult = parseFloat(loanTurnoverMultiplier ? loanTurnoverMultiplier.value : 0.05) || 0.05;
-            if (!validateField(loanTurnoverAmount, rawTurnover >= 500000)) isValid = false;
-            effectiveIncome = rawTurnover * mult; // Equivalent annual derived income
+
+            if (!validateField(loanTurnoverAmount, rawT1 >= 500000 || avgTurnover >= 500000)) isValid = false;
+            effectiveIncome = avgTurnover * mult; // Equivalent annual derived income from 2-year average
         } else {
             const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
             const minIncome = isSalaried 

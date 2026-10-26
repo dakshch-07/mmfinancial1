@@ -467,6 +467,14 @@ const CONFIG = {
     const bizTurnoverPctIn = document.getElementById('bizTurnoverPctInput');
     const bizTurnoverPctSl = document.getElementById('bizTurnoverPctSlider');
 
+    const bizTurnoverYear2In = document.getElementById('bizTurnoverYear2Input');
+    if (bizTurnoverYear2In) {
+      bizTurnoverYear2In.addEventListener('input', recalc);
+      bizTurnoverYear2In.addEventListener('blur', () => {
+        const val = parseNumber(bizTurnoverYear2In.value);
+        if (val > 0) bizTurnoverYear2In.value = '₹' + fmtINR(val);
+      });
+    }
     if (bizTurnoverIn && bizTurnoverSl) {
       bindSync(bizTurnoverIn, bizTurnoverSl, 1000000, 500000000, 500000, recalc);
     }
@@ -1184,6 +1192,14 @@ const CONFIG = {
     bindSync(propIn, propSl, 2000000, 100000000, 100000, recalc);
     bindSync(incIn, incSl, 30000, 2000000, 5000, recalc);
 
+    const lapTurnoverYear2In = document.getElementById('lapTurnoverYear2Input');
+    if (lapTurnoverYear2In) {
+      lapTurnoverYear2In.addEventListener('input', recalc);
+      lapTurnoverYear2In.addEventListener('blur', () => {
+        const val = parseNumber(lapTurnoverYear2In.value);
+        if (val > 0) lapTurnoverYear2In.value = '₹' + fmtINR(val);
+      });
+    }
     if (turnoverIn && turnoverSl) {
       bindSync(turnoverIn, turnoverSl, 1000000, 500000000, 500000, recalc);
     }
