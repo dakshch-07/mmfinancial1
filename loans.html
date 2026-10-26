@@ -245,39 +245,40 @@
                                 </div>
                             </div>
 
-                            <!-- Business Assessment Mode (Visible only for Business/Self-Employed) -->
-                            <div class="form-row" id="businessProgramRow" style="display: none;">
+                            <!-- Assessment Mode: Salaried or Business can evaluate both Net Income / ITR and Gross Turnover / Gross Receipts -->
+                            <div class="form-row" id="businessProgramRow">
                                 <div class="form-field" style="width: 100%;">
-                                    <label for="loanBusinessProgram">Business Assessment Program <span class="req">*</span></label>
+                                    <label for="loanBusinessProgram">Income Assessment Method <span class="req">*</span></label>
                                     <select id="loanBusinessProgram" name="loanBusinessProgram" class="form-select">
-                                        <option value="itr" selected>Net Profit Method (Audited ITR Profit &amp; Loss)</option>
-                                        <option value="turnover">Gross Turnover Program (2% to 7% of Annual Turnover)</option>
+                                        <option value="itr" selected>Standard Net Income / ITR Profit Method</option>
+                                        <option value="turnover">Gross Turnover / Gross Receipts Program (Bank Banking Norms)</option>
                                     </select>
-                                    <span class="field-hint">Choose whether eligibility is evaluated on ITR net profit or GST/annual turnover multiple.</span>
+                                    <span class="field-hint">Evaluate your loan eligibility via regular monthly salary / ITR net profit OR via Gross Turnover / Professional Gross Receipts multiple.</span>
                                 </div>
                             </div>
 
-                            <!-- Turnover Multiplier Controls (Visible when Turnover Program chosen) -->
-                            <div class="form-row" id="businessTurnoverRow" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <!-- Turnover / Gross Receipts Multiplier Controls (Mfg, Services, Trader, CA, CS, Doctor MBBS) -->
+                            <div class="form-row" id="businessTurnoverRow" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
                                 <div class="form-field">
-                                    <label for="loanTurnoverAmount">Annual Gross Turnover (₹) <span class="req">*</span></label>
+                                    <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel">Annual Gross Turnover / Gross Receipts (₹) <span class="req">*</span></label>
                                     <input type="text" id="loanTurnoverAmount" name="loanTurnoverAmount" placeholder="e.g. ₹2,00,00,000" class="form-input" inputmode="numeric">
-                                    <span class="field-hint">Annual business turnover as per GST returns / Audited P&amp;L</span>
+                                    <span class="field-hint" id="loanTurnoverAmountHint">Annual revenue / gross receipts as per GST returns, 26AS, or Audited P&amp;L</span>
                                 </div>
                                 <div class="form-field">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                        <label for="loanTurnoverMultiplier" style="margin-bottom: 0;">Turnover Multiplier (% Margin) <span class="req">*</span></label>
-                                        <span class="input-badge" id="loanTurnoverMultiplierBadge" style="background: rgba(197, 154, 63, 0.2); color: #78350f; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">5.0%</span>
+                                        <label for="loanTurnoverMultiplier" style="margin-bottom: 0;">Industry / Professional Margin <span class="req">*</span></label>
+                                        <span class="input-badge" id="loanTurnoverMultiplierBadge" style="background: rgba(197, 154, 63, 0.2); color: #78350f; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">7.5%</span>
                                     </div>
                                     <select id="loanTurnoverMultiplier" name="loanTurnoverMultiplier" class="form-select">
-                                        <option value="0.02">2.0% (Traders / Low Gross Margin)</option>
-                                        <option value="0.03">3.0% (Wholesale / Distribution)</option>
-                                        <option value="0.04">4.0% (Standard Commercial Slabs)</option>
-                                        <option value="0.05" selected>5.0% (Manufacturing &amp; Engineering)</option>
-                                        <option value="0.06">6.0% (Healthcare &amp; Professional Firms)</option>
-                                        <option value="0.07">7.0% (High-Margin IT / Consulting / Services)</option>
+                                        <option value="0.12" data-min="10" data-max="15">Manufacturing (MFG 10% - 15%)</option>
+                                        <option value="0.12" data-min="10" data-max="15">Services Sector (10% - 15%)</option>
+                                        <option value="0.075" data-min="5" data-max="10" selected>Trading / Wholesale / Retail (5% - 10%)</option>
+                                        <option value="0.025" data-min="2" data-max="3">Professional CA (Gross Receipts 2% - 3%)</option>
+                                        <option value="0.015" data-min="1.5" data-max="1.5">Company Secretary (CS Gross Receipts 1.5%)</option>
+                                        <option value="0.025" data-min="2" data-max="3">Doctor MBBS (Gross Receipts 2% - 3%)</option>
+                                        <option value="0.05" data-min="1" data-max="20">Custom Margin (2% - 7% / Flexible)</option>
                                     </select>
-                                    <span class="field-hint">Formula: Derived Net Monthly Profit = (Turnover × Multiplier %) ÷ 12</span>
+                                    <span class="field-hint" id="loanTurnoverFormulaHint">Formula: Derived Net Monthly Profit = (Turnover / Receipts × Multiplier %) ÷ 12</span>
                                 </div>
                             </div>
 

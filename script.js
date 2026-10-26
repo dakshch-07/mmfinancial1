@@ -1653,34 +1653,85 @@ function initLoanForm() {
     // Dynamic Income Label & Turnover Program switching based on Employment Profile
     function updateIncomeLabel() {
         if (!empType) return;
-        const isSalaried = empType.value.toLowerCase().includes('salaried');
+        const empVal = empType.value.toLowerCase();
+        const isSalaried = empVal.includes('salaried');
+        const isDoctor = empVal.includes('doctor') || empVal.includes('professional');
+
+        // Always show the assessment program selector so ANY profile (Salaried or Business) can choose
+        if (bizProgramRow) bizProgramRow.style.display = 'flex';
+
+        // Auto-select Doctor MBBS Gross Receipts if Doctor / Professional selected
+        if (isDoctor && loanTurnoverMultiplier) {
+            // If user selected doctor, default to Doctor MBBS option
+            for (let i = 0; i < loanTurnoverMultiplier.options.length; i++) {
+                if (loanTurnoverMultiplier.options[i].text.includes('Doctor MBBS')) {
+                    loanTurnoverMultiplier.selectedIndex = i;
+                    break;
+                }
+            }
+            if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = '2.5%';
+            if (bizProgramSelect && bizProgramSelect.value !== 'turnover') {
+                bizProgramSelect.value = 'turnover';
+            }
+        }
+
         if (isSalaried) {
-            if (bizProgramRow) bizProgramRow.style.display = 'none';
-            if (bizTurnoverRow) bizTurnoverRow.style.display = 'none';
-            if (loanIncomeField) loanIncomeField.style.display = 'block';
-            if (income) income.required = true;
-            if (incomeLabel) incomeLabel.innerHTML = 'Monthly Net Salary <span class="req">*</span>';
-            if (income) income.placeholder = 'e.g. ₹85,000 / month';
-            if (incomeHint) incomeHint.textContent = 'Net monthly take-home salary credited to bank account';
             if (salariedAddFields) salariedAddFields.style.display = 'flex';
             if (businessAddFields) businessAddFields.style.display = 'none';
         } else {
-            if (bizProgramRow) bizProgramRow.style.display = 'flex';
-            updateTurnoverView();
             if (salariedAddFields) salariedAddFields.style.display = 'none';
             if (businessAddFields) businessAddFields.style.display = 'flex';
         }
+
+        updateTurnoverView();
     }
 
     function updateTurnoverView() {
         const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
         if (bizTurnoverRow) bizTurnoverRow.style.display = isTurnover ? 'flex' : 'none';
         if (loanIncomeField) loanIncomeField.style.display = isTurnover ? 'none' : 'block';
+
+        const empVal = (empType ? empType.value : '').toLowerCase();
+        const isSalaried = empVal.includes('salaried');
+
         if (income) {
             income.required = !isTurnover;
-            if (incomeLabel) incomeLabel.innerHTML = 'Annual Net Profit as per ITR <span class="req">*</span>';
-            if (income) income.placeholder = 'e.g. ₹15,00,000 profit / year';
-            if (incomeHint) incomeHint.textContent = 'Net business income / profit as per latest ITR computation sheet';
+            if (isSalaried) {
+                if (incomeLabel) incomeLabel.innerHTML = 'Monthly Net Salary <span class="req">*</span>';
+                if (income) income.placeholder = 'e.g. ₹85,000 / month';
+                if (incomeHint) incomeHint.textContent = 'Net monthly take-home salary credited to bank account';
+            } else {
+                if (incomeLabel) incomeLabel.innerHTML = 'Annual Net Profit as per ITR <span class="req">*</span>';
+                if (income) income.placeholder = 'e.g. ₹15,00,000 profit / year';
+                if (incomeHint) incomeHint.textContent = 'Net business income / profit as per latest ITR computation sheet';
+            }
+        }
+
+        // Update Turnover / Gross Receipts labels dynamically
+        if (isTurnover) {
+            const multOpt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
+            const optText = multOpt ? multOpt.text : '';
+            const isGrossReceipt = optText.includes('Gross Receipts') || optText.includes('Doctor') || optText.includes('CA') || optText.includes('CS');
+            
+            const amtLabel = document.getElementById('loanTurnoverAmountLabel');
+            const amtHint = document.getElementById('loanTurnoverAmountHint');
+            const formulaHint = document.getElementById('loanTurnoverFormulaHint');
+
+            if (amtLabel) {
+                amtLabel.innerHTML = isGrossReceipt 
+                    ? 'Annual Gross Receipts / Fees (₹) <span class="req">*</span>' 
+                    : 'Annual Gross Turnover (₹) <span class="req">*</span>';
+            }
+            if (amtHint) {
+                amtHint.textContent = isGrossReceipt
+                    ? 'Gross professional receipts/fees credited as per Form 26AS / Bank Statements'
+                    : 'Annual business turnover as per GST returns / Audited P&L';
+            }
+            if (formulaHint) {
+                formulaHint.textContent = isGrossReceipt
+                    ? 'Formula: Derived Net Monthly Income = (Gross Receipts × Multiplier %) ÷ 12'
+                    : 'Formula: Derived Net Monthly Profit = (Turnover × Multiplier %) ÷ 12';
+            }
         }
     }
 
@@ -1692,6 +1743,7 @@ function initLoanForm() {
         loanTurnoverMultiplier.addEventListener('change', () => {
             const pct = (parseFloat(loanTurnoverMultiplier.value) * 100).toFixed(1) + '%';
             if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = pct;
+            updateTurnoverView();
         });
     }
 
@@ -1836,7 +1888,7 @@ function initLoanForm() {
         if (!validateField(amount, numAmount >= LOAN_ELIGIBILITY_CONFIG.limits.minLoanAmount)) isValid = false;
 
         const isSalaried = empType && empType.value.toLowerCase().includes('salaried');
-        const isTurnover = (!isSalaried) && bizProgramSelect && bizProgramSelect.value === 'turnover';
+        const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
 
         let effectiveIncome = 0;
         if (isTurnover) {
