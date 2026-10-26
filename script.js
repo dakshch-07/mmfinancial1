@@ -1397,6 +1397,9 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'Car / Auto Loan': 9.00
     },
     cibilSlabs: {
+        '800+': { label: '800+ (Super Prime / 7.60% Lowest Rate)', roiAdjustment: -0.90, foirAdjustment: 0.0, eligible: true },
+        '775-799': { label: '775 - 799 (Prime Special / 7.75% Rate)', roiAdjustment: -0.75, foirAdjustment: 0.0, eligible: true },
+        '750-774': { label: '750 - 774 (Excellent / 8.50% Base)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
         '750+': { label: '750+ (Excellent / Lowest ROI)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
         '700-749': { label: '700 - 749 (Good / Prime Banking)', roiAdjustment: 0.25, foirAdjustment: 0.0, eligible: true },
         '650-699': { label: '650 - 699 (Fair / Standard NBFC)', roiAdjustment: 0.75, foirAdjustment: -0.05, eligible: true },
@@ -1822,7 +1825,7 @@ function initLoanForm() {
     function updateBenchmarkRoi() {
         if (!loanRoiInput) return;
         const selType = loanType ? loanType.value : 'Home Loan';
-        const selCibil = cibilSelect ? cibilSelect.value : '750+';
+        const selCibil = cibilSelect ? cibilSelect.value : '800+';
         const catRoi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[selType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
         const cibilObj = LOAN_ELIGIBILITY_CONFIG.cibilSlabs[selCibil] || LOAN_ELIGIBILITY_CONFIG.cibilSlabs['750+'];
         const suggestedRoi = (catRoi + (cibilObj.roiAdjustment || 0)).toFixed(2);

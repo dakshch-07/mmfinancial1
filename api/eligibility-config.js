@@ -23,6 +23,9 @@ const LOAN_ELIGIBILITY_CONFIG = {
 
     // CIBIL Score Slabs & Risk Assessment
     cibilSlabs: {
+        '800+': { label: '800+ (Super Prime / 7.60% Lowest Rate)', roiAdjustment: -0.90, foirAdjustment: 0.0, eligible: true },
+        '775-799': { label: '775 - 799 (Prime Special / 7.75% Rate)', roiAdjustment: -0.75, foirAdjustment: 0.0, eligible: true },
+        '750-774': { label: '750 - 774 (Excellent / 8.50% Base)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
         '750+': { label: '750+ (Excellent / Lowest ROI)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
         '700-749': { label: '700 - 749 (Good / Prime Banking)', roiAdjustment: 0.25, foirAdjustment: 0.0, eligible: true },
         '650-699': { label: '650 - 699 (Fair / Standard NBFC)', roiAdjustment: 0.75, foirAdjustment: -0.05, eligible: true },
