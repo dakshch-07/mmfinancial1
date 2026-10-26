@@ -458,6 +458,31 @@ const CONFIG = {
     bindSync(document.getElementById('bizRentInput'), document.getElementById('bizRentSlider'), 0, 500000, 1000, recalc);
     bindSync(document.getElementById('bizEmiInput'), document.getElementById('bizEmiSlider'), 0, 1000000, 1000, recalc);
 
+    // Business Turnover Program (2% to 7% Multiplier)
+    const bizProgSel = document.getElementById('bizProgramSelect');
+    const turnoverFields = document.getElementById('turnoverProgramFields');
+    const itrFields = document.getElementById('itrProgramFields');
+    const bizTurnoverIn = document.getElementById('bizTurnoverInput');
+    const bizTurnoverSl = document.getElementById('bizTurnoverSlider');
+    const bizTurnoverPctIn = document.getElementById('bizTurnoverPctInput');
+    const bizTurnoverPctSl = document.getElementById('bizTurnoverPctSlider');
+
+    if (bizTurnoverIn && bizTurnoverSl) {
+      bindSync(bizTurnoverIn, bizTurnoverSl, 5000000, 500000000, 500000, recalc);
+    }
+    if (bizTurnoverPctIn && bizTurnoverPctSl) {
+      bindSync(bizTurnoverPctIn, bizTurnoverPctSl, 2.0, 7.0, 0.5, recalc, true);
+    }
+
+    if (bizProgSel) {
+      bizProgSel.addEventListener('change', () => {
+        const isTurnover = bizProgSel.value === 'turnover';
+        if (turnoverFields) turnoverFields.style.display = isTurnover ? 'block' : 'none';
+        if (itrFields) itrFields.style.display = isTurnover ? 'none' : 'block';
+        recalc();
+      });
+    }
+
     const isPersonal = widget.dataset.calcId === 'personal-loan-eligibility-calculator';
     const defaultRate = isPersonal ? 11.0 : 8.75;
     const maxTenure = isPersonal ? 7 : 30;
@@ -511,36 +536,56 @@ const CONFIG = {
         const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.5);
         eligibleIncome = monthlyEquivalent * appliedFoir;
       } else {
-        // Business / Self-Employed: 2-Year ITR assessment (24 Months / 12 Months)
-        const profit1 = parseNumber((document.getElementById('bizProfitInput') || {}).value);
-        const profit2 = parseNumber((document.getElementById('bizProfit2Input') || {}).value);
-        const depr = parseNumber((document.getElementById('bizDepreciationInput') || {}).value);
-        const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
-        const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
+        // Business / Self-Employed Assessment: Net Profit (ITR) OR Turnover Program (2% - 7%)
+        const isTurnoverProg = (bizProgSel && bizProgSel.value === 'turnover');
+        let totalMonthlyBusinessIncome = 0;
+
+        if (isTurnoverProg) {
+          const turnover = parseNumber((document.getElementById('bizTurnoverInput') || {}).value) || 20000000;
+          const turnoverPct = parseFloat((document.getElementById('bizTurnoverPctInput') || {}).value) || 5.0;
+          const annualDerivedIncome = turnover * (turnoverPct / 100);
+          totalMonthlyBusinessIncome = annualDerivedIncome / 12;
+
+          // Add-backs: Rent & Remuneration
+          const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
+          const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
+          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.5);
+
+          const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover);
+          const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = turnoverPct.toFixed(1) + '%';
+        } else {
+          // 2-Year ITR assessment (24 Months / 12 Months)
+          const profit1 = parseNumber((document.getElementById('bizProfitInput') || {}).value);
+          const profit2 = parseNumber((document.getElementById('bizProfit2Input') || {}).value);
+          const depr = parseNumber((document.getElementById('bizDepreciationInput') || {}).value);
+          const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
+          const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
+
+          // 2 Years Income Average: (Year 1 + Year 2) / 24 months = Monthly Profit
+          const total2YrProfit = profit1 + profit2;
+          const avgAnnualProfit = total2YrProfit / 2;
+          const monthlyProfit = total2YrProfit / 24;
+
+          // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent
+          const monthlyDepr = depr / 12;
+          const monthlyRemun = remun / 12;
+          const monthlyRent = rent * 0.5;
+
+          // Total Monthly Cash Flow for Business Underwriting
+          totalMonthlyBusinessIncome = monthlyProfit + monthlyDepr + monthlyRemun + monthlyRent;
+
+          // Update Business calculation summary badges
+          const elAvgP = document.getElementById('bizAvgAnnualProfit');
+          if (elAvgP) elAvgP.textContent = '₹' + fmtINR(avgAnnualProfit);
+
+          const elMonP = document.getElementById('bizMonthlyProfit');
+          if (elMonP) elMonP.textContent = '₹' + fmtINR(monthlyProfit);
+        }
+
         existingEmi = parseNumber((document.getElementById('bizEmiInput') || {}).value);
-
-        // 2 Years Income Average: (Year 1 + Year 2) / 24 months = Monthly Profit
-        const total2YrProfit = profit1 + profit2;
-        const avgAnnualProfit = total2YrProfit / 2;
-        const monthlyProfit = total2YrProfit / 24;
-
-        // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent
-        const monthlyDepr = depr / 12;
-        const monthlyRemun = remun / 12;
-        const monthlyRent = rent * 0.5;
-
-        // Total Monthly Cash Flow for Business Underwriting
-        const totalMonthlyBusinessIncome = monthlyProfit + monthlyDepr + monthlyRemun + monthlyRent;
 
         // Applied FOIR: 60% for Home Loan / LAP, 65% for Personal Loan
         eligibleIncome = totalMonthlyBusinessIncome * appliedFoir;
-
-        // Update Business calculation summary badges
-        const elAvgP = document.getElementById('bizAvgAnnualProfit');
-        if (elAvgP) elAvgP.textContent = '₹' + fmtINR(avgAnnualProfit);
-
-        const elMonP = document.getElementById('bizMonthlyProfit');
-        if (elMonP) elMonP.textContent = '₹' + fmtINR(monthlyProfit);
 
         const elTotInc = document.getElementById('bizTotalMonthlyIncome');
         if (elTotInc) elTotInc.textContent = '₹' + fmtINR(totalMonthlyBusinessIncome);
@@ -1081,14 +1126,38 @@ const CONFIG = {
     const propIn = document.getElementById('lapPropValueInput');
     const propSl = document.getElementById('lapPropValueSlider');
     const propSel = document.getElementById('lapPropTypeSelect');
+    const progSel = document.getElementById('lapProgramSelect');
+    const incGroup = document.getElementById('lapIncomeGroup');
+    const turnoverGroup = document.getElementById('lapTurnoverGroup');
     const incIn = document.getElementById('lapIncomeInput');
     const incSl = document.getElementById('lapIncomeSlider');
+    const turnoverIn = document.getElementById('lapTurnoverInput');
+    const turnoverSl = document.getElementById('lapTurnoverSlider');
+    const turnoverPctIn = document.getElementById('lapTurnoverPctInput');
+    const turnoverPctSl = document.getElementById('lapTurnoverPctSlider');
     const emiIn = document.getElementById('lapEmiInput');
     const rateIn = document.getElementById('lapRateInput');
     const tenIn = document.getElementById('lapTenureInput');
 
     bindSync(propIn, propSl, 2000000, 100000000, 100000, recalc);
     bindSync(incIn, incSl, 30000, 2000000, 5000, recalc);
+
+    if (turnoverIn && turnoverSl) {
+      bindSync(turnoverIn, turnoverSl, 5000000, 500000000, 500000, recalc);
+    }
+    if (turnoverPctIn && turnoverPctSl) {
+      bindSync(turnoverPctIn, turnoverPctSl, 2.0, 7.0, 0.5, recalc, true);
+    }
+
+    if (progSel) {
+      progSel.addEventListener('change', () => {
+        const isTurnover = progSel.value === 'turnover';
+        if (turnoverGroup) turnoverGroup.style.display = isTurnover ? 'block' : 'none';
+        if (incGroup) incGroup.style.display = isTurnover ? 'none' : 'block';
+        recalc();
+      });
+    }
+
     if (propSel) propSel.addEventListener('change', recalc);
     if (emiIn) emiIn.addEventListener('input', recalc);
     if (rateIn) rateIn.addEventListener('input', recalc);
@@ -1097,7 +1166,20 @@ const CONFIG = {
     function recalc() {
       const propVal = parseNumber(propIn.value);
       const ltvPct = parseFloat(propSel.value) || 0.65;
-      const netInc = parseNumber(incIn.value);
+      const isTurnover = (progSel && progSel.value === 'turnover');
+
+      let netInc = 0;
+      if (isTurnover) {
+        const turnover = parseNumber((turnoverIn || {}).value) || 30000000;
+        const pct = parseFloat((turnoverPctIn || {}).value) || 5.0;
+        netInc = Math.round((turnover * (pct / 100)) / 12);
+        const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover);
+        const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = pct.toFixed(1) + '%';
+      } else {
+        netInc = parseNumber(incIn.value);
+        const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = '₹' + fmtINR(netInc);
+      }
+
       const existingEmi = parseNumber(emiIn.value);
       const rate = parseFloat(rateIn.value) || 9.5;
       const tenure = parseInt(tenIn.value, 10) || 15;
@@ -1118,7 +1200,6 @@ const CONFIG = {
       const res = calculateEmi(finalSanction, rate, tenure);
 
       const bP = document.getElementById('lapPropValueBadge'); if (bP) bP.textContent = '₹' + fmtINR(propVal);
-      const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = '₹' + fmtINR(netInc);
 
       animateNumber(document.getElementById('lapMaxLoan'), finalSanction);
       const wordsEl = document.getElementById('lapMaxLoanWords');

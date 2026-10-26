@@ -1642,23 +1642,57 @@ function initLoanForm() {
         });
     }
 
-    // Dynamic Income Label switching based on Employment Profile
+    const bizProgramRow = document.getElementById('businessProgramRow');
+    const bizProgramSelect = document.getElementById('loanBusinessProgram');
+    const bizTurnoverRow = document.getElementById('businessTurnoverRow');
+    const loanTurnoverAmount = document.getElementById('loanTurnoverAmount');
+    const loanTurnoverMultiplier = document.getElementById('loanTurnoverMultiplier');
+    const loanTurnoverMultiplierBadge = document.getElementById('loanTurnoverMultiplierBadge');
+    const loanIncomeField = document.getElementById('loanIncomeField');
+
+    // Dynamic Income Label & Turnover Program switching based on Employment Profile
     function updateIncomeLabel() {
         if (!empType) return;
         const isSalaried = empType.value.toLowerCase().includes('salaried');
         if (isSalaried) {
+            if (bizProgramRow) bizProgramRow.style.display = 'none';
+            if (bizTurnoverRow) bizTurnoverRow.style.display = 'none';
+            if (loanIncomeField) loanIncomeField.style.display = 'block';
+            if (income) income.required = true;
             if (incomeLabel) incomeLabel.innerHTML = 'Monthly Net Salary <span class="req">*</span>';
             if (income) income.placeholder = 'e.g. ₹85,000 / month';
             if (incomeHint) incomeHint.textContent = 'Net monthly take-home salary credited to bank account';
             if (salariedAddFields) salariedAddFields.style.display = 'flex';
             if (businessAddFields) businessAddFields.style.display = 'none';
         } else {
-            if (incomeLabel) incomeLabel.innerHTML = 'Annual Net Profit as per ITR <span class="req">*</span>';
-            if (income) income.placeholder = 'e.g. ₹15,00,000 profit / year';
-            if (incomeHint) incomeHint.textContent = 'Net business income / profit as per latest ITR computation sheet';
+            if (bizProgramRow) bizProgramRow.style.display = 'flex';
+            updateTurnoverView();
             if (salariedAddFields) salariedAddFields.style.display = 'none';
             if (businessAddFields) businessAddFields.style.display = 'flex';
         }
+    }
+
+    function updateTurnoverView() {
+        const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
+        if (bizTurnoverRow) bizTurnoverRow.style.display = isTurnover ? 'flex' : 'none';
+        if (loanIncomeField) loanIncomeField.style.display = isTurnover ? 'none' : 'block';
+        if (income) {
+            income.required = !isTurnover;
+            if (incomeLabel) incomeLabel.innerHTML = 'Annual Net Profit as per ITR <span class="req">*</span>';
+            if (income) income.placeholder = 'e.g. ₹15,00,000 profit / year';
+            if (incomeHint) incomeHint.textContent = 'Net business income / profit as per latest ITR computation sheet';
+        }
+    }
+
+    if (bizProgramSelect) {
+        bizProgramSelect.addEventListener('change', updateTurnoverView);
+    }
+
+    if (loanTurnoverMultiplier) {
+        loanTurnoverMultiplier.addEventListener('change', () => {
+            const pct = (parseFloat(loanTurnoverMultiplier.value) * 100).toFixed(1) + '%';
+            if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = pct;
+        });
     }
 
     if (empType) {
@@ -1677,7 +1711,7 @@ function initLoanForm() {
         });
     }
 
-    [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary].forEach(el => {
+    [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary, loanTurnoverAmount].forEach(el => {
         formatCurrencyInput(el);
     });
 
@@ -1801,12 +1835,23 @@ function initLoanForm() {
         const numAmount = parseFloat(String(amount ? amount.value : '').replace(/[^0-9.]/g, '')) || 0;
         if (!validateField(amount, numAmount >= LOAN_ELIGIBILITY_CONFIG.limits.minLoanAmount)) isValid = false;
 
-        const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
         const isSalaried = empType && empType.value.toLowerCase().includes('salaried');
-        const minIncome = isSalaried 
-            ? LOAN_ELIGIBILITY_CONFIG.limits.minSalariedMonthlySalary 
-            : LOAN_ELIGIBILITY_CONFIG.limits.minBusinessAnnualProfit;
-        if (!validateField(income, numIncome >= minIncome)) isValid = false;
+        const isTurnover = (!isSalaried) && bizProgramSelect && bizProgramSelect.value === 'turnover';
+
+        let effectiveIncome = 0;
+        if (isTurnover) {
+            const rawTurnover = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
+            const mult = parseFloat(loanTurnoverMultiplier ? loanTurnoverMultiplier.value : 0.05) || 0.05;
+            if (!validateField(loanTurnoverAmount, rawTurnover >= 500000)) isValid = false;
+            effectiveIncome = rawTurnover * mult; // Equivalent annual derived income
+        } else {
+            const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
+            const minIncome = isSalaried 
+                ? LOAN_ELIGIBILITY_CONFIG.limits.minSalariedMonthlySalary 
+                : LOAN_ELIGIBILITY_CONFIG.limits.minBusinessAnnualProfit;
+            if (!validateField(income, numIncome >= minIncome)) isValid = false;
+            effectiveIncome = numIncome;
+        }
 
         if (!isValid) {
             const firstErr = step1Form.querySelector('.form-field.has-error input, .form-field.has-error select');
@@ -1822,7 +1867,10 @@ function initLoanForm() {
             loanEmpType: empType.value,
             loanType: loanType.value,
             loanAmount: numAmount,
-            loanIncome: numIncome,
+            loanIncome: effectiveIncome,
+            businessProgram: isTurnover ? 'turnover' : 'itr',
+            turnoverAmount: isTurnover ? parseFloat(String(loanTurnoverAmount.value).replace(/[^0-9.]/g, '')) || 0 : 0,
+            turnoverMultiplier: isTurnover ? parseFloat(loanTurnoverMultiplier.value) || 0.05 : 0,
             loanExistingEmi: parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0,
             loanTenure: tenure ? tenure.value : '20 Years',
             loanCibil: cibilSelect ? cibilSelect.value : '750+',

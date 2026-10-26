@@ -245,6 +245,42 @@
                                 </div>
                             </div>
 
+                            <!-- Business Assessment Mode (Visible only for Business/Self-Employed) -->
+                            <div class="form-row" id="businessProgramRow" style="display: none;">
+                                <div class="form-field" style="width: 100%;">
+                                    <label for="loanBusinessProgram">Business Assessment Program <span class="req">*</span></label>
+                                    <select id="loanBusinessProgram" name="loanBusinessProgram" class="form-select">
+                                        <option value="itr" selected>Net Profit Method (Audited ITR Profit &amp; Loss)</option>
+                                        <option value="turnover">Gross Turnover Program (2% to 7% of Annual Turnover)</option>
+                                    </select>
+                                    <span class="field-hint">Choose whether eligibility is evaluated on ITR net profit or GST/annual turnover multiple.</span>
+                                </div>
+                            </div>
+
+                            <!-- Turnover Multiplier Controls (Visible when Turnover Program chosen) -->
+                            <div class="form-row" id="businessTurnoverRow" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                                <div class="form-field">
+                                    <label for="loanTurnoverAmount">Annual Gross Turnover (₹) <span class="req">*</span></label>
+                                    <input type="text" id="loanTurnoverAmount" name="loanTurnoverAmount" placeholder="e.g. ₹2,00,00,000" class="form-input" inputmode="numeric">
+                                    <span class="field-hint">Annual business turnover as per GST returns / Audited P&amp;L</span>
+                                </div>
+                                <div class="form-field">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <label for="loanTurnoverMultiplier" style="margin-bottom: 0;">Turnover Multiplier (% Margin) <span class="req">*</span></label>
+                                        <span class="input-badge" id="loanTurnoverMultiplierBadge" style="background: rgba(197, 154, 63, 0.2); color: #78350f; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">5.0%</span>
+                                    </div>
+                                    <select id="loanTurnoverMultiplier" name="loanTurnoverMultiplier" class="form-select">
+                                        <option value="0.02">2.0% (Traders / Low Gross Margin)</option>
+                                        <option value="0.03">3.0% (Wholesale / Distribution)</option>
+                                        <option value="0.04">4.0% (Standard Commercial Slabs)</option>
+                                        <option value="0.05" selected>5.0% (Manufacturing &amp; Engineering)</option>
+                                        <option value="0.06">6.0% (Healthcare &amp; Professional Firms)</option>
+                                        <option value="0.07">7.0% (High-Margin IT / Consulting / Services)</option>
+                                    </select>
+                                    <span class="field-hint">Formula: Derived Net Monthly Profit = (Turnover × Multiplier %) ÷ 12</span>
+                                </div>
+                            </div>
+
                             <!-- Required Loan Amount & Monthly Salary / Annual Profit -->
                             <div class="form-row">
                                 <div class="form-field">
@@ -260,7 +296,7 @@
                                         <button type="button" class="form-chip-pill" data-target="loanAmount" data-val="₹2,00,00,000">₹2 Cr+</button>
                                     </div>
                                 </div>
-                                <div class="form-field">
+                                <div class="form-field" id="loanIncomeField">
                                     <label for="loanIncome" id="loanIncomeLabel">Monthly Net Salary <span class="req">*</span></label>
                                     <input type="text" id="loanIncome" name="loanIncome" placeholder="e.g. ₹85,000 / month" required class="form-input" inputmode="numeric">
                                     <span class="field-error" id="loanIncomeError">Please enter your monthly salary</span>
