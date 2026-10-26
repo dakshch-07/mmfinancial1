@@ -634,10 +634,7 @@ const CONFIG = {
           const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
           const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = turnoverPct.toFixed(1) + '%';
           const bMon = document.getElementById('bizMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(Math.round(annualDerivedIncome / 12)) + ' / mo';
-          const bForm = document.getElementById('bizTurnoverFormulaText');
-          if (bForm) {
-            bForm.textContent = 'Formula: (2-Year Average ₹' + fmtINR(avgTurnover) + ' × ' + turnoverPct.toFixed(1) + '%) ÷ 12 = ₹' + fmtINR(Math.round(annualDerivedIncome / 12)) + ' / month';
-          }
+          // formula text removed as per user instruction
         } else {
           // 2-Year ITR assessment (24 Months / 12 Months)
           const profit1 = parseNumber((document.getElementById('bizProfitInput') || {}).value);
@@ -1332,10 +1329,7 @@ const CONFIG = {
         const bAvg = document.getElementById('lapAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
         const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = pct.toFixed(1) + '%';
         const bMon = document.getElementById('lapMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(netInc) + ' / mo';
-        const bForm = document.getElementById('lapTurnoverFormulaText');
-        if (bForm) {
-          bForm.textContent = 'Formula: (2-Year Average ₹' + fmtINR(avgTurnover) + ' × ' + pct.toFixed(1) + '%) ÷ 12 = ₹' + fmtINR(netInc) + ' / month';
-        }
+        // formula text removed as per user instruction
       } else {
         netInc = parseNumber(incIn.value);
         const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = '₹' + fmtINR(netInc);

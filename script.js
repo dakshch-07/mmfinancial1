@@ -1891,12 +1891,7 @@ function initLoanForm() {
         }
 
         if (loanTurnoverFormulaHint) {
-            const multPct = (mult * 100).toFixed(1) + '%';
-            const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
-            const optText = opt ? opt.text : '';
-            const isGrossReceipt = optText.includes('Gross Receipts') || optText.includes('Doctor') || optText.includes('CA') || optText.includes('CS');
-            const term = isGrossReceipt ? '2-Yr Avg Receipts' : '2-Yr Avg Turnover';
-            loanTurnoverFormulaHint.textContent = `Formula: [(${term} ₹${formatIndianNumber(avg)} × ${multPct} ÷ 12 = ₹${formatIndianNumber(monthlyDerived)}) - Obligations ₹${formatIndianNumber(obligation)}] ÷ EMI Per Lakh ₹${formatIndianNumber(emiPerLakh)} = Max Loan ₹${formatIndianNumber(maxLoanEligible)}`;
+            loanTurnoverFormulaHint.textContent = '';
         }
         return { avg, monthlyDerived, annualDerived, obligation, netCapacity, emiPerLakh, maxLoanEligible };
     }
