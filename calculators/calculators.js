@@ -1659,9 +1659,7 @@ const CONFIG = {
     const utilBadge = document.getElementById('lamfUtilBadge');
     const utilAmountIn = document.getElementById('lamfUtilAmountInput');
 
-    // CIBIL & Tenure Controls
-    const cibilSel = document.getElementById('lamfCibilSelect');
-    const cibilBadge = document.getElementById('lamfCibilBadge');
+    // Tenure Controls (12 to 84 Months or 1 to 7 Years)
     const tenureIn = document.getElementById('lamfTenureInput');
     const tenureSl = document.getElementById('lamfTenureSlider');
     const tenureBadge = document.getElementById('lamfTenureBadge');
@@ -1675,7 +1673,6 @@ const CONFIG = {
     const elStampDuty = document.getElementById('lamfStampDuty');
 
     let currentTenureUnit = 'months'; // 'months' | 'years'
-    const defaultLamfRate = 10.50;
 
     // Interest outputs
     const elMonthlyInterest = document.getElementById('lamfMonthlyInterest');
@@ -2221,31 +2218,6 @@ const CONFIG = {
       });
     }
 
-    // CIBIL Score selection benchmarks interest rate
-    if (cibilSel) {
-      cibilSel.addEventListener('change', () => {
-        const val = cibilSel.value;
-        if (cibilBadge) {
-          cibilBadge.textContent = val === '750+' ? '750+ (Prime ROI)' : val;
-        }
-
-        let baseRate = defaultLamfRate; // 10.50%
-        if (val === '750+') baseRate = 10.00;
-        else if (val === '700-749') baseRate = 10.50;
-        else if (val === '650-699') baseRate = 11.25;
-        else if (val === 'Below 650') baseRate = 12.00;
-        else if (val === 'New to Credit') baseRate = 10.75;
-
-        if (rateIn) rateIn.value = baseRate.toFixed(2);
-        if (rateSl) {
-          rateSl.value = baseRate.toFixed(2);
-          updateSliderFill(rateSl);
-        }
-        if (rateBadge) rateBadge.textContent = `${baseRate.toFixed(2)}%`;
-        recalculate();
-      });
-    }
-
     // Tenure Toggle (12 to 84 Months or 1 to 7 Years)
     function setTenureUnit(newUnit) {
       if (currentTenureUnit === newUnit) return;
@@ -2588,7 +2560,6 @@ const CONFIG = {
         schemeText = 'Not specified yet';
       }
 
-      const cibilVal = (cibilSel ? cibilSel.value : '750+');
       const tenureVal = (tenureIn ? tenureIn.value : 36) + (currentTenureUnit === 'months' ? ' Months' : ' Years');
 
       const msg = `Hello Mukesh ji,\nI evaluated Loan Against Mutual Funds (LAMF) on your website.\n\n` +
@@ -2596,7 +2567,7 @@ const CONFIG = {
                   `*Total Mutual Fund Value:* ₹${fmtINR(totals.totalPortfolioVal)}\n` +
                   `*Estimated Credit Limit:* ₹${fmtINR(totals.totalLimit)}\n` +
                   `*Equity Sub-limit:* ₹${fmtINR(totals.equityLimit)} | *Debt Sub-limit:* ₹${fmtINR(totals.debtLimit)}\n` +
-                  `*CIBIL Profile:* ${cibilVal} | *Tenure:* ${tenureVal}\n` +
+                  `*Tenure:* ${tenureVal}\n` +
                   `*Indicative Interest Rate:* ${rate}% p.a.\n\n` +
                   `Please guide me with the online paperless lien-marking and sanction process.`;
 
