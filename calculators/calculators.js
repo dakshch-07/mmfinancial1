@@ -7,7 +7,7 @@
 const LAMF_CONFIG = {
   ltv: { equity: 0.45, debt: 0.80 },        // editable defaults
   ltvLimits: { equity: [0.30, 0.50], debt: [0.60, 0.85] },
-  rate: { default: 10.5, min: 9, max: 12, step: 0.05 },
+  rate: { default: 10.5, min: 10.5, max: 15.0, step: 0.05 },
   daysInYear: 365,
   maxSchemes: 15,
   navApi: { search: "https://api.mfapi.in/mf/search?q=", latest: "https://api.mfapi.in/mf/{code}/latest" },
@@ -2556,7 +2556,7 @@ const CONFIG = {
       });
       rateIn.addEventListener('input', () => {
         const val = parseFloat(rateIn.value);
-        if (!isNaN(val) && val >= LAMF_CONFIG.rate.min && val <= LAMF_CONFIG.rate.max) {
+        if (!isNaN(val) && val >= 10.5 && val <= 15.0) {
           rateSl.value = val;
           if (rateBadge) rateBadge.textContent = `${val.toFixed(2)}%`;
           updateSliderFill(rateSl);
@@ -2671,7 +2671,7 @@ const CONFIG = {
         }
       }
 
-      // Interest Calculation (Interest charged ONLY on amount used)
+            // Interest & Monthly EMI Calculation
       const annualRate = parseFloat(rateIn ? rateIn.value : LAMF_CONFIG.rate.default) || LAMF_CONFIG.rate.default;
       const annualInterest = Math.round(withdrawn * (annualRate / 100));
       const monthlyInterest = (withdrawn * (annualRate / 100)) / 12;
@@ -2682,12 +2682,27 @@ const CONFIG = {
       const tenureMonths = currentTenureUnit === 'months' ? rawTenure : (rawTenure * 12);
       const tenureYears = tenureMonths / 12;
 
+      // Regular Term Loan Monthly EMI Formula: P * r * (1+r)^n / ((1+r)^n - 1)
+      let calculatedMonthlyEmi = 0;
+      if (withdrawn > 0 && tenureMonths > 0) {
+        calculatedMonthlyEmi = Math.round(calculateEmi(withdrawn, annualRate, tenureMonths));
+      }
+
+      const elMonthlyEmi = document.getElementById('lamfMonthlyEmi');
+      if (elMonthlyEmi) elMonthlyEmi.textContent = '₹' + fmtINR(calculatedMonthlyEmi);
+
       if (tenureBadge) {
-        tenureBadge.textContent = `${rawTenure} Months`;
+        if (currentTenureUnit === 'months') {
+          const yrs = (rawTenure / 12).toFixed(1).replace(/\.0$/, '');
+          tenureBadge.textContent = `${rawTenure} Months (${yrs} Yrs)`;
+        } else {
+          const mos = Math.round(rawTenure * 12);
+          tenureBadge.textContent = `${rawTenure} ${rawTenure === 1 ? 'Year' : 'Years'} (${mos} Mo)`;
+        }
       }
 
       if (elTenureSummary) {
-        elTenureSummary.textContent = `${tenureMonths} Months`;
+        elTenureSummary.textContent = `${tenureMonths} Mo`;
       }
 
       const totalTenureInterest = Math.round(annualInterest * (tenureMonths / 12));

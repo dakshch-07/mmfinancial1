@@ -274,21 +274,42 @@
                         <div class="calc-widget-grid" style="margin-top: 0;">
                             <!-- Left: Interactive Controls -->
                             <div class="calc-card inputs-card">
-                                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--color-navy); margin-bottom: 16px;">Overdraft Facility &amp; Usage Controls</h4>
+                                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--color-navy); margin-bottom: 16px;">Loan &amp; Overdraft Facility Controls</h4>
 
-                                <!-- Loan Tenure / Overdraft Facility Period (12 to 84 Months or 1 to 7 Years) -->
+                                <!-- Rate of Interest (10.50% to 15.00% p.a.) -->
                                 <div class="input-group">
-                                    <div class="input-header" style="display: flex; justify-content: space-between; align-items: center;">
-                                        <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure (12 to 84 Months)</label>
-                                        <span class="input-badge" id="lamfTenureBadge">36 Months</span>
+                                    <div class="input-header">
+                                        <label for="lamfRateInput">Interest Rate (% p.a. &bull; 10.5% to 15%)</label>
+                                        <span class="input-badge" id="lamfRateBadge">10.50%</span>
                                     </div>
                                     <div class="input-with-symbol">
-                                        <span class="currency-prefix" id="lamfTenurePrefix" style="left: 12px; pointer-events: none; font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1;">Months</span>
-                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Facility Tenure in Months" style="padding-left: 68px;">
+                                        <span class="currency-prefix">%</span>
+                                        <input type="text" id="lamfRateInput" class="calc-input" value="10.50" inputmode="decimal" aria-label="Interest Rate">
+                                    </div>
+                                    <input type="range" id="lamfRateSlider" class="calc-slider" min="10.5" max="15.0" step="0.05" value="10.50">
+                                    <div class="slider-limits"><span>10.50% (Min)</span><span>15.00% (Max)</span></div>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Bank rate bracket: 10.50% to 15.00% p.a. as per bank/NBFC guidelines.</span>
+                                </div>
+
+                                <!-- Facility Tenure with Month / Year Option (12 to 84 Months / 1 to 7 Years) -->
+                                <div class="input-group">
+                                    <div class="input-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure</label>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div class="tenure-unit-toggle" role="group" aria-label="Tenure Unit Option">
+                                                <button type="button" class="tenure-unit-btn lamf-unit-btn active" data-unit="months" title="Tenure in Months"><span class="unit-full">Months</span><span class="unit-short">Mo</span></button>
+                                                <button type="button" class="tenure-unit-btn lamf-unit-btn" data-unit="years" title="Tenure in Years"><span class="unit-full">Years</span><span class="unit-short">Yr</span></button>
+                                            </div>
+                                            <span class="input-badge" id="lamfTenureBadge">36 Months (3 Yrs)</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-with-symbol">
+                                        <span class="currency-prefix" id="lamfTenurePrefix" style="left: 12px; pointer-events: none; font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1;">Mo</span>
+                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Facility Tenure" style="padding-left: 42px;">
                                     </div>
                                     <input type="range" id="lamfTenureSlider" class="calc-slider" min="12" max="84" step="1" value="36">
-                                    <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (Min)</span><span id="lamfTenureMaxLimit">84 Months (Max)</span></div>
-                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Flexible overdraft tenure from 12 Months to 84 Months. Interest billed only for days used.</span>
+                                    <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (1 Yr)</span><span id="lamfTenureMaxLimit">84 Months (7 Yrs)</span></div>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Tenure from 12 to 84 months (1 to 7 years). Choose Months or Years.</span>
                                 </div>
 
                                 <div class="input-group">
@@ -367,8 +388,12 @@
 
                                 <!-- Interest Details Grid -->
                                 <div class="result-metrics-grid" style="margin-top: 14px;">
+                                    <div class="metric-box" style="background: #f0fdf4; border: 1.5px solid #86efac;">
+                                        <span class="metric-title" style="color: #166534; font-weight: 800;">Monthly EMI (Term Loan)</span>
+                                        <span class="metric-val" id="lamfMonthlyEmi" style="color: #15803d; font-size: 1.25rem;">₹0</span>
+                                    </div>
                                     <div class="metric-box">
-                                        <span class="metric-title">Estimated Monthly Interest</span>
+                                        <span class="metric-title">Monthly Interest Only (OD Facility)</span>
                                         <span class="metric-val" id="lamfMonthlyInterest">₹0</span>
                                     </div>
                                     <div class="metric-box">
