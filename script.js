@@ -1434,6 +1434,14 @@ const LOAN_ELIGIBILITY_CONFIG = {
         maxLoanAmount: 500000000,
         minSalariedMonthlySalary: 10000,
         minBusinessAnnualProfit: 50000
+    },
+    statutoryCharges: {
+        stampDutyRate: 0.003,            // 0.3% (0.3 per 100) Loan Stamp Duty Fix Govt.
+        noticeOfIntimationGovt: 15000,   // Notice of Intimation Govt up to 30 Lacs
+        noticeVendorMin: 1800,           // Vendor fees 1,800 - 3,000 as per bank
+        noticeVendorMax: 3000,
+        notaryFrankingMin: 2000,         // Notary & Franking 2,000 - 5,000 as per bank
+        notaryFrankingMax: 5000
     }
 };
 
@@ -1532,6 +1540,12 @@ function computeLocalEligibility(params) {
     const estimatedReqEmi = Math.round((reqAmount / 100000) * emiPerLakh);
     const isEligible = (maxEligibleLoan >= reqAmount) && (eligibleEmiCapacity > 0) && (grossMonthlyIncome > 0);
 
+    // Statutory Charges as per Loan Amount
+    const stampDuty = Math.round(reqAmount * LOAN_ELIGIBILITY_CONFIG.statutoryCharges.stampDutyRate);
+    const noticeGovt = (reqAmount <= 3000000 && reqAmount > 0) ? LOAN_ELIGIBILITY_CONFIG.statutoryCharges.noticeOfIntimationGovt : 15000;
+    const noticeVendor = '₹1,800 - ₹3,000';
+    const notaryFranking = '₹2,000 - ₹5,000';
+
     const tips = [];
     if (!isEligible) {
         if (maxEligibleLoan > 0) {
@@ -1562,6 +1576,12 @@ function computeLocalEligibility(params) {
         cibilScore: cibil,
         emiPerLakh,
         estimatedReqEmi,
+        charges: {
+            stampDuty,
+            noticeGovt,
+            noticeVendor,
+            notaryFranking
+        },
         tips
     };
 }
@@ -1920,7 +1940,37 @@ function initLoanForm() {
                             <span class="stat-val">${data.foirUsed} Capacity</span>
                         </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: #166534; font-weight: 600;">
+
+                    <!-- Statutory Govt. & Bank Charges Breakdown Strip -->
+                    <div class="statutory-charges-accordion" style="margin-top: 14px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                Indicative Govt. &amp; Bank Charges (As per Requested ₹${formatIndianNumber(originalPayload.loanAmount)})
+                            </span>
+                            <span style="font-size: 0.72rem; color: #15803d; font-weight: 600; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">Govt. &amp; Bank Slabs</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 0.76rem; color: #374151;">
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Stamp Duty (Govt. Fixed):</strong>
+                                <span>0.3% of Loan = <strong>₹${formatIndianNumber(Math.round(originalPayload.loanAmount * 0.003))}</strong></span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Notice of Intimation (Govt.):</strong>
+                                <span>₹15,000 (up to 30L) + Vendor (₹1,800 - ₹3,000)</span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Notary &amp; Franking Charges:</strong>
+                                <span>₹2,000 - ₹5,000 (As per bank)</span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Processing Fee &amp; Insurance:</strong>
+                                <span>As per lending bank / NBFC policy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: #166534; font-weight: 600; margin-top: 10px;">
                         ✓ Complete Step 2 below to receive sanctioned quotes with zero hidden processing charges.
                     </div>
                 </div>

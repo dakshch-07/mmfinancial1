@@ -89,6 +89,18 @@ const LOAN_ELIGIBILITY_CONFIG = {
         maxTenureMonths: 360          // 30 Years
     },
 
+    // 7. STATUTORY LOAN DISBURSEMENT CHARGES & GOVT. LEVIES (MORTGAGE / HOME LOAN / LAP)
+    statutoryCharges: {
+        stampDutyRate: 0.003, // 0.3% (0.3 of 100) of loan amount (Govt. Stamp Duty on Mortgage / MODT)
+        noticeOfIntimationGovt: 15000, // Fixed Govt. fee for loan amounts up to ₹30 Lakhs
+        noticeOfIntimationVendorMin: 1800, // ₹1,800 vendor/filing fee min
+        noticeOfIntimationVendorMax: 3000, // ₹3,000 vendor/filing fee max
+        notaryFrankingMin: 2000, // ₹2,000 min
+        notaryFrankingMax: 5000, // ₹5,000 max
+        processingFeeNote: 'As per bank / NBFC policy (Typically 0.25% - 0.50% + GST)',
+        insuranceNote: 'As per bank / NBFC & age profile (Property & Loan Term Shield)'
+    },
+
     // 7. ANTI-BYPASS & SECURITY
     security: {
         tokenSecret: 'mm_loan_secure_token_secret_2026_mukesh_tiwari',
@@ -214,6 +226,12 @@ function computeLoanEligibility(params) {
     // Eligibility condition: Max Eligible Loan >= Required Loan Amount AND Eligible EMI > 0
     const isEligible = (maxEligibleLoan >= reqAmount) && (eligibleEmiCapacity > 0) && (grossMonthlyIncome > 0);
 
+    // Compute Statutory & Bank Charges as per Loan Amount (Mortgage / Secured Loans)
+    const stampDuty = Math.round(reqAmount * LOAN_ELIGIBILITY_CONFIG.statutoryCharges.stampDutyRate);
+    const noticeGovt = (reqAmount <= 3000000 && reqAmount > 0) ? LOAN_ELIGIBILITY_CONFIG.statutoryCharges.noticeOfIntimationGovt : 15000;
+    const noticeVendor = '₹1,800 - ₹3,000';
+    const notaryFranking = '₹2,000 - ₹5,000';
+
     // Generate Tailored Tips if Ineligible
     const tips = [];
     if (!isEligible) {
@@ -247,6 +265,14 @@ function computeLoanEligibility(params) {
         cibilScore: cibil,
         emiPerLakh,
         estimatedReqEmi,
+        charges: {
+            stampDuty,
+            noticeGovt,
+            noticeVendor,
+            notaryFranking,
+            processingFee: LOAN_ELIGIBILITY_CONFIG.statutoryCharges.processingFeeNote,
+            insurance: LOAN_ELIGIBILITY_CONFIG.statutoryCharges.insuranceNote
+        },
         tips
     };
 }

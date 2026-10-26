@@ -39,6 +39,14 @@ const CONFIG = {
       lapFoir: 0.60,
       personalLoanFoir: 0.65,
       businessFoir: 0.60
+    },
+    charges: {
+      stampDutyRate: 0.003,            // 0.3% of loan amount (Fixed Govt Charges)
+      noticeOfIntimationGovt: 15000,   // Loan amount up to 30 Lacs: 15,000 Govt
+      noticeVendorMin: 1800,           // Vendor fee 1,800 - 3,000 as per bank
+      noticeVendorMax: 3000,
+      notaryFrankingMin: 2000,         // Notary & franking 2,000 - 5,000 as per bank
+      notaryFrankingMax: 5000
     }
   }
 };
@@ -580,6 +588,14 @@ const CONFIG = {
       if (foirEl) foirEl.textContent = Math.round(appliedFoir * 100);
       animateNumber(document.getElementById('eligTotalPayable'), totalPayable);
 
+      // Render Indicative Statutory Charges on Eligibility Card
+      const chargesContainer = widget.querySelector('.statutory-charges-box');
+      if (chargesContainer) {
+        const stampDuty = Math.round(maxLoan * CONFIG.defaults.charges.stampDutyRate);
+        const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
+        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+      }
+
       updateWhatsAppCta(
         document.getElementById('eligWhatsAppBtn'),
         isPersonal ? 'Personal Loan Eligibility Calculator' : 'Home Loan Eligibility Calculator',
@@ -735,6 +751,14 @@ const CONFIG = {
       animateNumber(document.getElementById('emiTotalPayable'), emiRes.totalPayable);
 
       updateDonut(svgDonut, P, emiRes.totalInterest);
+
+      // Render Indicative Statutory Charges Breakdown Box
+      const chargesContainer = widget.querySelector('.statutory-charges-box');
+      if (chargesContainer) {
+        const stampDuty = Math.round(P * CONFIG.defaults.charges.stampDutyRate);
+        const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
+        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+      }
 
       currentSchedule = buildAmortizationSchedule(P, rate, tenureYears, tenureMonths);
       renderAmortizationTable(tableBody, currentSchedule);
@@ -1104,6 +1128,14 @@ const CONFIG = {
       animateNumber(document.getElementById('lapIncomeLimit'), incomeLimit);
       animateNumber(document.getElementById('lapMonthlyEmi'), res.emi);
       animateNumber(document.getElementById('lapTotalPayable'), res.totalPayable);
+
+      // Render Indicative Statutory Charges on LAP Result Card
+      const chargesContainer = widget.querySelector('.statutory-charges-box');
+      if (chargesContainer) {
+        const stampDuty = Math.round(finalSanction * CONFIG.defaults.charges.stampDutyRate);
+        const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
+        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+      }
 
       updateWhatsAppCta(
         document.getElementById('lapWhatsAppBtn'),
