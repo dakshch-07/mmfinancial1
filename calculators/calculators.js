@@ -1704,7 +1704,29 @@ const CONFIG = {
         clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Search failed');
         const list = await res.json();
-        const results = Array.isArray(list) ? list.slice(0, 10) : [];
+        let results = Array.isArray(list) ? list : [];
+
+        // Sort so active, modern Growth and Direct/Regular plans appear first ahead of ancient/discontinued plans
+        results.sort((a, b) => {
+          const aName = (a.schemeName || '').toLowerCase();
+          const bName = (b.schemeName || '').toLowerCase();
+
+          // Penalize old discontinued or bonus/premium-plus suffixes
+          const aOld = aName.includes('dividend') || aName.includes('premium') || aName.includes('bonus');
+          const bOld = bName.includes('dividend') || bName.includes('premium') || bName.includes('bonus');
+          if (aOld && !bOld) return 1;
+          if (!aOld && bOld) return -1;
+
+          // Prioritize Growth options
+          const aGrowth = aName.includes('growth');
+          const bGrowth = bName.includes('growth');
+          if (aGrowth && !bGrowth) return -1;
+          if (!aGrowth && bGrowth) return 1;
+
+          return 0;
+        });
+
+        results = results.slice(0, 12);
         searchCache.set(q, results);
         return results;
       } catch (err) {
@@ -1768,8 +1790,9 @@ const CONFIG = {
             </td>
             <td style="width: 14%;">
               <div style="position: relative;">
-                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal" aria-label="NAV">
+                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal" aria-label="NAV" style="${s.navManualRequired ? 'border-color: #f59e0b; background: #fffbeb;' : ''}">
                 ${s.navDate ? `<span class="lamf-meta-date">As of: ${s.navDate} ${s.navAgeWarning ? '⚠️' : ''}</span>` : ''}
+                ${s.navManualRequired ? `<span class="lamf-meta-date" style="color: #b45309; font-weight: 600;">Discontinued plan. Please enter NAV</span>` : ''}
               </div>
             </td>
             <td style="width: 14%;">
@@ -1838,8 +1861,9 @@ const CONFIG = {
 
               <div class="lamf-card-field">
                 <label class="lamf-card-label">NAV (₹)</label>
-                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal">
+                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal" style="${s.navManualRequired ? 'border-color: #f59e0b; background: #fffbeb;' : ''}">
                 ${s.navDate ? `<span class="lamf-meta-date">As of: ${s.navDate}</span>` : ''}
+                ${s.navManualRequired ? `<span class="lamf-meta-date" style="color: #b45309; font-weight: 600;">Discontinued plan. Please enter NAV</span>` : ''}
               </div>
 
               <div class="lamf-card-field">
@@ -1975,7 +1999,7 @@ const CONFIG = {
 
           if (navData && navData.data && navData.data.length > 0) {
             const rawNav = parseFloat(navData.data[0].nav);
-            s.nav = isNaN(rawNav) ? 0 : rawNav;
+            s.nav = (!isNaN(rawNav) && rawNav > 0) ? rawNav : 0;
             s.navDate = navData.data[0].date || '';
 
             // Check if NAV older than 5 days
@@ -1993,19 +2017,29 @@ const CONFIG = {
             s.type = detectFundType(category, schemeName);
             s.ltv = s.type === 'equity' ? LAMF_CONFIG.ltv.equity : LAMF_CONFIG.ltv.debt;
           } else {
-            // NAV fetch failed: allow manual entry
-            const notice = container.querySelector('.lamf-search-box');
-            if (notice && !container.querySelector('.nav-err-note')) {
-              const errDiv = document.createElement('div');
-              errDiv.className = 'nav-err-note';
-              errDiv.style.cssText = 'color: #b91c1c; font-size: 0.72rem; margin-top: 4px;';
-              errDiv.textContent = 'Could not fetch live NAV. Please enter NAV manually.';
-              notice.appendChild(errDiv);
-            }
+            s.nav = 0;
+            s.navDate = '';
+          }
+
+          // If scheme is discontinued / returned 0 NAV, flag it so user knows to input NAV
+          if (s.nav === 0) {
+            s.navManualRequired = true;
+          } else {
+            s.navManualRequired = false;
           }
 
           render();
         });
+      }
+
+      // Helper to update row/card display metrics live without re-rendering the whole form
+      function updateRowDisplay() {
+        const totalVal = Math.round(s.units * s.nav);
+        const eligibleVal = totalVal > 0 ? Math.round(totalVal * s.ltv) : 0;
+        const totEl = container.querySelector('.total-val-display');
+        const eligEl = container.querySelector('.eligible-val-display');
+        if (totEl) totEl.textContent = totalVal > 0 ? '₹' + fmtINR(totalVal) : '—';
+        if (eligEl) eligEl.textContent = eligibleVal > 0 ? '₹' + fmtINR(eligibleVal) : '—';
       }
 
       // Fund type override
@@ -2013,7 +2047,9 @@ const CONFIG = {
         typeSelect.addEventListener('change', () => {
           s.type = typeSelect.value;
           s.ltv = s.type === 'equity' ? LAMF_CONFIG.ltv.equity : LAMF_CONFIG.ltv.debt;
-          render();
+          if (ltvIn) ltvIn.value = Math.round(s.ltv * 100);
+          updateRowDisplay();
+          recalculate();
         });
       }
 
@@ -2022,6 +2058,7 @@ const CONFIG = {
         unitsIn.addEventListener('input', () => {
           const val = parseFloat(unitsIn.value);
           s.units = (!isNaN(val) && val >= 0) ? val : 0;
+          updateRowDisplay();
           recalculate();
         });
       }
@@ -2031,6 +2068,12 @@ const CONFIG = {
         navIn.addEventListener('input', () => {
           const val = parseFloat(navIn.value);
           s.nav = (!isNaN(val) && val >= 0) ? val : 0;
+          if (s.nav > 0) {
+            navIn.style.borderColor = '';
+            const errNote = container.querySelector('.nav-err-note');
+            if (errNote) errNote.remove();
+          }
+          updateRowDisplay();
           recalculate();
         });
       }
@@ -2041,6 +2084,7 @@ const CONFIG = {
           const val = parseFloat(ltvIn.value);
           if (!isNaN(val) && val >= 0) {
             s.ltv = Math.min(1, Math.max(0, val / 100));
+            updateRowDisplay();
             recalculate();
           }
         });
