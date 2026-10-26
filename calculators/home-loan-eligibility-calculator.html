@@ -322,27 +322,33 @@
                             </select>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                            <div class="input-group" style="margin-bottom: 0;">
-                                <div class="input-header">
-                                    <label for="bizTurnoverInput">Year 1 Turnover / Receipts</label>
-                                    <span class="input-badge" id="bizTurnoverBadge">₹1.80 Cr</span>
-                                </div>
-                                <div class="input-with-symbol">
-                                    <span class="currency-prefix">₹</span>
-                                    <input type="text" id="bizTurnoverInput" class="calc-input" value="1,80,00,000" inputmode="numeric" aria-label="Year 1 Turnover">
-                                </div>
+                        <!-- Current & Previous Year Turnover Inputs -->
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizTurnoverInput" id="bizTurnoverLabel">Current Financial Year Gross Turnover / Receipts (₹)</label>
+                                <span class="input-badge" id="bizTurnoverBadge">₹2,00,00,000</span>
                             </div>
-                            <div class="input-group" style="margin-bottom: 0;">
-                                <div class="input-header">
-                                    <label for="bizTurnoverYear2Input">Year 2 Turnover / Receipts</label>
-                                    <span class="input-badge" id="bizTurnoverYear2Badge">₹2.20 Cr</span>
-                                </div>
-                                <div class="input-with-symbol">
-                                    <span class="currency-prefix">₹</span>
-                                    <input type="text" id="bizTurnoverYear2Input" class="calc-input" value="2,20,00,000" inputmode="numeric" aria-label="Year 2 Turnover">
-                                </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizTurnoverInput" class="calc-input" value="2,00,00,000" inputmode="numeric" aria-label="Current Year Turnover">
                             </div>
+                            <input type="range" id="bizTurnoverSlider" class="calc-slider" min="1000000" max="500000000" step="500000" value="20000000">
+                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
+                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Latest / Current FY revenue as per GST returns / Audited P&amp;L.</span>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizTurnoverYear2Input" id="bizTurnoverYear2Label">Previous Financial Year Gross Turnover / Receipts (₹)</label>
+                                <span class="input-badge" id="bizTurnoverYear2Badge">₹1,80,00,000</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizTurnoverYear2Input" class="calc-input" value="1,80,00,000" inputmode="numeric" aria-label="Previous Year Turnover">
+                            </div>
+                            <input type="range" id="bizTurnoverYear2Slider" class="calc-slider" min="1000000" max="500000000" step="500000" value="18000000">
+                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
+                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Previous FY revenue as per GST returns / Audited P&amp;L.</span>
                         </div>
                         <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 12px;">
                             <span style="color: #78350f; font-weight: 600;">2-Year Average Turnover:</span>
