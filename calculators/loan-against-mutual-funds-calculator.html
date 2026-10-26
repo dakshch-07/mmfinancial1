@@ -276,6 +276,22 @@
                             <div class="calc-card inputs-card">
                                 <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--color-navy); margin-bottom: 16px;">Overdraft Facility &amp; Usage Controls</h4>
                                 
+                                <!-- CIBIL Score Selection (ROI Benchmark) -->
+                                <div class="input-group">
+                                    <div class="input-header">
+                                        <label for="lamfCibilSelect">CIBIL / Credit Score</label>
+                                        <span class="input-badge" id="lamfCibilBadge">750+ (Prime ROI)</span>
+                                    </div>
+                                    <select id="lamfCibilSelect" class="calc-select" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--color-navy); background: #ffffff;">
+                                        <option value="750+" selected>750 &amp; Above (Lowest ROI ~ 9.50% - 10.50%)</option>
+                                        <option value="700-749">700 - 749 (Standard Banking ~ 10.50% - 11.00%)</option>
+                                        <option value="650-699">650 - 699 (Fair / Standard NBFC ~ 11.25% - 11.75%)</option>
+                                        <option value="Below 650">Below 650 (Advisory Slabs ~ 12.00%)</option>
+                                        <option value="New to Credit">New to Credit / No Score (-1 / NH ~ 10.75%)</option>
+                                    </select>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Rate of Interest auto-calibrates based on selected credit profile.</span>
+                                </div>
+
                                 <div class="input-group">
                                     <div class="input-header">
                                         <label for="lamfRateInput">Overdraft Interest Rate (% p.a.)</label>
@@ -285,8 +301,29 @@
                                         <span class="currency-prefix">%</span>
                                         <input type="text" id="lamfRateInput" class="calc-input" value="10.50" inputmode="decimal" aria-label="Interest Rate">
                                     </div>
-                                    <input type="range" id="lamfRateSlider" class="calc-slider" min="9.0" max="12.0" step="0.05" value="10.50">
-                                    <div class="slider-limits"><span>9.0%</span><span>12.0%</span></div>
+                                    <input type="range" id="lamfRateSlider" class="calc-slider" min="9.0" max="14.0" step="0.05" value="10.50">
+                                    <div class="slider-limits"><span>9.0%</span><span>14.0%</span></div>
+                                </div>
+
+                                <!-- Loan Tenure / Overdraft Facility Period (12 to 84 Months or 1 to 7 Years) -->
+                                <div class="input-group">
+                                    <div class="input-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <label for="lamfTenureInput" id="lamfTenureLabel">Facility Tenure</label>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div class="tenure-unit-toggle" style="display: inline-flex; background: #e2e8f0; border-radius: 6px; padding: 2px;">
+                                                <button type="button" class="lamf-unit-btn active" data-unit="months" style="padding: 2px 8px; font-size: 0.72rem; border: none; background: #ffffff; color: var(--color-navy); border-radius: 4px; font-weight: 700; cursor: pointer;">Months</button>
+                                                <button type="button" class="lamf-unit-btn" data-unit="years" style="padding: 2px 8px; font-size: 0.72rem; border: none; background: transparent; color: #64748b; border-radius: 4px; font-weight: 700; cursor: pointer;">Years</button>
+                                            </div>
+                                            <span class="input-badge" id="lamfTenureBadge">36 Months (3 Yrs)</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-with-symbol">
+                                        <span class="currency-prefix" id="lamfTenurePrefix">Mo</span>
+                                        <input type="text" id="lamfTenureInput" class="calc-input" value="36" inputmode="numeric" aria-label="Tenure">
+                                    </div>
+                                    <input type="range" id="lamfTenureSlider" class="calc-slider" min="12" max="84" step="1" value="36">
+                                    <div class="slider-limits"><span id="lamfTenureMinLimit">12 Months (1 Yr)</span><span id="lamfTenureMaxLimit">84 Months (7 Yrs)</span></div>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Annual renewal or repayment window from 12 to 84 months (1 to 7 years).</span>
                                 </div>
 
                                 <div class="input-group">
@@ -373,14 +410,49 @@
                                         <span class="metric-title">Annual Interest Cost</span>
                                         <span class="metric-val" id="lamfAnnualInterest">₹0</span>
                                     </div>
-                                    <div class="metric-box" style="grid-column: span 2;">
+                                    <div class="metric-box">
                                         <span class="metric-title">Interest Accrual per Day</span>
                                         <span class="metric-val" id="lamfDailyInterest">₹0</span>
+                                    </div>
+                                    <div class="metric-box">
+                                        <span class="metric-title">Total Tenure Interest (<span id="lamfTenureSummary">36 Mo</span>)</span>
+                                        <span class="metric-val" id="lamfTenureTotalInterest">₹0</span>
                                     </div>
                                 </div>
 
                                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 0.78rem; color: #475569; line-height: 1.45;">
-                                    💡 <strong>Zero Compulsory EMI:</strong> Interest is charged strictly on the amount actually used, for the days it is used. Repay the principal whenever you like with zero foreclosure fees.
+                                    💡 <strong>Zero Compulsory EMI:</strong> Interest is charged strictly on the amount actually used, for the days it is used. Repay the principal whenever you like within the 12 to 84-month tenure with zero foreclosure fees.
+                                </div>
+
+                                <!-- Statutory Govt & Bank Charges Breakdown -->
+                                <div class="statutory-charges-box" style="margin-top: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+                                        <span style="font-size: 0.76rem; font-weight: 700; color: var(--color-navy); text-transform: uppercase; letter-spacing: 0.5px;">
+                                            ⚖️ Loan Stamp Duty &amp; Govt. Charges
+                                        </span>
+                                        <span style="font-size: 0.7rem; color: #15803d; font-weight: 700; background: #dcfce7; padding: 2px 6px; border-radius: 4px;">Standard Slabs</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem;">
+                                        <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                            <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Loan Stamp Duty (Govt. 0.3%):</span>
+                                            <strong class="charge-stamp-duty" id="lamfStampDuty" style="color: var(--color-navy); font-size: 0.85rem;">₹0</strong>
+                                        </div>
+                                        <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                            <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notice of Intimation (Govt.):</span>
+                                            <strong style="color: var(--color-navy); font-size: 0.82rem;">₹15,000 (up to 30L)</strong>
+                                        </div>
+                                        <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                            <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notice Vendor Filing:</span>
+                                            <strong style="color: var(--color-navy); font-size: 0.82rem;">₹1,800 - ₹3,000</strong>
+                                        </div>
+                                        <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                            <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notary &amp; Franking:</span>
+                                            <strong style="color: var(--color-navy); font-size: 0.82rem;">₹2,000 - ₹5,000</strong>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 0.7rem; color: #64748b;">
+                                        * Processing Fee (PF) &amp; Loan Insurance are as per lending bank/NBFC guidelines.
+                                    </div>
                                 </div>
 
                                 <!-- Inline SVG Visual Portfolio Distribution -->

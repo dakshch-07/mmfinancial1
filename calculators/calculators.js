@@ -1659,6 +1659,24 @@ const CONFIG = {
     const utilBadge = document.getElementById('lamfUtilBadge');
     const utilAmountIn = document.getElementById('lamfUtilAmountInput');
 
+    // CIBIL & Tenure Controls
+    const cibilSel = document.getElementById('lamfCibilSelect');
+    const cibilBadge = document.getElementById('lamfCibilBadge');
+    const tenureIn = document.getElementById('lamfTenureInput');
+    const tenureSl = document.getElementById('lamfTenureSlider');
+    const tenureBadge = document.getElementById('lamfTenureBadge');
+    const tenureLabel = document.getElementById('lamfTenureLabel');
+    const tenurePrefix = document.getElementById('lamfTenurePrefix');
+    const tenureMinLimit = document.getElementById('lamfTenureMinLimit');
+    const tenureMaxLimit = document.getElementById('lamfTenureMaxLimit');
+    const unitToggleBtns = widget.querySelectorAll('.lamf-unit-btn');
+    const elTenureSummary = document.getElementById('lamfTenureSummary');
+    const elTenureTotalInterest = document.getElementById('lamfTenureTotalInterest');
+    const elStampDuty = document.getElementById('lamfStampDuty');
+
+    let currentTenureUnit = 'months'; // 'months' | 'years'
+    const defaultLamfRate = 10.50;
+
     // Interest outputs
     const elMonthlyInterest = document.getElementById('lamfMonthlyInterest');
     const elAnnualInterest = document.getElementById('lamfAnnualInterest');
@@ -2155,6 +2173,105 @@ const CONFIG = {
       });
     }
 
+    // CIBIL Score selection benchmarks interest rate
+    if (cibilSel) {
+      cibilSel.addEventListener('change', () => {
+        const val = cibilSel.value;
+        if (cibilBadge) {
+          cibilBadge.textContent = val === '750+' ? '750+ (Prime ROI)' : val;
+        }
+
+        let baseRate = defaultLamfRate; // 10.50%
+        if (val === '750+') baseRate = 10.00;
+        else if (val === '700-749') baseRate = 10.50;
+        else if (val === '650-699') baseRate = 11.25;
+        else if (val === 'Below 650') baseRate = 12.00;
+        else if (val === 'New to Credit') baseRate = 10.75;
+
+        if (rateIn) rateIn.value = baseRate.toFixed(2);
+        if (rateSl) {
+          rateSl.value = baseRate.toFixed(2);
+          updateSliderFill(rateSl);
+        }
+        if (rateBadge) rateBadge.textContent = `${baseRate.toFixed(2)}%`;
+        recalculate();
+      });
+    }
+
+    // Tenure Toggle (12 to 84 Months or 1 to 7 Years)
+    function setTenureUnit(newUnit) {
+      if (currentTenureUnit === newUnit) return;
+      currentTenureUnit = newUnit;
+
+      unitToggleBtns.forEach(btn => {
+        const isActive = btn.dataset.unit === newUnit;
+        btn.classList.toggle('active', isActive);
+        btn.style.background = isActive ? '#ffffff' : 'transparent';
+        btn.style.color = isActive ? 'var(--color-navy)' : '#64748b';
+      });
+
+      if (newUnit === 'months') {
+        const currentYrs = parseFloat(tenureIn.value) || 3;
+        const moVal = Math.max(12, Math.min(84, Math.round(currentYrs * 12)));
+        tenureSl.min = 12;
+        tenureSl.max = 84;
+        tenureSl.step = 1;
+        tenureSl.value = moVal;
+        tenureIn.value = moVal;
+        if (tenurePrefix) tenurePrefix.textContent = 'Mo';
+        if (tenureMinLimit) tenureMinLimit.textContent = '12 Months (1 Yr)';
+        if (tenureMaxLimit) tenureMaxLimit.textContent = '84 Months (7 Yrs)';
+      } else {
+        const currentMos = parseFloat(tenureIn.value) || 36;
+        const yrVal = Math.max(1, Math.min(7, Math.round(currentMos / 12) || 1));
+        tenureSl.min = 1;
+        tenureSl.max = 7;
+        tenureSl.step = 1;
+        tenureSl.value = yrVal;
+        tenureIn.value = yrVal;
+        if (tenurePrefix) tenurePrefix.textContent = 'Yr';
+        if (tenureMinLimit) tenureMinLimit.textContent = '1 Year (12 Mo)';
+        if (tenureMaxLimit) tenureMaxLimit.textContent = '7 Years (84 Mo)';
+      }
+
+      updateSliderFill(tenureSl);
+      recalculate();
+    }
+
+    unitToggleBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setTenureUnit(btn.dataset.unit);
+      });
+    });
+
+    if (tenurePrefix) {
+      tenurePrefix.style.cursor = 'pointer';
+      tenurePrefix.title = 'Switch between Months (12-84) and Years (1-7)';
+      tenurePrefix.addEventListener('click', () => {
+        setTenureUnit(currentTenureUnit === 'months' ? 'years' : 'months');
+      });
+    }
+
+    if (tenureIn && tenureSl) {
+      tenureSl.addEventListener('input', () => {
+        tenureIn.value = tenureSl.value;
+        updateSliderFill(tenureSl);
+        recalculate();
+      });
+
+      tenureIn.addEventListener('input', () => {
+        const val = parseInt(tenureIn.value, 10);
+        const minVal = parseFloat(tenureSl.min);
+        const maxVal = parseFloat(tenureSl.max);
+        if (!isNaN(val) && val >= minVal && val <= maxVal) {
+          tenureSl.value = val;
+          updateSliderFill(tenureSl);
+          recalculate();
+        }
+      });
+    }
+
     // Global Interest Rate Slider & Input Sync
     if (rateIn && rateSl) {
       rateSl.addEventListener('input', () => {
@@ -2286,9 +2403,37 @@ const CONFIG = {
       const monthlyInterest = (withdrawn * (annualRate / 100)) / 12;
       const dailyInterest = (withdrawn * (annualRate / 100)) / LAMF_CONFIG.daysInYear;
 
+      // Tenure Calculation (12-84 Months or 1-7 Years)
+      const rawTenure = parseFloat(tenureIn ? tenureIn.value : 36) || (currentTenureUnit === 'months' ? 36 : 3);
+      const tenureMonths = currentTenureUnit === 'months' ? rawTenure : (rawTenure * 12);
+      const tenureYears = tenureMonths / 12;
+
+      if (tenureBadge) {
+        if (currentTenureUnit === 'months') {
+          const yrs = (rawTenure / 12).toFixed(1).replace(/\.0$/, '');
+          tenureBadge.textContent = `${rawTenure} Months (${yrs} Yrs)`;
+        } else {
+          const mos = Math.round(rawTenure * 12);
+          tenureBadge.textContent = `${rawTenure} ${rawTenure === 1 ? 'Year' : 'Years'} (${mos} Mo)`;
+        }
+      }
+
+      if (elTenureSummary) {
+        elTenureSummary.textContent = `${tenureMonths} Mo`;
+      }
+
+      const totalTenureInterest = Math.round(annualInterest * (tenureMonths / 12));
+      if (elTenureTotalInterest) elTenureTotalInterest.textContent = '₹' + fmtINR(totalTenureInterest);
+
       if (elAnnualInterest) elAnnualInterest.textContent = '₹' + fmtINR(annualInterest);
       if (elMonthlyInterest) elMonthlyInterest.textContent = '₹' + fmtINR(Math.round(monthlyInterest));
       if (elDailyInterest) elDailyInterest.textContent = '₹' + fmtINR(Math.round(dailyInterest));
+
+      // Calculate Statutory Govt Stamp Duty (0.3% of Sanctioned Limit)
+      if (elStampDuty) {
+        const stampVal = Math.round(totalLimit * CONFIG.defaults.charges.stampDutyRate);
+        elStampDuty.textContent = '₹' + fmtINR(stampVal);
+      }
 
       // Stress Test: Market Fall Impact
       const stressPct = parseFloat(stressSl ? stressSl.value : 0) || 0;
@@ -2395,11 +2540,15 @@ const CONFIG = {
         schemeText = 'Not specified yet';
       }
 
+      const cibilVal = (cibilSel ? cibilSel.value : '750+');
+      const tenureVal = (tenureIn ? tenureIn.value : 36) + (currentTenureUnit === 'months' ? ' Months' : ' Years');
+
       const msg = `Hello Mukesh ji,\nI evaluated Loan Against Mutual Funds (LAMF) on your website.\n\n` +
                   `*Schemes:* ${schemeText}\n` +
                   `*Total Mutual Fund Value:* ₹${fmtINR(totals.totalPortfolioVal)}\n` +
                   `*Estimated Credit Limit:* ₹${fmtINR(totals.totalLimit)}\n` +
                   `*Equity Sub-limit:* ₹${fmtINR(totals.equityLimit)} | *Debt Sub-limit:* ₹${fmtINR(totals.debtLimit)}\n` +
+                  `*CIBIL Profile:* ${cibilVal} | *Tenure:* ${tenureVal}\n` +
                   `*Indicative Interest Rate:* ${rate}% p.a.\n\n` +
                   `Please guide me with the online paperless lien-marking and sanction process.`;
 
