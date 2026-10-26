@@ -269,32 +269,108 @@
                     </div>
                 </div>
 
-                <!-- Business Inputs (2-Year ITR Banking Assessment) -->
+                <!-- Business Inputs (2-Year ITR Banking Assessment / Turnover Program) -->
                 <div id="businessFields" class="profile-fields" style="display:none;">
+                    <!-- Assessment Method Selector -->
                     <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizProfitInput">Latest Year Net Profit (ITR Year 1 PAT)</label>
-                            <span class="input-badge" id="bizProfitBadge">₹12,00,000</span>
-                        </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizProfitInput" class="calc-input" value="12,00,000" inputmode="numeric" aria-label="Latest Year Net Profit">
-                        </div>
-                        <input type="range" id="bizProfitSlider" class="calc-slider" min="100000" max="20000000" step="25000" value="1200000">
-                        <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
+                        <label for="bizProgramSelect" style="font-size:0.78rem; font-weight:700;">Business Assessment Underwriting Program</label>
+                        <select id="bizProgramSelect" class="calc-input" style="font-weight: 700; color: var(--color-navy);">
+                            <option value="itr" selected>Net Profit Method (2-Year ITR PAT + Depreciation)</option>
+                            <option value="turnover">Gross Turnover Program (Banking Norm: Mfg, Services, Traders, CA, CS, Doctors)</option>
+                        </select>
                     </div>
 
-                    <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizProfit2Input">Previous Year Net Profit (ITR Year 2 PAT)</label>
-                            <span class="input-badge" id="bizProfit2Badge">₹10,00,000</span>
+                    <!-- Turnover Program Specific Controls -->
+                    <div id="turnoverProgramFields" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+                        <!-- Industry / Profession Category Selector -->
+                        <div class="input-group">
+                            <label for="bizIndustrySelect" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Industry / Profession Category (Bank Benchmark)</label>
+                            <select id="bizIndustrySelect" class="calc-input" style="font-weight: 700; color: var(--color-navy); border-color: #fcd34d;">
+                                <option value="mfg" data-min="10" data-max="15" data-def="12">Manufacturing (10% - 15% Margin)</option>
+                                <option value="services" data-min="10" data-max="15" data-def="12">Services (10% - 15% Margin)</option>
+                                <option value="trader" data-min="5" data-max="10" data-def="7.5" selected>Trading / Wholesale / Retail (5% - 10% Margin)</option>
+                                <option value="ca" data-min="2" data-max="3" data-def="2.5">Chartered Accountant (CA Gross Receipts 2% - 3%)</option>
+                                <option value="cs" data-min="1.5" data-max="1.5" data-def="1.5">Company Secretary (CS Gross Receipts 1.5%)</option>
+                                <option value="doctor" data-min="2" data-max="3" data-def="2.5">Doctor (MBBS / Specialist Gross Receipts 2% - 3%)</option>
+                                <option value="custom" data-min="1" data-max="20" data-def="5">Custom Multiplier (1% - 20%)</option>
+                            </select>
                         </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizProfit2Input" class="calc-input" value="10,00,000" inputmode="numeric" aria-label="Previous Year Net Profit">
+
+                        <!-- Current & Previous Year Turnover Inputs -->
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizTurnoverInput" id="bizTurnoverLabel">Current Financial Year Gross Turnover / Receipts (₹)</label>
+                                <span class="input-badge" id="bizTurnoverBadge">₹2,00,00,000</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizTurnoverInput" class="calc-input" value="2,00,00,000" inputmode="numeric" aria-label="Current Year Turnover">
+                            </div>
+                            <input type="range" id="bizTurnoverSlider" class="calc-slider" min="1000000" max="500000000" step="500000" value="20000000">
+                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
+                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Latest / Current FY revenue as per GST returns / Audited P&amp;L.</span>
                         </div>
-                        <input type="range" id="bizProfit2Slider" class="calc-slider" min="100000" max="20000000" step="25000" value="1000000">
-                        <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
+
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizTurnoverYear2Input" id="bizTurnoverYear2Label">Previous Financial Year Gross Turnover / Receipts (₹)</label>
+                                <span class="input-badge" id="bizTurnoverYear2Badge">₹1,80,00,000</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizTurnoverYear2Input" class="calc-input" value="1,80,00,000" inputmode="numeric" aria-label="Previous Year Turnover">
+                            </div>
+                            <input type="range" id="bizTurnoverYear2Slider" class="calc-slider" min="1000000" max="500000000" step="500000" value="18000000">
+                            <div class="slider-limits"><span>₹10 Lakh</span><span>₹50 Crore</span></div>
+                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Previous FY revenue as per GST returns / Audited P&amp;L.</span>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 12px;">
+                            <span style="color: #78350f; font-weight: 600;" id="bizAvgTurnoverLabel">2-Year Average Turnover:</span>
+                            <strong id="bizAvgTurnoverBadge" style="color: var(--color-navy); font-size: 0.95rem;">₹1,90,00,000</strong>
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <div class="input-header">
+                                <label for="bizTurnoverPctInput">Turnover Multiplier (% Assumed Net Cash Margin)</label>
+                                <span class="input-badge" id="bizTurnoverPctBadge">7.5%</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">%</span>
+                                <input type="text" id="bizTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage">
+                            </div>
+                            <input type="range" id="bizTurnoverPctSlider" class="calc-slider" min="1.0" max="20.0" step="0.1" value="7.5">
+                            <div class="slider-limits"><span id="bizTurnoverMinLimit">5.0% (Min)</span><span id="bizTurnoverMaxLimit">10.0% (Max)</span></div>
+                            <span id="bizTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Trading benchmark accepted by leading banks: 5% to 10% of gross turnover.</span>
+                        </div>
+                    </div>
+
+                    <!-- Standard 2-Year ITR Fields -->
+                    <div id="itrProgramFields">
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizProfitInput">Latest Year Net Profit (ITR Year 1 PAT)</label>
+                                <span class="input-badge" id="bizProfitBadge">₹12,00,000</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizProfitInput" class="calc-input" value="12,00,000" inputmode="numeric" aria-label="Latest Year Net Profit">
+                            </div>
+                            <input type="range" id="bizProfitSlider" class="calc-slider" min="100000" max="20000000" step="25000" value="1200000">
+                            <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="input-header">
+                                <label for="bizProfit2Input">Previous Year Net Profit (ITR Year 2 PAT)</label>
+                                <span class="input-badge" id="bizProfit2Badge">₹10,00,000</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizProfit2Input" class="calc-input" value="10,00,000" inputmode="numeric" aria-label="Previous Year Net Profit">
+                            </div>
+                            <input type="range" id="bizProfit2Slider" class="calc-slider" min="100000" max="20000000" step="25000" value="1000000">
+                            <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
+                        </div>
                     </div>
 
                     <!-- 2-Year ITR Bank Assessment Strip -->

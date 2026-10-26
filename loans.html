@@ -281,19 +281,19 @@
 
                                 <div class="form-row" style="margin-bottom: 8px;">
                                     <div class="form-field">
-                                        <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel">Year 1 Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                        <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel">Current Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
                                         <input type="text" id="loanTurnoverAmount" name="loanTurnoverAmount" placeholder="e.g. ₹1,80,00,000" class="form-input" inputmode="numeric">
-                                        <span class="field-hint">Latest Financial Year GST / 26AS</span>
+                                        <span class="field-hint">Latest / Current Financial Year GST / 26AS</span>
                                     </div>
                                     <div class="form-field">
-                                        <label for="loanTurnoverAmountYear2" id="loanTurnoverAmountYear2Label">Year 2 Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                        <label for="loanTurnoverAmountYear2" id="loanTurnoverAmountYear2Label">Previous Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
                                         <input type="text" id="loanTurnoverAmountYear2" name="loanTurnoverAmountYear2" placeholder="e.g. ₹2,20,00,000" class="form-input" inputmode="numeric">
                                         <span class="field-hint">Previous Financial Year GST / 26AS</span>
                                     </div>
                                 </div>
 
                                 <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-top: 6px;">
-                                    <span style="color: #78350f;">2-Year Average Turnover / Receipts:</span>
+                                    <span style="color: #78350f; font-weight: 600;" id="loanAvgTurnoverLabel">2-Year Average Turnover / Receipts:</span>
                                     <strong id="loanAvgTurnoverDisplay" style="color: var(--color-navy); font-size: 0.95rem;">₹2,00,00,000</strong>
                                 </div>
                                 <span class="field-hint" id="loanTurnoverFormulaHint" style="margin-top: 6px; display: block; color: #92400e;">Bank Norm: Derived Monthly Profit = (2-Year Average Turnover × Margin %) ÷ 12</span>

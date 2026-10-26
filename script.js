@@ -1717,13 +1717,25 @@ function initLoanForm() {
             const isGrossReceipt = optText.includes('Gross Receipts') || optText.includes('Doctor') || optText.includes('CA') || optText.includes('CS');
             
             const amtLabel = document.getElementById('loanTurnoverAmountLabel');
+            const amtLabelYear2 = document.getElementById('loanTurnoverAmountYear2Label');
+            const avgLabel = document.getElementById('loanAvgTurnoverLabel');
             const amtHint = document.getElementById('loanTurnoverAmountHint');
             const formulaHint = document.getElementById('loanTurnoverFormulaHint');
 
             if (amtLabel) {
                 amtLabel.innerHTML = isGrossReceipt 
-                    ? 'Annual Gross Receipts / Fees (₹) <span class="req">*</span>' 
-                    : 'Annual Gross Turnover (₹) <span class="req">*</span>';
+                    ? 'Current Financial Year Gross Receipts / Fees (₹) <span class="req">*</span>' 
+                    : 'Current Financial Year Gross Turnover (₹) <span class="req">*</span>';
+            }
+            if (amtLabelYear2) {
+                amtLabelYear2.innerHTML = isGrossReceipt 
+                    ? 'Previous Financial Year Gross Receipts / Fees (₹) <span class="req">*</span>' 
+                    : 'Previous Financial Year Gross Turnover (₹) <span class="req">*</span>';
+            }
+            if (avgLabel) {
+                avgLabel.textContent = isGrossReceipt
+                    ? '2-Year Average Gross Receipts / Fees:'
+                    : '2-Year Average Turnover:';
             }
             if (amtHint) {
                 amtHint.textContent = isGrossReceipt
@@ -1732,8 +1744,8 @@ function initLoanForm() {
             }
             if (formulaHint) {
                 formulaHint.textContent = isGrossReceipt
-                    ? 'Formula: Derived Net Monthly Income = (Gross Receipts × Multiplier %) ÷ 12'
-                    : 'Formula: Derived Net Monthly Profit = (Turnover × Multiplier %) ÷ 12';
+                    ? 'Formula: Derived Net Monthly Income = (2-Year Average Receipts × Multiplier %) ÷ 12'
+                    : 'Formula: Derived Net Monthly Profit = (2-Year Average Turnover × Multiplier %) ÷ 12';
             }
         }
     }

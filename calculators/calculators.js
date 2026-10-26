@@ -518,6 +518,15 @@ const CONFIG = {
           };
           bizTurnoverNote.textContent = notes[bizIndustrySel.value] || 'Bank benchmark applied.';
         }
+
+        const isReceipt = (bizIndustrySel.value === 'doctor' || bizIndustrySel.value === 'ca' || bizIndustrySel.value === 'cs');
+        const l1 = document.getElementById('bizTurnoverLabel');
+        const l2 = document.getElementById('bizTurnoverYear2Label');
+        const lAvg = document.getElementById('bizAvgTurnoverLabel');
+        if (l1) l1.textContent = isReceipt ? 'Current Financial Year Gross Receipts / Fees (₹)' : 'Current Financial Year Gross Turnover (₹)';
+        if (l2) l2.textContent = isReceipt ? 'Previous Financial Year Gross Receipts / Fees (₹)' : 'Previous Financial Year Gross Turnover (₹)';
+        if (lAvg) lAvg.textContent = isReceipt ? '2-Year Average Gross Receipts:' : '2-Year Average Turnover:';
+
         recalc();
       });
     }
@@ -589,9 +598,11 @@ const CONFIG = {
         let totalMonthlyBusinessIncome = 0;
 
         if (isTurnoverProg) {
-          const turnover = parseNumber((document.getElementById('bizTurnoverInput') || {}).value) || 20000000;
+          const turnover1 = parseNumber((document.getElementById('bizTurnoverInput') || {}).value) || 20000000;
+          const turnover2 = parseNumber((document.getElementById('bizTurnoverYear2Input') || {}).value) || turnover1;
+          const avgTurnover = Math.round((turnover1 + turnover2) / 2);
           const turnoverPct = parseFloat((document.getElementById('bizTurnoverPctInput') || {}).value) || 5.0;
-          const annualDerivedIncome = turnover * (turnoverPct / 100);
+          const annualDerivedIncome = avgTurnover * (turnoverPct / 100);
           totalMonthlyBusinessIncome = annualDerivedIncome / 12;
 
           // Add-backs: Rent & Remuneration
@@ -599,7 +610,9 @@ const CONFIG = {
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
           totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.5);
 
-          const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover);
+          const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
+          const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
+          const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
           const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = turnoverPct.toFixed(1) + '%';
         } else {
           // 2-Year ITR assessment (24 Months / 12 Months)
@@ -1266,10 +1279,14 @@ const CONFIG = {
 
       let netInc = 0;
       if (isTurnover) {
-        const turnover = parseNumber((turnoverIn || {}).value) || 30000000;
+        const turnover1 = parseNumber((turnoverIn || {}).value) || 30000000;
+        const turnover2 = parseNumber((lapTurnoverYear2In || {}).value) || turnover1;
+        const avgTurnover = Math.round((turnover1 + turnover2) / 2);
         const pct = parseFloat((turnoverPctIn || {}).value) || 5.0;
-        netInc = Math.round((turnover * (pct / 100)) / 12);
-        const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover);
+        netInc = Math.round((avgTurnover * (pct / 100)) / 12);
+        const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
+        const bT2 = document.getElementById('lapTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
+        const bAvg = document.getElementById('lapAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
         const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = pct.toFixed(1) + '%';
       } else {
         netInc = parseNumber(incIn.value);
