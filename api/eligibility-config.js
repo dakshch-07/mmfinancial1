@@ -21,6 +21,15 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'Car / Auto Loan': 9.00
     },
 
+    // CIBIL Score Slabs & Risk Assessment
+    cibilSlabs: {
+        '750+': { label: '750+ (Excellent / Lowest ROI)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
+        '700-749': { label: '700 - 749 (Good / Prime Banking)', roiAdjustment: 0.25, foirAdjustment: 0.0, eligible: true },
+        '650-699': { label: '650 - 699 (Fair / Standard NBFC)', roiAdjustment: 0.75, foirAdjustment: -0.05, eligible: true },
+        'Below 650': { label: 'Below 650 (Advisory / Co-Applicant Needed)', roiAdjustment: 1.50, foirAdjustment: -0.10, eligible: false, advisory: true },
+        'New to Credit': { label: 'New to Credit (No History)', roiAdjustment: 0.50, foirAdjustment: -0.05, eligible: true }
+    },
+
     // 2. SALARIED FOIR SLABS (Fixed Obligation to Income Ratio)
     // Slabs evaluated by Monthly Net Take-Home Salary (₹)
     salariedFoirSlabs: [
@@ -128,7 +137,15 @@ function computeLoanEligibility(params) {
     const reqAmount = Math.max(0, parseFloat(params.loanAmount) || 0);
     const existingEmi = Math.max(0, parseFloat(params.loanExistingEmi) || 0);
     const tenureMonths = parseTenureToMonths(params.loanTenure);
-    const roi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[loanType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
+    const cibil = String(params.cibilScore || params.cibil || '750+').trim();
+    
+    // Check if custom ROI is provided, otherwise evaluate category ROI + CIBIL adjustment
+    const customRoi = parseFloat(params.customRoi || params.loanRoi);
+    const categoryRoi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[loanType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
+    const cibilInfo = LOAN_ELIGIBILITY_CONFIG.cibilSlabs[cibil] || LOAN_ELIGIBILITY_CONFIG.cibilSlabs['750+'];
+    const roi = (!isNaN(customRoi) && customRoi >= 5.0 && customRoi <= 30.0) 
+        ? customRoi 
+        : parseFloat((categoryRoi + (cibilInfo.roiAdjustment || 0)).toFixed(2));
 
     // Check if Salaried
     const isSalaried = empType.toLowerCase().includes('salaried');
@@ -227,6 +244,7 @@ function computeLoanEligibility(params) {
         reqAmount,
         tenureMonths,
         roi,
+        cibilScore: cibil,
         emiPerLakh,
         estimatedReqEmi,
         tips

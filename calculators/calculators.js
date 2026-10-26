@@ -442,6 +442,30 @@ const CONFIG = {
     const defaultRate = isPersonal ? 11.0 : 8.75;
     const maxTenure = isPersonal ? 7 : 30;
 
+    const cibilSel = document.getElementById('eligCibilSelect');
+    const cibilBadge = document.getElementById('eligCibilBadge');
+
+    if (cibilSel) {
+      cibilSel.addEventListener('change', () => {
+        const val = cibilSel.value;
+        if (cibilBadge) {
+          cibilBadge.textContent = val === '750+' ? '750+ (Prime)' : val;
+        }
+        // Benchmark rate adjustments based on CIBIL
+        let base = defaultRate;
+        if (val === '700-749') base += 0.25;
+        else if (val === '650-699') base += 0.75;
+        else if (val === 'Below 650') base += 1.50;
+        else if (val === 'New to Credit') base += 0.50;
+
+        const rateIn = document.getElementById('eligRateInput');
+        const rateSl = document.getElementById('eligRateSlider');
+        if (rateIn) rateIn.value = base.toFixed(2);
+        if (rateSl) rateSl.value = base.toFixed(2);
+        recalc();
+      });
+    }
+
     bindSync(document.getElementById('eligRateInput'), document.getElementById('eligRateSlider'), 6.0, 24.0, 0.05, recalc, true);
     bindSync(document.getElementById('eligTenureInput'), document.getElementById('eligTenureSlider'), 1, maxTenure, 1, recalc);
 

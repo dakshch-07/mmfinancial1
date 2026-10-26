@@ -127,6 +127,8 @@ module.exports = async (req, res) => {
             loanIncome: parseFloat(rawIncome) || 0,
             loanExistingEmi: parseFloat(rawEmi) || 0,
             loanTenure: body.loanTenure,
+            cibilScore: body.loanCibil || body.cibilScore || '750+',
+            customRoi: parseFloat(body.loanRoi || body.customRoi),
             bonusIncome: parseFloat(String(body.bonusIncome || '').replace(/[^0-9.]/g, '')) || 0,
             rentalIncome: parseFloat(String(body.rentalIncome || '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(body.depreciation || '').replace(/[^0-9.]/g, '')) || 0,
@@ -195,6 +197,8 @@ module.exports = async (req, res) => {
             `*Eligible Capacity:* Up to ${formattedMaxEligible}\n` +
             `*Requested Loan:* ${formattedAmount}\n` +
             `*Est. Monthly Installment:* ${formattedEstEmi}/mo\n` +
+            `*Interest Rate:* ${evalResult.roi}% p.a.\n` +
+            `*CIBIL Score Band:* ${evalResult.cibilScore}\n` +
             `*Applied FOIR:* ${evalResult.foirPercentText} (${evalResult.foirLabel})\n` +
             `----------------------------------------\n` +
             `*Applicant Name:* ${fullName}\n` +

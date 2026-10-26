@@ -80,6 +80,9 @@ module.exports = async (req, res) => {
             errors.loanExistingEmi = 'Existing EMI obligations cannot be negative.';
         }
 
+        const loanCibil = String(body.loanCibil || body.cibilScore || '750+').trim();
+        const customRoi = parseFloat(body.loanRoi || body.customRoi);
+
         if (Object.keys(errors).length > 0) {
             return res.status(400).json({
                 status: 'error',
@@ -96,6 +99,8 @@ module.exports = async (req, res) => {
             loanIncome,
             loanExistingEmi,
             loanTenure,
+            cibilScore: loanCibil,
+            customRoi: !isNaN(customRoi) ? customRoi : undefined,
             bonusIncome: parseFloat(String(body.bonusIncome || '').replace(/[^0-9.]/g, '')) || 0,
             rentalIncome: parseFloat(String(body.rentalIncome || '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(body.depreciation || '').replace(/[^0-9.]/g, '')) || 0,

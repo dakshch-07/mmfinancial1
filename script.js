@@ -1396,6 +1396,13 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'Education Loan': 9.50,
         'Car / Auto Loan': 9.00
     },
+    cibilSlabs: {
+        '750+': { label: '750+ (Excellent / Lowest ROI)', roiAdjustment: 0.0, foirAdjustment: 0.0, eligible: true },
+        '700-749': { label: '700 - 749 (Good / Prime Banking)', roiAdjustment: 0.25, foirAdjustment: 0.0, eligible: true },
+        '650-699': { label: '650 - 699 (Fair / Standard NBFC)', roiAdjustment: 0.75, foirAdjustment: -0.05, eligible: true },
+        'Below 650': { label: 'Below 650 (Advisory / Co-Applicant Needed)', roiAdjustment: 1.50, foirAdjustment: -0.10, eligible: false, advisory: true },
+        'New to Credit': { label: 'New to Credit (No History)', roiAdjustment: 0.50, foirAdjustment: -0.05, eligible: true }
+    },
     salariedFoirSlabs: [
         { min: 0, max: 35000, foir: 0.45, label: '45% FOIR' },
         { min: 35001, max: 75000, foir: 0.50, label: '50% FOIR' },
@@ -1465,7 +1472,14 @@ function computeLocalEligibility(params) {
     const reqAmount = Math.max(0, parseFloat(params.loanAmount) || 0);
     const existingEmi = Math.max(0, parseFloat(params.loanExistingEmi) || 0);
     const tenureMonths = parseTenureToMonthsLocal(params.loanTenure);
-    const roi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[loanType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
+    const cibil = String(params.cibilScore || params.cibil || '750+').trim();
+    
+    const customRoi = parseFloat(params.customRoi || params.loanRoi);
+    const categoryRoi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[loanType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
+    const cibilInfo = LOAN_ELIGIBILITY_CONFIG.cibilSlabs[cibil] || LOAN_ELIGIBILITY_CONFIG.cibilSlabs['750+'];
+    const roi = (!isNaN(customRoi) && customRoi >= 5.0 && customRoi <= 30.0) 
+        ? customRoi 
+        : parseFloat((categoryRoi + (cibilInfo.roiAdjustment || 0)).toFixed(2));
     const isSalaried = empType.toLowerCase().includes('salaried');
 
     let grossMonthlyIncome = 0;
@@ -1545,6 +1559,7 @@ function computeLocalEligibility(params) {
         reqAmount,
         tenureMonths,
         roi,
+        cibilScore: cibil,
         emiPerLakh,
         estimatedReqEmi,
         tips
@@ -1568,6 +1583,10 @@ function initLoanForm() {
     const incomeHint = document.getElementById('loanIncomeHint');
     const emi = document.getElementById('loanExistingEmi');
     const tenure = document.getElementById('loanTenure');
+    const cibilSelect = document.getElementById('loanCibil');
+    const cibilChips = step1Form.querySelectorAll('.form-chip-pill[data-target="loanCibil"]');
+    const loanRoiInput = document.getElementById('loanRoi');
+    const loanRoiBadge = document.getElementById('loanRoiBadge');
     const tenureFilterBtns = step1Form.querySelectorAll('.tenure-filter-btn');
     const optMonths = document.getElementById('optgroupMonths');
     const optYears = document.getElementById('optgroupYears');
@@ -1693,6 +1712,53 @@ function initLoanForm() {
         });
     });
 
+    // CIBIL and ROI Dynamic Sync
+    function updateBenchmarkRoi() {
+        if (!loanRoiInput) return;
+        const selType = loanType ? loanType.value : 'Home Loan';
+        const selCibil = cibilSelect ? cibilSelect.value : '750+';
+        const catRoi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[selType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
+        const cibilObj = LOAN_ELIGIBILITY_CONFIG.cibilSlabs[selCibil] || LOAN_ELIGIBILITY_CONFIG.cibilSlabs['750+'];
+        const suggestedRoi = (catRoi + (cibilObj.roiAdjustment || 0)).toFixed(2);
+        
+        loanRoiInput.value = suggestedRoi;
+        if (loanRoiBadge) loanRoiBadge.textContent = `${suggestedRoi}%`;
+    }
+
+    if (loanType) {
+        loanType.addEventListener('change', updateBenchmarkRoi);
+    }
+
+    if (cibilSelect) {
+        cibilSelect.addEventListener('change', () => {
+            cibilChips.forEach(chip => {
+                chip.classList.toggle('active', chip.getAttribute('data-val') === cibilSelect.value);
+            });
+            updateBenchmarkRoi();
+        });
+    }
+
+    cibilChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            e.preventDefault();
+            const val = chip.getAttribute('data-val');
+            if (cibilSelect) {
+                cibilSelect.value = val;
+                cibilChips.forEach(c => c.classList.toggle('active', c === chip));
+                updateBenchmarkRoi();
+            }
+        });
+    });
+
+    if (loanRoiInput) {
+        loanRoiInput.addEventListener('input', () => {
+            const val = parseFloat(loanRoiInput.value);
+            if (!isNaN(val) && loanRoiBadge) {
+                loanRoiBadge.textContent = `${val.toFixed(2)}%`;
+            }
+        });
+    }
+
     function validateField(input, condition, errorMsgId) {
         const field = input ? input.closest('.form-field') : null;
         if (!condition) {
@@ -1739,6 +1805,8 @@ function initLoanForm() {
             loanIncome: numIncome,
             loanExistingEmi: parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0,
             loanTenure: tenure ? tenure.value : '20 Years',
+            loanCibil: cibilSelect ? cibilSelect.value : '750+',
+            loanRoi: parseFloat(loanRoiInput ? loanRoiInput.value : 8.5),
             bonusIncome: parseFloat(String(loanBonus ? loanBonus.value : '').replace(/[^0-9.]/g, '')) || 0,
             rentalIncome: parseFloat(String(loanRentIncome ? loanRentIncome.value : '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
@@ -1773,6 +1841,8 @@ function initLoanForm() {
                 loanIncome: payload.loanIncome,
                 loanExistingEmi: payload.loanExistingEmi,
                 loanTenure: payload.loanTenure,
+                cibilScore: payload.loanCibil,
+                loanRoi: payload.loanRoi,
                 bonusIncome: payload.bonusIncome,
                 rentalIncome: payload.rentalIncome,
                 depreciation: payload.depreciation,
@@ -1877,6 +1947,8 @@ function initLoanForm() {
                         <span class="summary-pill-item">Loan: <strong>${originalPayload.loanType}</strong></span>
                         <span class="summary-pill-item">Requested: <strong>₹${formatIndianNumber(originalPayload.loanAmount)}</strong></span>
                         <span class="summary-pill-item">Tenure: <strong>${originalPayload.loanTenure}</strong></span>
+                        <span class="summary-pill-item">ROI: <strong>${data.roi}% p.a.</strong></span>
+                        <span class="summary-pill-item">CIBIL: <strong>${originalPayload.loanCibil || '750+'}</strong></span>
                         <span class="summary-pill-item">Monthly Income: <strong>${data.formattedGrossIncome}/mo</strong></span>
                         <span class="summary-pill-item" style="border-color: #86efac; color: #15803d;">Status: <strong>✓ Pre-Approved</strong></span>
                     </div>
@@ -1890,6 +1962,8 @@ function initLoanForm() {
                     <input type="hidden" name="loanIncome" value="${originalPayload.loanIncome}">
                     <input type="hidden" name="loanExistingEmi" value="${originalPayload.loanExistingEmi}">
                     <input type="hidden" name="loanTenure" value="${originalPayload.loanTenure}">
+                    <input type="hidden" name="loanCibil" value="${originalPayload.loanCibil || '750+'}">
+                    <input type="hidden" name="loanRoi" value="${data.roi}">
                     <input type="hidden" name="bonusIncome" value="${originalPayload.bonusIncome || 0}">
                     <input type="hidden" name="rentalIncome" value="${originalPayload.rentalIncome || 0}">
                     <input type="hidden" name="depreciation" value="${originalPayload.depreciation || 0}">
@@ -2029,6 +2103,8 @@ function initLoanForm() {
             const formattedIncome = `₹${formatIndianNumber(originalPayload.loanIncome)}`;
             const formattedMaxEligible = eligibilityData.formattedMaxLoan;
             const formattedEstEmi = eligibilityData.formattedEstimatedEmi;
+            const roiVal = eligibilityData.roi || originalPayload.loanRoi || '8.5';
+            const cibilVal = originalPayload.loanCibil || '750+';
 
             return `*New Verified Loan Application — MM Financial Services*\n` +
                    `----------------------------------------\n` +
@@ -2036,6 +2112,8 @@ function initLoanForm() {
                    `*Eligible Capacity:* Up to ${formattedMaxEligible}\n` +
                    `*Requested Loan:* ${formattedAmount}\n` +
                    `*Est. Monthly Installment:* ${formattedEstEmi}\n` +
+                   `*Interest Rate:* ${roiVal}% p.a.\n` +
+                   `*CIBIL Score Band:* ${cibilVal}\n` +
                    `*Applied FOIR:* ${eligibilityData.foirUsed}\n` +
                    `----------------------------------------\n` +
                    `*Applicant Name:* ${leadFullName && leadFullName.value.trim() ? leadFullName.value.trim() : 'Not specified'}\n` +
@@ -2093,6 +2171,8 @@ function initLoanForm() {
                 loanIncome: originalPayload.loanIncome,
                 loanExistingEmi: originalPayload.loanExistingEmi,
                 loanTenure: originalPayload.loanTenure,
+                loanCibil: originalPayload.loanCibil || '750+',
+                loanRoi: eligibilityData.roi || originalPayload.loanRoi || 8.5,
                 bonusIncome: originalPayload.bonusIncome,
                 rentalIncome: originalPayload.rentalIncome,
                 depreciation: originalPayload.depreciation,
@@ -2145,6 +2225,8 @@ function initLoanForm() {
                 "Requested Loan Amount": `₹${formatIndianNumber(originalPayload.loanAmount)}`,
                 "Max Eligible Capacity": eligibilityData.formattedMaxLoan,
                 "Estimated Monthly EMI": eligibilityData.formattedEstimatedEmi,
+                "Interest Rate": `${eligibilityData.roi || originalPayload.loanRoi || 8.5}% p.a.`,
+                "CIBIL Score Band": originalPayload.loanCibil || '750+',
                 "Applied FOIR": eligibilityData.foirUsed,
                 "Monthly Net Income / Profit": `₹${formatIndianNumber(originalPayload.loanIncome)}`,
                 "Existing Monthly EMIs": `₹${formatIndianNumber(originalPayload.loanExistingEmi)}`,
