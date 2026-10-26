@@ -1,8 +1,20 @@
 /**
  * FINANCIAL CALCULATORS HUB & SUITE — calculators.js
  * MM Financial Services Consultant (Mukesh Tiwari)
- * 100% Client-side Vanilla JS engines for all 18 calculators.
+ * 100% Client-side Vanilla JS engines for all calculators.
  */
+
+const LAMF_CONFIG = {
+  ltv: { equity: 0.45, debt: 0.80 },        // editable defaults
+  ltvLimits: { equity: [0.30, 0.50], debt: [0.60, 0.85] },
+  rate: { default: 10.5, min: 9, max: 12, step: 0.05 },
+  daysInYear: 365,
+  maxSchemes: 15,
+  navApi: { search: "https://api.mfapi.in/mf/search?q=", latest: "https://api.mfapi.in/mf/{code}/latest" },
+  debtKeywords: ["debt","liquid","overnight","gilt","money market","bond","duration","credit risk","banking & psu","floater","corporate bond","ultra short","low duration","short duration","medium duration","long duration","dynamic bond","fixed maturity"],
+  whatsappNumber: "919594736833",            // Mukesh Tiwari
+  phone: "+919594736833"
+};
 
 const CONFIG = {
   whatsappNumber: "919594736833",   // Official WhatsApp contact
@@ -1572,6 +1584,756 @@ const CONFIG = {
     }
   }
 
+  /* ── 14. LOAN AGAINST MUTUAL FUNDS (LAMF) CONTROLLER ───────────────────── */
+  function initLamfWidget(widget) {
+    let schemes = [
+      {
+        id: 'scheme_' + Date.now() + '_1',
+        name: '',
+        code: null,
+        type: 'equity', // 'equity' | 'debt'
+        units: 0,
+        nav: 0,
+        navDate: '',
+        navAgeWarning: false,
+        ltv: LAMF_CONFIG.ltv.equity,
+        isLockIn: false
+      }
+    ];
+
+    // In-memory cache for search queries and scheme latest NAVs
+    const searchCache = new Map();
+    const navCache = new Map();
+
+    const tbody = document.getElementById('lamfTableBody');
+    const cardsContainer = document.getElementById('lamfCardsContainer');
+    const btnAdd = document.getElementById('btnAddScheme');
+    const btnClearAll = document.getElementById('btnClearAllSchemes');
+    const countBadge = document.getElementById('lamfSchemeCount');
+
+    // Stats elements
+    const elTotalLimit = document.getElementById('lamfTotalLimit');
+    const elTotalLimitWords = document.getElementById('lamfTotalLimitWords');
+    const elEquityLimit = document.getElementById('lamfEquityLimit');
+    const elDebtLimit = document.getElementById('lamfDebtLimit');
+    const cardEquitySub = document.getElementById('cardEquitySub');
+    const cardDebtSub = document.getElementById('cardDebtSub');
+
+    // Controls
+    const rateIn = document.getElementById('lamfRateInput');
+    const rateSl = document.getElementById('lamfRateSlider');
+    const rateBadge = document.getElementById('lamfRateBadge');
+    const utilSl = document.getElementById('lamfUtilSlider');
+    const utilBadge = document.getElementById('lamfUtilBadge');
+    const utilAmountIn = document.getElementById('lamfUtilAmountInput');
+
+    // Interest outputs
+    const elMonthlyInterest = document.getElementById('lamfMonthlyInterest');
+    const elAnnualInterest = document.getElementById('lamfAnnualInterest');
+    const elDailyInterest = document.getElementById('lamfDailyInterest');
+
+    // Stress testing
+    const stressSl = document.getElementById('lamfStressSlider');
+    const stressBadge = document.getElementById('lamfStressBadge');
+    const stressNewLimit = document.getElementById('lamfStressNewLimit');
+    const stressLimitDiff = document.getElementById('lamfStressLimitDiff');
+    const warningBanner = document.getElementById('lamfWarningBanner');
+
+    // SVG Visual Chart & Legend
+    const chartContainer = document.getElementById('lamfChartContainer');
+
+    // CTA
+    const waBtn = document.getElementById('lamfWhatsAppBtn');
+
+    // Helper: is debt keyword
+    function detectFundType(categoryName, schemeName) {
+      const combined = `${categoryName || ''} ${schemeName || ''}`.toLowerCase();
+      for (const kw of LAMF_CONFIG.debtKeywords) {
+        if (combined.includes(kw)) return 'debt';
+      }
+      return 'equity';
+    }
+
+    // Helper: check lock-in
+    function checkLockIn(name) {
+      const s = (name || '').toLowerCase();
+      return s.includes('elss') || s.includes('tax saver') || s.includes('lock-in') || s.includes('retirement');
+    }
+
+    // Fetch search query with debounce
+    async function searchSchemes(query) {
+      const q = query.trim().toLowerCase();
+      if (searchCache.has(q)) return searchCache.get(q);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      try {
+        const res = await fetch(LAMF_CONFIG.navApi.search + encodeURIComponent(query), { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('Search failed');
+        const list = await res.json();
+        const results = Array.isArray(list) ? list.slice(0, 10) : [];
+        searchCache.set(q, results);
+        return results;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        return [];
+      }
+    }
+
+    // Fetch latest NAV
+    async function fetchLatestNav(code) {
+      if (navCache.has(code)) return navCache.get(code);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      try {
+        const url = LAMF_CONFIG.navApi.latest.replace('{code}', code);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('NAV fetch failed');
+        const data = await res.json();
+        navCache.set(code, data);
+        return data;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        return null;
+      }
+    }
+
+    // Render Table and Mobile Cards
+    function render() {
+      if (countBadge) countBadge.textContent = schemes.length;
+      if (btnAdd) btnAdd.disabled = schemes.length >= LAMF_CONFIG.maxSchemes;
+
+      // Desktop table render
+      if (tbody) {
+        tbody.innerHTML = '';
+        schemes.forEach((s, idx) => {
+          const tr = document.createElement('tr');
+          tr.className = 'lamf-row';
+          tr.dataset.id = s.id;
+
+          const totalVal = Math.round(s.units * s.nav);
+          const eligibleVal = totalVal > 0 ? Math.round(totalVal * s.ltv) : 0;
+
+          tr.innerHTML = `
+            <td style="width: 28%;">
+              <div class="lamf-search-box">
+                <input type="text" class="lamf-search-input scheme-name-input" placeholder="Type scheme name (min 3 chars)..." value="${escapeHtml(s.name)}" aria-label="Scheme Name" autocomplete="off">
+                <div class="lamf-dropdown scheme-dropdown" role="listbox"></div>
+                ${s.isLockIn ? '<div class="lamf-lockin-alert">⚠️ ELSS / Lock-in fund: Pledging subject to lender lock-in approval.</div>' : ''}
+              </div>
+            </td>
+            <td style="width: 14%;">
+              <select class="lamf-select-compact scheme-type-select" aria-label="Fund Type">
+                <option value="equity" ${s.type === 'equity' ? 'selected' : ''}>Equity / Hybrid (${Math.round(LAMF_CONFIG.ltv.equity * 100)}% LTV)</option>
+                <option value="debt" ${s.type === 'debt' ? 'selected' : ''}>Debt / Liquid (${Math.round(LAMF_CONFIG.ltv.debt * 100)}% LTV)</option>
+              </select>
+            </td>
+            <td style="width: 12%;">
+              <input type="number" step="0.001" min="0" class="lamf-input-compact scheme-units-input" placeholder="0.000" value="${s.units > 0 ? s.units : ''}" inputmode="decimal" aria-label="Units">
+            </td>
+            <td style="width: 14%;">
+              <div style="position: relative;">
+                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal" aria-label="NAV">
+                ${s.navDate ? `<span class="lamf-meta-date">As of: ${s.navDate} ${s.navAgeWarning ? '⚠️' : ''}</span>` : ''}
+              </div>
+            </td>
+            <td style="width: 14%;">
+              <span class="lamf-val-text total-val-display">${totalVal > 0 ? '₹' + fmtINR(totalVal) : '—'}</span>
+            </td>
+            <td style="width: 10%;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="number" step="1" min="${s.type === 'equity' ? LAMF_CONFIG.ltvLimits.equity[0] * 100 : LAMF_CONFIG.ltvLimits.debt[0] * 100}" max="${s.type === 'equity' ? LAMF_CONFIG.ltvLimits.equity[1] * 100 : LAMF_CONFIG.ltvLimits.debt[1] * 100}" class="lamf-input-compact scheme-ltv-input" value="${Math.round(s.ltv * 100)}" aria-label="LTV Percentage" style="min-width: 55px;">
+                <span style="font-size: 0.8rem; font-weight:700; color:#64748b;">%</span>
+              </div>
+            </td>
+            <td style="width: 14%;">
+              <span class="lamf-val-text lamf-val-highlight eligible-val-display">${eligibleVal > 0 ? '₹' + fmtINR(eligibleVal) : '—'}</span>
+            </td>
+            <td style="width: 4%; text-align: center;">
+              <button type="button" class="lamf-btn-remove" title="Remove Scheme" aria-label="Remove Scheme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </td>
+          `;
+
+          bindRowEvents(tr, s, idx);
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Mobile cards render
+      if (cardsContainer) {
+        cardsContainer.innerHTML = '';
+        schemes.forEach((s, idx) => {
+          const card = document.createElement('div');
+          card.className = 'lamf-scheme-card';
+          card.dataset.id = s.id;
+
+          const totalVal = Math.round(s.units * s.nav);
+          const eligibleVal = totalVal > 0 ? Math.round(totalVal * s.ltv) : 0;
+
+          card.innerHTML = `
+            <div class="lamf-scheme-card-header">
+              <span class="lamf-count-tag" style="background: var(--color-navy); color:#fff; font-size: 0.72rem;">#${idx + 1} Scheme</span>
+              <button type="button" class="lamf-btn-remove" title="Remove Scheme" aria-label="Remove Scheme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            <div class="lamf-search-box" style="margin-bottom: 12px;">
+              <label class="lamf-card-label">Mutual Fund Scheme</label>
+              <input type="text" class="lamf-search-input scheme-name-input" placeholder="Search scheme name (min 3 chars)..." value="${escapeHtml(s.name)}" aria-label="Scheme Name" autocomplete="off" style="margin-top:4px;">
+              <div class="lamf-dropdown scheme-dropdown" role="listbox"></div>
+              ${s.isLockIn ? '<div class="lamf-lockin-alert">⚠️ ELSS / Lock-in fund: Subject to lender lock-in approval.</div>' : ''}
+            </div>
+
+            <div class="lamf-card-grid">
+              <div class="lamf-card-field">
+                <label class="lamf-card-label">Category / Type</label>
+                <select class="lamf-select-compact scheme-type-select">
+                  <option value="equity" ${s.type === 'equity' ? 'selected' : ''}>Equity / Hybrid</option>
+                  <option value="debt" ${s.type === 'debt' ? 'selected' : ''}>Debt / Liquid</option>
+                </select>
+              </div>
+
+              <div class="lamf-card-field">
+                <label class="lamf-card-label">Units Held</label>
+                <input type="number" step="0.001" min="0" class="lamf-input-compact scheme-units-input" placeholder="0.000" value="${s.units > 0 ? s.units : ''}" inputmode="decimal">
+              </div>
+
+              <div class="lamf-card-field">
+                <label class="lamf-card-label">NAV (₹)</label>
+                <input type="number" step="0.0001" min="0" class="lamf-input-compact scheme-nav-input" placeholder="0.00" value="${s.nav > 0 ? s.nav : ''}" inputmode="decimal">
+                ${s.navDate ? `<span class="lamf-meta-date">As of: ${s.navDate}</span>` : ''}
+              </div>
+
+              <div class="lamf-card-field">
+                <label class="lamf-card-label">LTV (%)</label>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <input type="number" step="1" class="lamf-input-compact scheme-ltv-input" value="${Math.round(s.ltv * 100)}">
+                  <span style="font-weight:700; color:#64748b;">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lamf-card-footer">
+              <div>
+                <span class="lamf-card-label">Total Value:</span>
+                <strong style="color: var(--color-navy); font-size: 0.95rem;">${totalVal > 0 ? '₹' + fmtINR(totalVal) : '—'}</strong>
+              </div>
+              <div style="text-align: right;">
+                <span class="lamf-card-label">Eligible Credit:</span>
+                <strong style="color: var(--color-brick); font-size: 1.05rem;">${eligibleVal > 0 ? '₹' + fmtINR(eligibleVal) : '—'}</strong>
+              </div>
+            </div>
+          `;
+
+          bindRowEvents(card, s, idx);
+          cardsContainer.appendChild(card);
+        });
+      }
+
+      recalculate();
+    }
+
+    // Helper: escape HTML string
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Bind event handlers for an individual row/card
+    function bindRowEvents(container, s, idx) {
+      const nameIn = container.querySelector('.scheme-name-input');
+      const dropdown = container.querySelector('.scheme-dropdown');
+      const typeSelect = container.querySelector('.scheme-type-select');
+      const unitsIn = container.querySelector('.scheme-units-input');
+      const navIn = container.querySelector('.scheme-nav-input');
+      const ltvIn = container.querySelector('.scheme-ltv-input');
+      const btnRemove = container.querySelector('.lamf-btn-remove');
+
+      let debounceTimer = null;
+      let activeIndex = -1;
+
+      // Autocomplete Search
+      if (nameIn && dropdown) {
+        nameIn.addEventListener('input', () => {
+          s.name = nameIn.value;
+          s.isLockIn = checkLockIn(s.name);
+          clearTimeout(debounceTimer);
+          const q = nameIn.value.trim();
+          if (q.length < 3) {
+            dropdown.classList.remove('open');
+            dropdown.innerHTML = '';
+            return;
+          }
+
+          debounceTimer = setTimeout(async () => {
+            const list = await searchSchemes(q);
+            if (!list || list.length === 0) {
+              dropdown.innerHTML = '<div class="lamf-dropdown-item" style="color:#94a3b8; font-style:italic;">No matching funds found. Enter name and NAV manually.</div>';
+              dropdown.classList.add('open');
+              return;
+            }
+
+            dropdown.innerHTML = list.map(item => `
+              <div class="lamf-dropdown-item" data-code="${item.schemeCode}" data-name="${escapeHtml(item.schemeName)}">
+                ${escapeHtml(item.schemeName)}
+              </div>
+            `).join('');
+            dropdown.classList.add('open');
+            activeIndex = -1;
+          }, 300);
+        });
+
+        // Keyboard navigation for dropdown
+        nameIn.addEventListener('keydown', (e) => {
+          const items = dropdown.querySelectorAll('.lamf-dropdown-item[data-code]');
+          if (!dropdown.classList.contains('open') || items.length === 0) return;
+
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = (activeIndex + 1) % items.length;
+            highlightItem(items);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = (activeIndex - 1 + items.length) % items.length;
+            highlightItem(items);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeIndex >= 0 && activeIndex < items.length) {
+              items[activeIndex].click();
+            }
+          } else if (e.key === 'Escape') {
+            dropdown.classList.remove('open');
+          }
+        });
+
+        function highlightItem(items) {
+          items.forEach((it, i) => it.classList.toggle('active', i === activeIndex));
+          if (items[activeIndex]) items[activeIndex].scrollIntoView({ block: 'nearest' });
+        }
+
+        // Click outside closes dropdown
+        document.addEventListener('click', (e) => {
+          if (!container.contains(e.target)) {
+            dropdown.classList.remove('open');
+          }
+        });
+
+        // Selecting a scheme from dropdown
+        dropdown.addEventListener('click', async (e) => {
+          const item = e.target.closest('.lamf-dropdown-item[data-code]');
+          if (!item) return;
+
+          const code = item.dataset.code;
+          const schemeName = item.dataset.name;
+          s.name = schemeName;
+          s.code = code;
+          s.isLockIn = checkLockIn(schemeName);
+          nameIn.value = schemeName;
+          dropdown.classList.remove('open');
+
+          // Fetch NAV
+          nameIn.placeholder = 'Fetching live NAV...';
+          const navData = await fetchLatestNav(code);
+          nameIn.placeholder = 'Type scheme name (min 3 chars)...';
+
+          if (navData && navData.data && navData.data.length > 0) {
+            const rawNav = parseFloat(navData.data[0].nav);
+            s.nav = isNaN(rawNav) ? 0 : rawNav;
+            s.navDate = navData.data[0].date || '';
+
+            // Check if NAV older than 5 days
+            if (s.navDate) {
+              const parts = s.navDate.split('-'); // dd-mm-yyyy
+              if (parts.length === 3) {
+                const navD = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                const ageDays = (Date.now() - navD.getTime()) / (1000 * 60 * 60 * 24);
+                s.navAgeWarning = ageDays > 5;
+              }
+            }
+
+            // Auto-detect Equity vs Debt
+            const category = (navData.meta && (navData.meta.scheme_category || navData.meta.scheme_type)) || '';
+            s.type = detectFundType(category, schemeName);
+            s.ltv = s.type === 'equity' ? LAMF_CONFIG.ltv.equity : LAMF_CONFIG.ltv.debt;
+          } else {
+            // NAV fetch failed: allow manual entry
+            const notice = container.querySelector('.lamf-search-box');
+            if (notice && !container.querySelector('.nav-err-note')) {
+              const errDiv = document.createElement('div');
+              errDiv.className = 'nav-err-note';
+              errDiv.style.cssText = 'color: #b91c1c; font-size: 0.72rem; margin-top: 4px;';
+              errDiv.textContent = 'Could not fetch live NAV. Please enter NAV manually.';
+              notice.appendChild(errDiv);
+            }
+          }
+
+          render();
+        });
+      }
+
+      // Fund type override
+      if (typeSelect) {
+        typeSelect.addEventListener('change', () => {
+          s.type = typeSelect.value;
+          s.ltv = s.type === 'equity' ? LAMF_CONFIG.ltv.equity : LAMF_CONFIG.ltv.debt;
+          render();
+        });
+      }
+
+      // Units input
+      if (unitsIn) {
+        unitsIn.addEventListener('input', () => {
+          const val = parseFloat(unitsIn.value);
+          s.units = (!isNaN(val) && val >= 0) ? val : 0;
+          recalculate();
+        });
+      }
+
+      // NAV input
+      if (navIn) {
+        navIn.addEventListener('input', () => {
+          const val = parseFloat(navIn.value);
+          s.nav = (!isNaN(val) && val >= 0) ? val : 0;
+          recalculate();
+        });
+      }
+
+      // LTV % input
+      if (ltvIn) {
+        ltvIn.addEventListener('input', () => {
+          const val = parseFloat(ltvIn.value);
+          if (!isNaN(val) && val >= 0) {
+            s.ltv = Math.min(1, Math.max(0, val / 100));
+            recalculate();
+          }
+        });
+      }
+
+      // Remove row
+      if (btnRemove) {
+        btnRemove.addEventListener('click', () => {
+          schemes = schemes.filter(item => item.id !== s.id);
+          if (schemes.length === 0) {
+            // keep at least 1 empty row
+            schemes.push({
+              id: 'scheme_' + Date.now(),
+              name: '',
+              code: null,
+              type: 'equity',
+              units: 0,
+              nav: 0,
+              navDate: '',
+              navAgeWarning: false,
+              ltv: LAMF_CONFIG.ltv.equity,
+              isLockIn: false
+            });
+          }
+          render();
+        });
+      }
+    }
+
+    // Add Scheme Button
+    if (btnAdd) {
+      btnAdd.addEventListener('click', () => {
+        if (schemes.length >= LAMF_CONFIG.maxSchemes) return;
+        schemes.push({
+          id: 'scheme_' + Date.now() + '_' + (schemes.length + 1),
+          name: '',
+          code: null,
+          type: 'equity',
+          units: 0,
+          nav: 0,
+          navDate: '',
+          navAgeWarning: false,
+          ltv: LAMF_CONFIG.ltv.equity,
+          isLockIn: false
+        });
+        render();
+      });
+    }
+
+    // Clear All Schemes Button
+    if (btnClearAll) {
+      btnClearAll.addEventListener('click', () => {
+        schemes = [
+          {
+            id: 'scheme_' + Date.now(),
+            name: '',
+            code: null,
+            type: 'equity',
+            units: 0,
+            nav: 0,
+            navDate: '',
+            navAgeWarning: false,
+            ltv: LAMF_CONFIG.ltv.equity,
+            isLockIn: false
+          }
+        ];
+        render();
+      });
+    }
+
+    // Global Interest Rate Slider & Input Sync
+    if (rateIn && rateSl) {
+      rateSl.addEventListener('input', () => {
+        rateIn.value = parseFloat(rateSl.value).toFixed(2);
+        if (rateBadge) rateBadge.textContent = `${rateIn.value}%`;
+        updateSliderFill(rateSl);
+        recalculate();
+      });
+      rateIn.addEventListener('input', () => {
+        const val = parseFloat(rateIn.value);
+        if (!isNaN(val) && val >= LAMF_CONFIG.rate.min && val <= LAMF_CONFIG.rate.max) {
+          rateSl.value = val;
+          if (rateBadge) rateBadge.textContent = `${val.toFixed(2)}%`;
+          updateSliderFill(rateSl);
+          recalculate();
+        }
+      });
+    }
+
+    // Utilisation Slider & Amount Sync
+    if (utilSl && utilAmountIn) {
+      utilSl.addEventListener('input', () => {
+        const pct = parseFloat(utilSl.value) || 0;
+        if (utilBadge) utilBadge.textContent = `${Math.round(pct)}%`;
+        updateSliderFill(utilSl);
+
+        const currentTotal = computeTotals().totalLimit;
+        const withdrawn = Math.round((pct / 100) * currentTotal);
+        utilAmountIn.value = withdrawn;
+        recalculate();
+      });
+
+      utilAmountIn.addEventListener('input', () => {
+        const amt = parseNumber(utilAmountIn.value);
+        const currentTotal = computeTotals().totalLimit;
+        if (currentTotal > 0) {
+          const pct = Math.min(100, Math.max(0, (amt / currentTotal) * 100));
+          utilSl.value = pct;
+          if (utilBadge) utilBadge.textContent = `${Math.round(pct)}%`;
+          updateSliderFill(utilSl);
+        }
+        recalculate();
+      });
+    }
+
+    // Market Fall Stress Slider Sync
+    if (stressSl) {
+      stressSl.addEventListener('input', () => {
+        const pct = parseFloat(stressSl.value) || 0;
+        if (stressBadge) {
+          stressBadge.textContent = (pct > 0 ? `+${pct}%` : `${pct}%`);
+          stressBadge.style.color = pct < 0 ? '#b91c1c' : (pct > 0 ? '#15803d' : '#92400e');
+        }
+        updateSliderFill(stressSl);
+        recalculate();
+      });
+    }
+
+    // Math Totals Computation
+    function computeTotals() {
+      let equityLimit = 0;
+      let debtLimit = 0;
+      let totalPortfolioVal = 0;
+      let hasEquity = false;
+      let hasDebt = false;
+
+      schemes.forEach(s => {
+        const val = s.units * s.nav;
+        const elig = val * s.ltv;
+        totalPortfolioVal += val;
+
+        if (s.type === 'equity') {
+          equityLimit += elig;
+          if (val > 0) hasEquity = true;
+        } else {
+          debtLimit += elig;
+          if (val > 0) hasDebt = true;
+        }
+      });
+
+      const totalLimit = Math.round(equityLimit + debtLimit);
+      return {
+        equityLimit: Math.round(equityLimit),
+        debtLimit: Math.round(debtLimit),
+        totalLimit,
+        totalPortfolioVal: Math.round(totalPortfolioVal),
+        hasEquity,
+        hasDebt
+      };
+    }
+
+    // Recalculate Live Stats
+    function recalculate() {
+      const totals = computeTotals();
+      const totalLimit = totals.totalLimit;
+
+      // Update Subtotals
+      if (elEquityLimit) elEquityLimit.textContent = '₹' + fmtINR(totals.equityLimit);
+      if (elDebtLimit) elDebtLimit.textContent = '₹' + fmtINR(totals.debtLimit);
+
+      if (cardEquitySub) cardEquitySub.style.display = totals.hasEquity ? 'flex' : 'none';
+      if (cardDebtSub) cardDebtSub.style.display = totals.hasDebt ? 'flex' : 'none';
+
+      // Update Total Limit Animation
+      animateNumber(elTotalLimit, totalLimit);
+      if (elTotalLimitWords) elTotalLimitWords.textContent = totalLimit > 0 ? wordFormINR(totalLimit) : 'Rs 0';
+
+      // Keep Withdrawn Amount in Sync
+      let utilPct = parseFloat(utilSl ? utilSl.value : 100) || 100;
+      let withdrawn = parseNumber(utilAmountIn ? utilAmountIn.value : 0);
+
+      if (document.activeElement !== utilAmountIn) {
+        withdrawn = Math.round((utilPct / 100) * totalLimit);
+        if (utilAmountIn) utilAmountIn.value = withdrawn;
+      } else {
+        if (totalLimit > 0) {
+          utilPct = Math.min(100, Math.max(0, (withdrawn / totalLimit) * 100));
+          if (utilSl) {
+            utilSl.value = utilPct;
+            updateSliderFill(utilSl);
+          }
+          if (utilBadge) utilBadge.textContent = `${Math.round(utilPct)}%`;
+        }
+      }
+
+      // Interest Calculation (Interest charged ONLY on amount used)
+      const annualRate = parseFloat(rateIn ? rateIn.value : LAMF_CONFIG.rate.default) || LAMF_CONFIG.rate.default;
+      const annualInterest = Math.round(withdrawn * (annualRate / 100));
+      const monthlyInterest = (withdrawn * (annualRate / 100)) / 12;
+      const dailyInterest = (withdrawn * (annualRate / 100)) / LAMF_CONFIG.daysInYear;
+
+      if (elAnnualInterest) elAnnualInterest.textContent = '₹' + fmtINR(annualInterest);
+      if (elMonthlyInterest) elMonthlyInterest.textContent = '₹' + fmtINR(Math.round(monthlyInterest));
+      if (elDailyInterest) elDailyInterest.textContent = '₹' + fmtINR(Math.round(dailyInterest));
+
+      // Stress Test: Market Fall Impact
+      const stressPct = parseFloat(stressSl ? stressSl.value : 0) || 0;
+      const stressMultiplier = 1 + (stressPct / 100);
+      const stressedLimit = Math.round(totalLimit * stressMultiplier);
+      const limitDiff = stressedLimit - totalLimit;
+
+      if (stressNewLimit) stressNewLimit.textContent = '₹' + fmtINR(stressedLimit);
+      if (stressLimitDiff) {
+        if (limitDiff === 0) {
+          stressLimitDiff.textContent = 'No change';
+          stressLimitDiff.style.color = '#64748b';
+        } else if (limitDiff < 0) {
+          stressLimitDiff.textContent = `(–₹${fmtINR(Math.abs(limitDiff))})`;
+          stressLimitDiff.style.color = '#b91c1c';
+        } else {
+          stressLimitDiff.textContent = `(+₹${fmtINR(limitDiff)})`;
+          stressLimitDiff.style.color = '#15803d';
+        }
+      }
+
+      // Warning Banner if New Limit falls below withdrawn amount
+      if (warningBanner) {
+        if (withdrawn > 0 && stressedLimit < withdrawn) {
+          warningBanner.style.display = 'block';
+          warningBanner.innerHTML = `⚠️ <strong>Margin Call Warning:</strong> With market shift of ${stressPct}%, your sanctioned credit limit drops to <strong>₹${fmtINR(stressedLimit)}</strong>, which is below your withdrawn borrowing of <strong>₹${fmtINR(withdrawn)}</strong>. You may be requested by the lender to pledge additional fund units or repay part of the overdraft (₹${fmtINR(withdrawn - stressedLimit)}).`;
+        } else {
+          warningBanner.style.display = 'none';
+        }
+      }
+
+      // Render Visual SVG Bar
+      renderSvgChart(totals);
+
+      // Update Live WhatsApp CTA Link
+      updateLamfWhatsApp(totals, annualRate, withdrawn);
+    }
+
+    // Render Hand-Written Inline SVG Stacked Bar
+    function renderSvgChart(totals) {
+      if (!chartContainer) return;
+      const activeSchemes = schemes.filter(s => (s.units * s.nav * s.ltv) > 0);
+      if (activeSchemes.length === 0 || totals.totalLimit <= 0) {
+        chartContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px 10px; color: #94a3b8; font-size: 0.85rem;">
+            Add your mutual fund schemes above to generate your portfolio collateral distribution.
+          </div>
+        `;
+        return;
+      }
+
+      const colors = ['#0d2140', '#c79a3f', '#a13a2e', '#1e40af', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#4b5563'];
+      let cumulativeX = 0;
+      const barHeight = 26;
+      const totalEligible = totals.totalLimit;
+
+      const segments = activeSchemes.map((s, idx) => {
+        const elig = Math.round(s.units * s.nav * s.ltv);
+        const widthPct = (elig / totalEligible) * 100;
+        const color = colors[idx % colors.length];
+        const rect = `<rect x="${cumulativeX}%" y="0" width="${widthPct}%" height="${barHeight}" fill="${color}" rx="0" ry="0"><title>${escapeHtml(s.name || 'Scheme')}: ₹${fmtINR(elig)} (${widthPct.toFixed(1)}%)</title></rect>`;
+        cumulativeX += widthPct;
+        return {
+          rect,
+          name: s.name || `Scheme #${idx + 1}`,
+          color,
+          elig,
+          pct: widthPct.toFixed(1)
+        };
+      });
+
+      const legendHtml = segments.map(seg => `
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; margin-right: 14px; margin-top: 6px;">
+          <span style="width: 10px; height: 10px; border-radius: 2px; background: ${seg.color}; flex-shrink: 0;"></span>
+          <span style="color: var(--color-navy); font-weight: 600;">${escapeHtml(seg.name)}</span>
+          <span style="color: #64748b;">(₹${fmtINR(seg.elig)} &bull; ${seg.pct}%)</span>
+        </div>
+      `).join('');
+
+      chartContainer.innerHTML = `
+        <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Collateral Limit Distribution</span>
+          <span style="font-size: 0.72rem; color: var(--color-navy); font-weight: 700;">Total Limit: ₹${fmtINR(totals.totalLimit)}</span>
+        </div>
+        <svg width="100%" height="${barHeight}" style="border-radius: 6px; overflow: hidden; background: #f1f5f9; display: block;" role="img" aria-label="Scheme collateral share">
+          ${segments.map(s => s.rect).join('')}
+        </svg>
+        <div style="margin-top: 10px; display: flex; flex-wrap: wrap;">
+          ${legendHtml}
+        </div>
+      `;
+    }
+
+    // Build WhatsApp CTA Link
+    function updateLamfWhatsApp(totals, rate, withdrawn) {
+      if (!waBtn) return;
+      const activeSchemes = schemes.filter(s => s.name.trim() !== '' && s.units > 0);
+      let schemeText = '';
+      if (activeSchemes.length > 0) {
+        const top5 = activeSchemes.slice(0, 5).map(s => `${s.name} (${s.units} units @ NAV ₹${s.nav})`).join(', ');
+        const remaining = activeSchemes.length - 5;
+        schemeText = top5 + (remaining > 0 ? ` and ${remaining} more` : '');
+      } else {
+        schemeText = 'Not specified yet';
+      }
+
+      const msg = `Hello Mukesh ji,\nI evaluated Loan Against Mutual Funds (LAMF) on your website.\n\n` +
+                  `*Schemes:* ${schemeText}\n` +
+                  `*Total Mutual Fund Value:* ₹${fmtINR(totals.totalPortfolioVal)}\n` +
+                  `*Estimated Credit Limit:* ₹${fmtINR(totals.totalLimit)}\n` +
+                  `*Equity Sub-limit:* ₹${fmtINR(totals.equityLimit)} | *Debt Sub-limit:* ₹${fmtINR(totals.debtLimit)}\n` +
+                  `*Indicative Interest Rate:* ${rate}% p.a.\n\n` +
+                  `Please guide me with the online paperless lien-marking and sanction process.`;
+
+      waBtn.href = `https://wa.me/${LAMF_CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    }
+
+    // Initial table render
+    render();
+  }
+
   /* ── Main Router on DOMContentLoaded ────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', () => {
     initFormulaAccordions();
@@ -1595,11 +2357,13 @@ const CONFIG = {
       else if (type === 'ppf') initPpfWidget(widget);
       else if (type === 'ssy') initSsyWidget(widget);
       else if (type === 'life-insurance') initLifeInsuranceWidget(widget);
+      else if (type === 'lamf') initLamfWidget(widget);
     }
   });
 
   window.MMCalc = {
     CONFIG,
+    LAMF_CONFIG,
     fmtINR,
     parseNumber,
     wordFormINR,

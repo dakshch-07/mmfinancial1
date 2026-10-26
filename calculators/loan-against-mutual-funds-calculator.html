@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Against Mutual Funds Calculator | Instant Credit Limit & Overdraft | MM Financial Services</title>
+    <meta name="description" content="Calculate your eligible credit limit, overdraft interest, and collateral value with our Loan Against Mutual Funds (LAMF) Calculator. Borrow against equity and debt funds without liquidating your investments.">
+    <link rel="canonical" href="https://mm-financial-demo-three.vercel.app/calculators/loan-against-mutual-funds-calculator">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css?v=2.4">
+    <link rel="stylesheet" href="/calculators/calculators.css?v=2.4">
+    
+    <!-- Structured Data: BreadcrumbList & FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://mm-financial-demo-three.vercel.app/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Calculators",
+              "item": "https://mm-financial-demo-three.vercel.app/calculators"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Loan Against Mutual Funds Calculator",
+              "item": "https://mm-financial-demo-three.vercel.app/calculators/loan-against-mutual-funds-calculator"
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is the NAV fetched in real time?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The calculator fetches official mutual fund Net Asset Values (NAV) published by AMFI/AMCs on every business day. If an online connection is unavailable, you can manually key in your current NAV."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is the calculated amount my final sanctioned loan limit?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The calculated figure is an indicative estimate based on standard industry LTV benchmarks (approx. 45% for equity and 80% for debt funds). The final sanctioned credit limit is established by the partnering bank or NBFC after digital lien marking."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I pledge units across multiple mutual fund schemes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. You can add up to 15 different mutual fund schemes across different AMCs (HDFC, ICICI Prudential, SBI, Nippon India, Axis, Mirae Asset, etc.)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is interest charged on a Loan Against Mutual Funds?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A Loan Against Mutual Funds operates as an overdraft facility. Interest is calculated strictly on the amount actually withdrawn and only for the exact number of days it remains utilized. There is no interest on the unutilized credit limit."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does checking eligibility here impact my credit score or investments?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Not at all. This calculator is 100% client-side and indicative. It does not check your bureau score, nor does it alter or sell your mutual fund holdings."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which mutual funds are accepted for digital pledging?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Most growth-oriented equity, hybrid, liquid, and debt funds registered with CAMS and KFintech are accepted by partner banks. Closed-end funds or ELSS funds currently within their mandatory 3-year lock-in period cannot be pledged."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+</head>
+<body class="theme-light">
+    
+    <!-- 1. NAVBAR -->
+    <header class="site-header" id="header">
+        <div class="nav-container">
+            <a href="/" class="brand-logo" aria-label="MM Financial Services Consultant Home">
+                <div class="monogram-seal">
+                    <span class="seal-inner">MM</span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">MM FINANCIAL SERVICES</span>
+                    <span class="brand-sub">CONSULTANT</span>
+                </div>
+            </a>
+
+            <nav class="main-nav" id="mainNav" aria-label="Primary Navigation">
+                <ul class="nav-links">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/#about" class="nav-link">About</a></li>
+                    <li><a href="/loans" class="nav-link">Loans</a></li>
+                    <li><a href="/mutual-funds" class="nav-link">Mutual Funds</a></li>
+                    <li><a href="/insurance" class="nav-link">Insurance</a></li>
+                    <li><a href="/calculators" class="nav-link active">Calculators</a></li>
+                    <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="/#why-us" class="nav-link">Why Us</a></li>
+                    <li><a href="/#faq" class="nav-link">FAQ</a></li>
+                    <li><a href="/#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="tel:+919594736833" class="nav-phone" title="Call Mukesh Tiwari directly">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <span class="phone-digits">95947 36833</span>
+                </a>
+                <a href="/#contact" class="btn btn-brick-sm">Get Free Consultation</a>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. TOP TRUST TICKER BAR -->
+    <div class="top-ticker-bar" role="region" aria-label="Official announcements and trust notices">
+        <div class="ticker-inner">
+            <div class="ticker-content">
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Your Goals. Our Guidance. A Better Financial Future.</strong></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>MM Financial Services Consultant</strong> &mdash; Smart Financial Calculators</span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> Direct Advisor Access: Call <strong>9594736833</strong> &bull; <em>mmfsc09@gmail.com</em></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Loans &bull; Mutual Funds &bull; Insurance</strong> &mdash; Mukesh Tiwari</span>
+            </div>
+            <div class="ticker-content" aria-hidden="true">
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Your Goals. Our Guidance. A Better Financial Future.</strong></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>MM Financial Services Consultant</strong> &mdash; Smart Financial Calculators</span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> Direct Advisor Access: Call <strong>9594736833</strong> &bull; <em>mmfsc09@gmail.com</em></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Loans &bull; Mutual Funds &bull; Insurance</strong> &mdash; Mukesh Tiwari</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="monogram-seal mini"><span class="seal-inner">MM</span></div>
+            <span class="drawer-title">MM Financial Services</span>
+            <button class="drawer-close" id="drawerClose" aria-label="Close menu">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <ul class="drawer-links">
+                <li><a href="/" class="drawer-link">Home</a></li>
+                <li><a href="/#about" class="drawer-link">About Mukesh Tiwari</a></li>
+                <li><a href="/loans" class="drawer-link">Loans &amp; Financing</a></li>
+                <li><a href="/mutual-funds" class="drawer-link">Mutual Funds &amp; SIP</a></li>
+                <li><a href="/insurance" class="drawer-link">Insurance Solutions</a></li>
+                <li><a href="/calculators" class="drawer-link active">All Calculators</a></li>
+                <li><a href="/#how-it-works" class="drawer-link">How It Works</a></li>
+                <li><a href="/#why-us" class="drawer-link">Why Choose Us</a></li>
+                <li><a href="/#faq" class="drawer-link">FAQ</a></li>
+                <li><a href="/#contact" class="drawer-link">Contact Mukesh Tiwari</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <main id="main-content">
+        <!-- TOP BREADCRUMB BAR -->
+        <div class="calc-top-nav-bar">
+            <div class="calc-container">
+                <div class="calc-top-nav-inner">
+                    <a href="/calculators" class="calc-back-btn" title="Return to calculators hub">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        <span>Back to All Calculators</span>
+                    </a>
+                    <nav class="calc-breadcrumb" aria-label="Breadcrumb">
+                        <a href="/">Home</a>
+                        <span class="bc-sep">&rsaquo;</span>
+                        <a href="/calculators">Calculators</a>
+                        <span class="bc-sep">&rsaquo;</span>
+                        <span class="bc-curr">Loan Against Mutual Funds Calculator</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- HERO / HEADER -->
+        <section class="calc-page-hero">
+            <div class="calc-container">
+                <div class="calc-hero-content">
+                    <span class="calc-hero-badge">Instant Liquidity &bull; Zero Investment Selling</span>
+                    <h1 class="calc-hero-title">Loan Against Mutual Funds Calculator</h1>
+                    <p class="calc-hero-subtitle">Enter your mutual fund schemes and units to fetch the latest NAV, view eligible loan limits per scheme based on standard LTV guidelines (45% for equity, 80% for debt), simulate overdraft interest on exact usage, and stress-test your portfolio against market fluctuations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- WIDGET CONTAINER -->
+        <section class="calc-widget-section">
+            <div class="calc-container">
+                <div class="calc-widget" id="calcWidget" data-widget-type="lamf" data-calc-id="loan-against-mutual-funds-calculator">
+                    <div class="lamf-container">
+                        
+                        <!-- PART A: SCHEME HOLDINGS TABLE & CARDS -->
+                        <div class="lamf-schemes-card">
+                            <div class="lamf-header-bar">
+                                <div>
+                                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--color-navy); margin: 0;">Mutual Fund Holdings Pledged</h3>
+                                    <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0;">Search your scheme name to auto-fetch the latest AMFI NAV, or input details manually.</p>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="lamf-count-tag">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                                        Mutual funds (<span id="lamfSchemeCount">1</span>)
+                                    </span>
+                                    <button type="button" class="lamf-clear-btn" id="btnClearAllSchemes">Clear all</button>
+                                </div>
+                            </div>
+
+                            <!-- Desktop View Table -->
+                            <div class="lamf-table-wrapper">
+                                <table class="lamf-table">
+                                    <thead>
+                                        <tr>
+                                            <th>1. Scheme Name</th>
+                                            <th>2. Fund Type</th>
+                                            <th>3. No. of Units</th>
+                                            <th>4. NAV (₹)</th>
+                                            <th style="text-align: right;">5. Total Value</th>
+                                            <th>6. LTV (%)</th>
+                                            <th style="text-align: right;">7. Eligible Loan</th>
+                                            <th style="text-align: center;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lamfTableBody"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Mobile View Cards -->
+                            <div class="lamf-cards-container" id="lamfCardsContainer"></div>
+
+                            <!-- Add Row Action Button -->
+                            <button type="button" class="lamf-add-btn" id="btnAddScheme">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>+ Add another scheme (Max 15)</span>
+                            </button>
+                        </div>
+
+                        <!-- PART B: LOAN STATS & OVERDRAFT CONTROLS -->
+                        <div class="calc-widget-grid" style="margin-top: 0;">
+                            <!-- Left: Interactive Controls -->
+                            <div class="calc-card inputs-card">
+                                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--color-navy); margin-bottom: 16px;">Overdraft Facility &amp; Usage Controls</h4>
+                                
+                                <div class="input-group">
+                                    <div class="input-header">
+                                        <label for="lamfRateInput">Overdraft Interest Rate (% p.a.)</label>
+                                        <span class="input-badge" id="lamfRateBadge">10.50%</span>
+                                    </div>
+                                    <div class="input-with-symbol">
+                                        <span class="currency-prefix">%</span>
+                                        <input type="text" id="lamfRateInput" class="calc-input" value="10.50" inputmode="decimal" aria-label="Interest Rate">
+                                    </div>
+                                    <input type="range" id="lamfRateSlider" class="calc-slider" min="9.0" max="12.0" step="0.05" value="10.50">
+                                    <div class="slider-limits"><span>9.0%</span><span>12.0%</span></div>
+                                </div>
+
+                                <div class="input-group">
+                                    <div class="input-header">
+                                        <label for="lamfUtilSlider">How much of the limit will you use?</label>
+                                        <span class="input-badge" id="lamfUtilBadge">100%</span>
+                                    </div>
+                                    <input type="range" id="lamfUtilSlider" class="calc-slider" min="0" max="100" step="1" value="100">
+                                    <div class="slider-limits"><span>0% (₹0)</span><span>100% (Full Limit)</span></div>
+                                </div>
+
+                                <div class="input-group">
+                                    <div class="input-header">
+                                        <label for="lamfUtilAmountInput">Amount to Withdraw (₹)</label>
+                                    </div>
+                                    <div class="input-with-symbol">
+                                        <span class="currency-prefix">₹</span>
+                                        <input type="text" id="lamfUtilAmountInput" class="calc-input" value="0" inputmode="numeric" aria-label="Amount to withdraw">
+                                    </div>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Synced with usage slider. Interest is billed ONLY on this amount.</span>
+                                </div>
+
+                                <!-- PART C: STRESS TEST "WHAT IF MARKET FALLS?" -->
+                                <div class="lamf-market-stress-panel">
+                                    <div class="lamf-stress-header">
+                                        <span class="lamf-stress-title">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                                            Stress Test: What If Market Fluctuates?
+                                        </span>
+                                        <span class="input-badge" id="lamfStressBadge" style="background:#ffffff; color:#92400e; font-weight:800;">0%</span>
+                                    </div>
+                                    <input type="range" id="lamfStressSlider" class="calc-slider" min="-40" max="20" step="5" value="0">
+                                    <div class="slider-limits"><span>–40% Crash</span><span>0% Baseline</span><span>+20% Rally</span></div>
+                                    
+                                    <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;">
+                                        <span style="color: #78350f; font-weight:600;">Simulated Credit Limit:</span>
+                                        <div>
+                                            <strong id="lamfStressNewLimit" style="color: var(--color-navy); font-size: 0.95rem;">₹0</strong>
+                                            <span id="lamfStressLimitDiff" style="font-size: 0.75rem; margin-left: 4px;">No change</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="lamf-warning-banner" id="lamfWarningBanner"></div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Result Stats Panel -->
+                            <div class="calc-card result-card" aria-live="polite">
+                                <div class="result-highlight-box">
+                                    <span class="result-label">Total Sanctioned Credit Limit</span>
+                                    <div class="result-hero-amount">
+                                        <span class="rupee-sign">₹</span><span id="lamfTotalLimit">0</span>
+                                    </div>
+                                    <span class="result-word-amount" id="lamfTotalLimitWords">Rs 0</span>
+                                </div>
+
+                                <!-- Separate Subtotals for Equity & Debt Accounts -->
+                                <div class="lamf-split-subtotals">
+                                    <div class="lamf-subtotal-box" id="cardEquitySub">
+                                        <span class="lamf-subtotal-title">
+                                            <span style="width:8px; height:8px; border-radius:50%; background:#2563eb;"></span>
+                                            Equity Account Limit
+                                        </span>
+                                        <span class="lamf-subtotal-val" id="lamfEquityLimit">₹0</span>
+                                        <span style="font-size:0.68rem; color:#64748b;">45% LTV on Equity/Hybrid</span>
+                                    </div>
+                                    <div class="lamf-subtotal-box" id="cardDebtSub">
+                                        <span class="lamf-subtotal-title">
+                                            <span style="width:8px; height:8px; border-radius:50%; background:#16a34a;"></span>
+                                            Debt Account Limit
+                                        </span>
+                                        <span class="lamf-subtotal-val" id="lamfDebtLimit">₹0</span>
+                                        <span style="font-size:0.68rem; color:#64748b;">80% LTV on Liquid/Debt</span>
+                                    </div>
+                                </div>
+
+                                <!-- Interest Details Grid -->
+                                <div class="result-metrics-grid" style="margin-top: 14px;">
+                                    <div class="metric-box">
+                                        <span class="metric-title">Estimated Monthly Interest</span>
+                                        <span class="metric-val" id="lamfMonthlyInterest">₹0</span>
+                                    </div>
+                                    <div class="metric-box">
+                                        <span class="metric-title">Annual Interest Cost</span>
+                                        <span class="metric-val" id="lamfAnnualInterest">₹0</span>
+                                    </div>
+                                    <div class="metric-box" style="grid-column: span 2;">
+                                        <span class="metric-title">Interest Accrual per Day</span>
+                                        <span class="metric-val" id="lamfDailyInterest">₹0</span>
+                                    </div>
+                                </div>
+
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 0.78rem; color: #475569; line-height: 1.45;">
+                                    💡 <strong>Zero Compulsory EMI:</strong> Interest is charged strictly on the amount actually used, for the days it is used. Repay the principal whenever you like with zero foreclosure fees.
+                                </div>
+
+                                <!-- Inline SVG Visual Portfolio Distribution -->
+                                <div class="lamf-distribution-chart" id="lamfChartContainer"></div>
+
+                                <!-- CTA Action Group -->
+                                <div class="result-cta-group">
+                                    <a href="https://wa.me/919594736833" id="lamfWhatsAppBtn" target="_blank" rel="noopener noreferrer" class="btn btn-wa-full">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                                        <span>Chat on WhatsApp with Mukesh Tiwari</span>
+                                    </a>
+                                    <a href="tel:+919594736833" class="btn btn-navy-full">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                        <span>Call Now: 95947 36833</span>
+                                    </a>
+                                    <a href="/#contact" class="btn btn-outline-sm" style="text-align:center; justify-content:center; padding: 10px;">Get a Free Callback &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- PART F: FRESH STATUTORY DISCLAIMER BLOCK -->
+                <div class="calc-disclaimer-box" role="note" aria-label="Disclaimer">
+                    <div class="calc-disclaimer-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Regulatory Notice &amp; Statutory Disclaimer</span>
+                    </div>
+                    <p>This calculator provides an indicative estimate only and is not a loan offer, approval, sanction or financial advice. The final limit, LTV, interest rate and charges are decided by the lender and depend on your profile, the lender's approved list of schemes, the NAV on the date of lien marking and prevailing policies.</p>
+                    <p style="margin-top: 4px;">Only schemes approved by the lender can be pledged. LTV percentages and interest rates shown are illustrative and vary between lenders.</p>
+                    <p style="margin-top: 4px;">The value of pledged mutual funds is revalued regularly; if NAV falls, your limit can reduce and you may need to repay part of the loan or pledge additional units.</p>
+                    <p style="margin-top: 4px;">Mutual fund investments are subject to market risks; read all scheme-related documents carefully. Past performance is not an indicator of future returns.</p>
+                    <p style="margin-top: 4px;"><strong>MM Financial Services Consultant</strong> is an authorized partner/advisor and is not a lender. NAV data is fetched from a third-party public source and may be delayed or unavailable; please verify with the AMC.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PART F: EDITORIAL GUIDE & FAQS -->
+        <section class="calc-guide-section">
+            <div class="calc-container">
+                <div class="calc-guide-header">
+                    <span class="calc-hero-badge">Comprehensive Advisory Guide</span>
+                    <h2 class="calc-guide-title">How Does Loan Against Mutual Funds (LAMF) Work?</h2>
+                    <div class="calc-title-divider"></div>
+                </div>
+
+                <div class="calc-guide-content">
+                    <div class="guide-block">
+                        <h3 class="guide-heading">What is a Loan Against Mutual Funds?</h3>
+                        <p class="guide-text">
+                            A Loan Against Mutual Funds (LAMF) is an overdraft credit facility that enables investors to leverage their existing mutual fund holdings as collateral without selling or liquidating their investment portfolio. Through a secure, paperless digital lien-marking mechanism with registrars such as CAMS and KFintech, your mutual fund units remain safely invested in your name while an authorized lender sanctions a dedicated credit line.
+                        </p>
+                        <p class="guide-text" style="margin-top: 10px;">
+                            Unlike conventional personal loans where fixed EMIs commence immediately on the full disbursed sum, LAMF operates on an as-you-use basis. You only pay interest on the specific rupee balance drawn down, calculated on a daily basis. The unutilized portion incurs zero interest charges, making it one of the most flexible emergency liquidity solutions in India.
+                        </p>
+                    </div>
+
+                    <div class="guide-block" style="margin-top: 24px;">
+                        <h3 class="guide-heading">How to Use This Calculator</h3>
+                        <ol class="guide-list" style="padding-left: 20px; line-height: 1.8; color: var(--color-charcoal);">
+                            <li><strong>Search &amp; Select Schemes:</strong> Type at least three characters of your mutual fund scheme name. Select your exact growth or regular plan to fetch the latest official NAV.</li>
+                            <li><strong>Input Units Held:</strong> Enter the quantity of units from your latest mutual fund statement (CAS). The calculator automatically figures the gross investment value.</li>
+                            <li><strong>Verify Category &amp; LTV:</strong> Equity-oriented funds default to 45% LTV, while debt and liquid funds default to 80% LTV. You can adjust the LTV within approved lender boundaries.</li>
+                            <li><strong>Adjust Overdraft Usage &amp; Stress Test:</strong> Move the utilization slider to determine exact monthly and daily interest on actual borrowings, and simulate market crashes using the stress-test slider.</li>
+                        </ol>
+                    </div>
+
+                    <div class="guide-block" style="margin-top: 24px;">
+                        <h3 class="guide-heading">How is the Loan Amount Calculated? (Worked Example)</h3>
+                        <p class="guide-text">
+                            Lenders evaluate your credit capacity by multiplying your gross holding value by the regulatory Loan-to-Value (LTV) ratio assigned to that asset class. Equity funds carry conservative limits to cushion market swings, while debt funds permit substantially higher borrowing.
+                        </p>
+                        <div class="table-responsive" style="margin-top: 14px;">
+                            <table class="schedule-table" style="font-size: 0.85rem;">
+                                <thead>
+                                    <tr>
+                                        <th>Scheme Type</th>
+                                        <th>Current NAV</th>
+                                        <th>Units Pledged</th>
+                                        <th>Portfolio Value</th>
+                                        <th>Applicable LTV</th>
+                                        <th>Sanctioned Limit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Equity / Large-Cap Fund</strong></td>
+                                        <td>₹50.00</td>
+                                        <td>1,000</td>
+                                        <td>₹50,000</td>
+                                        <td>45%</td>
+                                        <td><strong style="color:var(--color-brick);">₹22,500</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Debt / Liquid Fund</strong></td>
+                                        <td>₹25.00</td>
+                                        <td>2,000</td>
+                                        <td>₹50,000</td>
+                                        <td>80%</td>
+                                        <td><strong style="color:var(--color-brick);">₹40,000</strong></td>
+                                    </tr>
+                                    <tr style="background:#fffbeb; font-weight:800;">
+                                        <td colspan="3"><strong>Total Portfolio Collateral</strong></td>
+                                        <td><strong>₹1,00,000</strong></td>
+                                        <td>—</td>
+                                        <td><strong style="color:var(--color-navy); font-size:1.05rem;">₹62,500</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="guide-block" style="margin-top: 24px;">
+                        <h3 class="guide-heading">Why Choose LAMF Instead of Redeeming Mutual Funds?</h3>
+                        <ul class="guide-list" style="padding-left: 20px; line-height: 1.8; color: var(--color-charcoal);">
+                            <li><strong>Unbroken Compounding:</strong> Your units remain active in the fund. Any capital appreciation, dividend reinvestments, and compounding benefits continue uninterrupted.</li>
+                            <li><strong>Zero Capital Gains Tax:</strong> Pledging units is not a sale. Consequently, you incur zero short-term or long-term capital gains tax liabilities.</li>
+                            <li><strong>Interest Only on Actual Drawdown:</strong> Borrow ₹50,000 from a ₹5,00,000 sanctioned limit, and interest is billed exclusively on ₹50,000 for the duration used.</li>
+                            <li><strong>Flexible Principal Repayment:</strong> No rigid EMI penalty. Repay whenever surplus liquidity is generated, with zero prepayment charges.</li>
+                            <li><strong>Important Risk Consideration:</strong> Pledged portfolios are revalued daily against closing NAVs. If a sharp market decline causes your limit to drop below your drawn balance, your lender may request additional collateral or a partial repayment to rebalance margins.</li>
+                        </ul>
+                    </div>
+
+                    <!-- FAQ ACCORDION -->
+                    <div class="faq-accordion-section" style="margin-top: 36px;">
+                        <h3 class="guide-heading" style="margin-bottom: 16px;">Frequently Asked Questions (FAQ)</h3>
+                        
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>Is the NAV fetched in real time?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>The calculator connects to daily closing Net Asset Values (NAV) published by AMFI/AMCs on every business day. If an online connection is unavailable, you can manually key in your current NAV.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>Is the calculated amount my final sanctioned loan limit?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>The calculated figure is an indicative estimate based on standard industry LTV benchmarks (approx. 45% for equity and 80% for debt funds). The final sanctioned credit limit is established by the partnering bank or NBFC after digital lien marking.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>Can I pledge units across multiple mutual fund schemes?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>Yes. You can add up to 15 different mutual fund schemes across different AMCs (HDFC, ICICI Prudential, SBI, Nippon India, Axis, Mirae Asset, etc.).</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>How is interest charged on a Loan Against Mutual Funds?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>A Loan Against Mutual Funds operates as an overdraft facility. Interest is calculated strictly on the amount actually withdrawn and only for the exact number of days it remains utilized. There is no interest on the unutilized credit limit.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>Does checking eligibility here impact my credit score or investments?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>Not at all. This calculator is 100% client-side and indicative. It does not check your bureau score, nor does it alter or sell your mutual fund holdings.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button type="button" class="faq-question" aria-expanded="false">
+                                <span>Which mutual funds are accepted for digital pledging?</span>
+                                <span class="faq-icon">+</span>
+                            </button>
+                            <div class="faq-answer" style="display:none;">
+                                <p>Most growth-oriented equity, hybrid, liquid, and debt funds registered with CAMS and KFintech are accepted by partner banks. Closed-end funds or ELSS funds currently within their mandatory 3-year lock-in period cannot be pledged.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OTHER CALCULATORS STRIP -->
+        <section class="other-calcs-section" id="othercalculators">
+            <div class="calc-container">
+                <div class="other-calcs-header">
+                    <div>
+                        <h3 class="other-calcs-title">Explore Other Financial Calculators</h3>
+                        <p class="other-calcs-desc">Instant, accurate financial tools to plan every aspect of your wealth and loans.</p>
+                    </div>
+                    <a href="/calculators" class="btn-outline-back">View All Calculators &rarr;</a>
+                </div>
+                <div class="other-calcs-grid">
+                    <a href="/calculators/sip-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Mutual Funds</span>
+                            <h4 class="other-calc-title">SIP &amp; Lumpsum Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/home-loan-eligibility-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Home Loan Eligibility Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/home-loan-emi-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Home Loan EMI Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/loan-against-property-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Loan Against Property (LAP)</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/personal-loan-eligibility-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Personal Loan Eligibility</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/gold-loan-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Gold Loan Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 10. FOOTER -->
+    <footer class="site-footer" id="footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <div class="brand-logo footer-logo">
+                    <div class="monogram-seal">
+                        <span class="seal-inner">MM</span>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">MM FINANCIAL SERVICES</span>
+                        <span class="brand-sub">CONSULTANT</span>
+                    </div>
+                </div>
+                <p class="footer-tagline">
+                    Your Goals. Our Guidance. A Better Financial Future.
+                </p>
+                <p class="footer-meta">
+                    Led by <strong>Mukesh Tiwari</strong> &bull; NJ Wealth Authorized Partner
+                </p>
+                <div class="footer-cta-box">
+                    <span class="footer-cta-label">Direct Consultation Hotline:</span>
+                    <a href="tel:+919594736833" class="footer-cta-phone">+91 95947 36833</a>
+                    <span class="footer-cta-sub">Available Monday &ndash; Saturday, 9:30 AM &ndash; 7:30 PM IST</span>
+                </div>
+            </div>
+
+            <div class="footer-links-grid">
+                <div class="footer-col">
+                    <h4 class="footer-col-title">Loans &amp; Financing</h4>
+                    <ul class="footer-col-list">
+                        <li><a href="/loans" class="footer-link">Home Loans (Fresh / Resale)</a></li>
+                        <li><a href="/loans" class="footer-link">Loan Against Property (LAP)</a></li>
+                        <li><a href="/loans" class="footer-link">Balance Transfer &amp; Top-Up</a></li>
+                        <li><a href="/loans" class="footer-link">Personal Loans</a></li>
+                        <li><a href="/loans" class="footer-link">Business Loans / Working Capital</a></li>
+                        <li><a href="/calculators/loan-against-mutual-funds-calculator" class="footer-link">Loan Against Mutual Funds (LAMF)</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-col-title">Investments &amp; Insurance</h4>
+                    <ul class="footer-col-list">
+                        <li><a href="/mutual-funds" class="footer-link">Mutual Funds &amp; SIP (NJ Wealth)</a></li>
+                        <li><a href="/mutual-funds" class="footer-link">Goal-Based Wealth Planning</a></li>
+                        <li><a href="/mutual-funds" class="footer-link">Retirement &amp; Child Education</a></li>
+                        <li><a href="/insurance" class="footer-link">Term Life Insurance</a></li>
+                        <li><a href="/insurance" class="footer-link">Health &amp; Critical Illness</a></li>
+                        <li><a href="/insurance" class="footer-link">Motor &amp; General Insurance</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-col-title">Calculators &amp; Advisory</h4>
+                    <ul class="footer-col-list">
+                        <li><a href="/calculators" class="footer-link"><strong>Financial Calculators Hub</strong></a></li>
+                        <li><a href="/calculators/loan-against-mutual-funds-calculator" class="footer-link">LAMF Overdraft Calculator</a></li>
+                        <li><a href="/calculators/home-loan-emi-calculator" class="footer-link">Home Loan EMI Calculator</a></li>
+                        <li><a href="/calculators/home-loan-eligibility-calculator" class="footer-link">Home Loan Eligibility</a></li>
+                        <li><a href="/calculators/sip-calculator" class="footer-link">SIP &amp; Lumpsum Calculator</a></li>
+                        <li><a href="/calculators/fd-calculator" class="footer-link">Fixed Deposit (FD) Calculator</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4 class="footer-col-title">Advisor Contact</h4>
+                    <address class="footer-address">
+                        <strong>MM Financial Services Consultant</strong><br>
+                        Advisor: Mukesh Tiwari<br>
+                        Authorized Partner: NJ Wealth Network<br>
+                        Mumbai, Maharashtra &bull; India<br>
+                        Phone: <a href="tel:+919594736833" class="footer-contact-link">+91 95947 36833</a><br>
+                        Email: <a href="mailto:mmfsc09@gmail.com" class="footer-contact-link">mmfsc09@gmail.com</a>
+                    </address>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container footer-bottom-inner">
+                <p class="footer-copy">
+                    &copy; 2026 MM Financial Services Consultant. All Rights Reserved.
+                </p>
+                <p class="footer-disclaimer-note">
+                    <strong>MM Financial Services Consultant</strong> (Mukesh Tiwari) provides financial consultancy across loans, mutual funds, and insurance. Mutual fund distribution is facilitated through the NJ Wealth partner network. All loan sanctions, interest rates, terms, and processing times are determined solely by lending banks/NBFCs based on underwriting criteria.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SHARED CALCULATOR JS -->
+    <script src="/calculators/calculators.js?v=2.4"></script>
+</body>
+</html>
