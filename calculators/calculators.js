@@ -1854,6 +1854,42 @@ const CONFIG = {
     const chartContainer = document.getElementById('lamfChartContainer');
 
     // CTA
+    
+    // 2-Year Income / ITR Assessment event listeners
+    const incomeToggleEl = document.getElementById('lamfIncomeCheckToggle');
+    const incomeFieldsBox = document.getElementById('lamfIncomeFieldsContainer');
+    const itr1In = document.getElementById('lamfItr1Input');
+    const itr2In = document.getElementById('lamfItr2Input');
+    const exEmiIn = document.getElementById('lamfExistingEmiInput');
+
+    if (incomeToggleEl && incomeFieldsBox) {
+      incomeToggleEl.addEventListener('change', () => {
+        incomeFieldsBox.style.display = incomeToggleEl.checked ? 'block' : 'none';
+        recalculate();
+      });
+    }
+    if (itr1In) {
+      itr1In.addEventListener('input', recalculate);
+      itr1In.addEventListener('blur', () => {
+        const v = parseNumber(itr1In.value);
+        if (v > 0) itr1In.value = '₹' + fmtINR(v);
+      });
+    }
+    if (itr2In) {
+      itr2In.addEventListener('input', recalculate);
+      itr2In.addEventListener('blur', () => {
+        const v = parseNumber(itr2In.value);
+        if (v > 0) itr2In.value = '₹' + fmtINR(v);
+      });
+    }
+    if (exEmiIn) {
+      exEmiIn.addEventListener('input', recalculate);
+      exEmiIn.addEventListener('blur', () => {
+        const v = parseNumber(exEmiIn.value);
+        if (v > 0) exEmiIn.value = '₹' + fmtINR(v);
+      });
+    }
+
     const waBtn = document.getElementById('lamfWhatsAppBtn');
 
     // Helper: is debt keyword
@@ -2743,6 +2779,50 @@ const CONFIG = {
       }
 
       // Render Visual SVG Bar
+      
+      // 2-Year ITR / Income Eligibility Assessment
+      const incomeToggle = document.getElementById('lamfIncomeCheckToggle');
+      if (incomeToggle && incomeToggle.checked) {
+        const itr1 = parseNumber((document.getElementById('lamfItr1Input') || {}).value);
+        const itr2 = parseNumber((document.getElementById('lamfItr2Input') || {}).value);
+        const exEmi = parseNumber((document.getElementById('lamfExistingEmiInput') || {}).value);
+
+        const total2Yr = itr1 + itr2;
+        const avgAnnual = Math.round(total2Yr / 2);
+        const monthlyDerived = Math.round(total2Yr / 24);
+
+        // 60% FOIR norm
+        const netCashForEmi = Math.max(0, (monthlyDerived * 0.60) - exEmi);
+
+        // Max supported loan based on EMI capacity over selected tenure
+        const r = (annualRate / 100) / 12;
+        const n = tenureMonths;
+        let incomeSupportedLoan = 0;
+        if (r > 0 && n > 0 && netCashForEmi > 0) {
+          incomeSupportedLoan = Math.round((netCashForEmi * (Math.pow(1 + r, n) - 1)) / (r * Math.pow(1 + r, n)));
+        }
+
+        const elAvg = document.getElementById('lamfAvgProfitVal');
+        const elDer = document.getElementById('lamfDerivedMonthlyVal');
+        const elElig = document.getElementById('lamfIncomeEligLoanVal');
+        const elBadge = document.getElementById('lamfIncomeStatusBadge');
+
+        if (elAvg) elAvg.textContent = '₹' + fmtINR(avgAnnual);
+        if (elDer) elDer.textContent = '₹' + fmtINR(monthlyDerived);
+        if (elElig) elElig.textContent = '₹' + fmtINR(incomeSupportedLoan);
+
+        if (elBadge) {
+          if (incomeSupportedLoan >= totalLimit) {
+            elBadge.style.background = '#ecfdf5';
+            elBadge.style.color = '#166534';
+            elBadge.innerHTML = '✅ <strong>Approved:</strong> 2-Year Average Income supports 100% of your ₹' + fmtINR(totalLimit) + ' Mutual Fund limit.';
+          } else {
+            elBadge.style.background = '#fffbeb';
+            elBadge.style.color = '#92400e';
+            elBadge.innerHTML = '⚠️ <strong>Note:</strong> 2-Year Average Income supports up to ₹' + fmtINR(incomeSupportedLoan) + '. Add co-applicant to unlock full ₹' + fmtINR(totalLimit) + '.';
+          }
+        }
+      }
       renderSvgChart(totals);
 
       // Update Live WhatsApp CTA Link
