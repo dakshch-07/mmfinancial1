@@ -368,6 +368,27 @@
                             <strong style="color: var(--color-navy); font-size: 0.82rem;">₹2,000 - ₹5,000</strong>
                         </div>
                     </div>
+
+                    <!-- Optional Bank Processing Fee & Insurance (Manual Input) -->
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">
+                            Optional Bank Charges &amp; Insurance (Manual / Custom Entry):
+                        </span>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px 8px; border-radius: 6px;">
+                                <label for="lapPfInput" style="font-size: 0.68rem; font-weight: 600; color: #475569; display: block; margin-bottom: 2px;">Processing Fee (PF ₹)</label>
+                                <input type="text" id="lapPfInput" class="calc-input" placeholder="e.g. ₹15,000" style="padding: 4px 8px; font-size: 0.82rem; height: auto;" inputmode="numeric">
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 8px; border-radius: 6px;">
+                                <label for="lapInsuranceInput" style="font-size: 0.68rem; font-weight: 600; color: #475569; display: block; margin-bottom: 2px;">Property &amp; Term Shield (₹)</label>
+                                <input type="text" id="lapInsuranceInput" class="calc-input" placeholder="e.g. ₹30,000" style="padding: 4px 8px; font-size: 0.82rem; height: auto;" inputmode="numeric">
+                            </div>
+                        </div>
+                        <div id="lapCustomChargesTotal" style="margin-top: 6px; font-size: 0.72rem; color: #15803d; font-weight: 700; display: none;">
+                            Total Bank PF &amp; Insurance: <span id="lapCustomChargesTotalVal">₹0</span>
+                        </div>
+                    </div>
+
                     <div style="margin-top: 6px; font-size: 0.7rem; color: #64748b;">
                         * Processing Fee (PF) &amp; Property Insurance are as per lending bank/NBFC guidelines.
                     </div>

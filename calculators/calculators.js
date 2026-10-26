@@ -2035,7 +2035,97 @@ const CONFIG = {
         });
       }
 
-      recalculate();
+      re
+    // Manual PF & Insurance optional inputs
+    const eligPfIn = widget.querySelector('#customPfInput');
+    const eligInsIn = widget.querySelector('#customInsuranceInput');
+    const eligTotBox = widget.querySelector('#customChargesTotal');
+    const eligTotVal = widget.querySelector('#customChargesTotalVal');
+    function updateEligCustomCharges() {
+      const pfVal = parseNumber((eligPfIn && eligPfIn.value) || 0);
+      const insVal = parseNumber((eligInsIn && eligInsIn.value) || 0);
+      const totalCustom = pfVal + insVal;
+      if (eligTotBox && eligTotVal) {
+        eligTotBox.style.display = totalCustom > 0 ? 'block' : 'none';
+        eligTotVal.textContent = '₹' + fmtINR(totalCustom);
+      }
+    }
+    if (eligPfIn) {
+      eligPfIn.addEventListener('input', updateEligCustomCharges);
+      eligPfIn.addEventListener('blur', () => {
+        const val = parseNumber(eligPfIn.value);
+        if (val > 0) eligPfIn.value = '₹' + fmtINR(val);
+      });
+    }
+    if (eligInsIn) {
+      eligInsIn.addEventListener('input', updateEligCustomCharges);
+      eligInsIn.addEventListener('blur', () => {
+        const val = parseNumber(eligInsIn.value);
+        if (val > 0) eligInsIn.value = '₹' + fmtINR(val);
+      });
+    }
+
+    
+    // Manual PF & Insurance optional inputs
+    const emiPfIn = widget.querySelector('#customPfInput');
+    const emiInsIn = widget.querySelector('#customInsuranceInput');
+    const emiTotBox = widget.querySelector('#customChargesTotal');
+    const emiTotVal = widget.querySelector('#customChargesTotalVal');
+    function updateEmiCustomCharges() {
+      const pfVal = parseNumber((emiPfIn && emiPfIn.value) || 0);
+      const insVal = parseNumber((emiInsIn && emiInsIn.value) || 0);
+      const totalCustom = pfVal + insVal;
+      if (emiTotBox && emiTotVal) {
+        emiTotBox.style.display = totalCustom > 0 ? 'block' : 'none';
+        emiTotVal.textContent = '₹' + fmtINR(totalCustom);
+      }
+    }
+    if (emiPfIn) {
+      emiPfIn.addEventListener('input', updateEmiCustomCharges);
+      emiPfIn.addEventListener('blur', () => {
+        const val = parseNumber(emiPfIn.value);
+        if (val > 0) emiPfIn.value = '₹' + fmtINR(val);
+      });
+    }
+    if (emiInsIn) {
+      emiInsIn.addEventListener('input', updateEmiCustomCharges);
+      emiInsIn.addEventListener('blur', () => {
+        const val = parseNumber(emiInsIn.value);
+        if (val > 0) emiInsIn.value = '₹' + fmtINR(val);
+      });
+    }
+
+    
+    // Manual PF & Insurance optional inputs for LAP
+    const lapPfIn = widget.querySelector('#lapPfInput');
+    const lapInsIn = widget.querySelector('#lapInsuranceInput');
+    const lapTotBox = widget.querySelector('#lapCustomChargesTotal');
+    const lapTotVal = widget.querySelector('#lapCustomChargesTotalVal');
+    function updateLapCustomCharges() {
+      const pfVal = parseNumber((lapPfIn && lapPfIn.value) || 0);
+      const insVal = parseNumber((lapInsIn && lapInsIn.value) || 0);
+      const totalCustom = pfVal + insVal;
+      if (lapTotBox && lapTotVal) {
+        lapTotBox.style.display = totalCustom > 0 ? 'block' : 'none';
+        lapTotVal.textContent = '₹' + fmtINR(totalCustom);
+      }
+    }
+    if (lapPfIn) {
+      lapPfIn.addEventListener('input', updateLapCustomCharges);
+      lapPfIn.addEventListener('blur', () => {
+        const val = parseNumber(lapPfIn.value);
+        if (val > 0) lapPfIn.value = '₹' + fmtINR(val);
+      });
+    }
+    if (lapInsIn) {
+      lapInsIn.addEventListener('input', updateLapCustomCharges);
+      lapInsIn.addEventListener('blur', () => {
+        const val = parseNumber(lapInsIn.value);
+        if (val > 0) lapInsIn.value = '₹' + fmtINR(val);
+      });
+    }
+
+    calculate();
     }
 
     // Helper: escape HTML string
