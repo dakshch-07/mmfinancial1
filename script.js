@@ -1511,6 +1511,7 @@ function computeLocalEligibility(params) {
         appliedFoir = slab.foir;
         foirLabel = slab.label;
     } else {
+        const isTurnoverProg = (params.businessProgram === 'turnover');
         const netProfit = Math.max(0, parseFloat(params.loanIncome) || 0);
         const depr = Math.max(0, parseFloat(params.depreciation) || 0);
         const directorSalary = Math.max(0, parseFloat(params.directorSalary) || 0);
@@ -1524,11 +1525,18 @@ function computeLocalEligibility(params) {
             (rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
 
         grossMonthlyIncome = Math.round(annualCashProfit / 12);
-        const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
-            s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
-        ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
-        appliedFoir = slab.foir;
-        foirLabel = slab.label;
+        
+        if (isTurnoverProg) {
+            // Business Turnover program uses 85% FOIR benchmarking
+            appliedFoir = 0.85;
+            foirLabel = '85% FOIR (Turnover Cash Flow Norm)';
+        } else {
+            const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
+                s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
+            ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
+            appliedFoir = slab.foir;
+            foirLabel = slab.label;
+        }
     }
 
     const maxAllowableEmi = Math.round(grossMonthlyIncome * appliedFoir);
@@ -1747,6 +1755,8 @@ function initLoanForm() {
     const loanTurnoverPctInput = document.getElementById('loanTurnoverPctInput');
     const loanTurnoverBracketTag = document.getElementById('loanTurnoverBracketTag');
     const loanTurnoverPctHint = document.getElementById('loanTurnoverPctHint');
+    const loanTurnoverPctLabel = document.getElementById('loanTurnoverPctLabel');
+    const loanTurnoverUnitSymbol = document.getElementById('loanTurnoverUnitSymbol');
     const loanMonthlyIncomeDisplay = document.getElementById('loanMonthlyIncomeDisplay');
 
     function syncBenchmarkLimits() {
@@ -1755,22 +1765,38 @@ function initLoanForm() {
         const minVal = parseFloat(opt.dataset.min) || 1.0;
         const maxVal = parseFloat(opt.dataset.max) || 20.0;
         const defVal = parseFloat(opt.dataset.def) || (minVal === maxVal ? minVal : (minVal + maxVal) / 2);
+        const isMultiplier = opt.dataset.isMultiplier === 'true' || opt.text.includes('Gross Receipts');
+
+        if (loanTurnoverPctLabel) {
+            loanTurnoverPctLabel.innerHTML = isMultiplier 
+                ? 'Gross Receipts Multiplier (Times) <span class="req">*</span>' 
+                : 'Manual Net Margin % (Editable) <span class="req">*</span>';
+        }
+        if (loanTurnoverUnitSymbol) {
+            loanTurnoverUnitSymbol.textContent = isMultiplier ? 'x' : '%';
+        }
 
         if (loanTurnoverBracketTag) {
-            loanTurnoverBracketTag.textContent = minVal === maxVal 
-                ? `${minVal.toFixed(1)}% Fixed` 
-                : `Min ${minVal.toFixed(1)}% - Max ${maxVal.toFixed(1)}%`;
+            if (isMultiplier) {
+                loanTurnoverBracketTag.textContent = minVal === maxVal ? `${minVal}x Multiplier` : `${minVal}x - ${maxVal}x Multiplier`;
+            } else {
+                loanTurnoverBracketTag.textContent = minVal === maxVal 
+                    ? `${minVal.toFixed(1)}% Fixed` 
+                    : `Min ${minVal.toFixed(1)}% - Max ${maxVal.toFixed(1)}%`;
+            }
         }
         if (loanTurnoverPctHint) {
-            loanTurnoverPctHint.textContent = minVal === maxVal
-                ? `Standard bank benchmark: ${minVal.toFixed(1)}% of gross revenue`
-                : `Allowed range: ${minVal.toFixed(1)}% to ${maxVal.toFixed(1)}% (Bank benchmark)`;
+            loanTurnoverPctHint.textContent = isMultiplier
+                ? `Standard bank benchmark: ${defVal} times of annual gross receipts`
+                : (minVal === maxVal
+                    ? `Standard bank benchmark: ${minVal.toFixed(1)}% of gross revenue`
+                    : `Allowed range: ${minVal.toFixed(1)}% to ${maxVal.toFixed(1)}% (Bank benchmark)`);
         }
         if (loanTurnoverPctInput) {
-            loanTurnoverPctInput.value = defVal.toFixed(1);
+            loanTurnoverPctInput.value = isMultiplier ? defVal.toString() : defVal.toFixed(1);
         }
         if (loanTurnoverMultiplierBadge) {
-            loanTurnoverMultiplierBadge.textContent = defVal.toFixed(1) + '%';
+            loanTurnoverMultiplierBadge.textContent = isMultiplier ? `${defVal}x` : defVal.toFixed(1) + '%';
         }
         updateLoansTurnoverAvg();
     }
@@ -1779,6 +1805,7 @@ function initLoanForm() {
         const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
         const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
         const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+        const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.text.includes('Gross Receipts'));
         
         let rawVal = parseFloat(String(loanTurnoverPctInput ? loanTurnoverPctInput.value : '').replace(/[^0-9.]/g, ''));
         if (isNaN(rawVal)) rawVal = minVal;
@@ -1786,11 +1813,13 @@ function initLoanForm() {
         // Clamp maximum immediately if user exceeds limit
         if (rawVal > maxVal) {
             rawVal = maxVal;
-            if (loanTurnoverPctInput) loanTurnoverPctInput.value = maxVal.toFixed(1);
+            if (loanTurnoverPctInput) loanTurnoverPctInput.value = isMultiplier ? maxVal.toString() : maxVal.toFixed(1);
         }
         
-        if (loanTurnoverMultiplierBadge) loanTurnoverMultiplierBadge.textContent = rawVal.toFixed(1) + '%';
-        return rawVal / 100;
+        if (loanTurnoverMultiplierBadge) {
+            loanTurnoverMultiplierBadge.textContent = isMultiplier ? `${rawVal}x` : rawVal.toFixed(1) + '%';
+        }
+        return { val: rawVal, isMultiplier, foir: (opt && opt.dataset.foir ? parseFloat(opt.dataset.foir) : null) };
     }
 
     if (loanTurnoverMultiplier) {
@@ -1809,10 +1838,11 @@ function initLoanForm() {
             const opt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
             const minVal = opt ? (parseFloat(opt.dataset.min) || 1.0) : 1.0;
             const maxVal = opt ? (parseFloat(opt.dataset.max) || 20.0) : 20.0;
+            const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.text.includes('Gross Receipts'));
             let v = parseFloat(loanTurnoverPctInput.value);
             if (isNaN(v) || v < minVal) v = minVal;
             if (v > maxVal) v = maxVal;
-            loanTurnoverPctInput.value = v.toFixed(1);
+            loanTurnoverPctInput.value = isMultiplier ? v.toString() : v.toFixed(1);
             updateLoansTurnoverAvg();
         });
     }
@@ -1852,15 +1882,30 @@ function initLoanForm() {
         if (t1 > 0 && t2 > 0) avg = Math.round((t1 + t2) / 2);
         else avg = t1 || t2;
 
-        const mult = getAndValidatePct();
-        const annualDerived = Math.round(avg * mult);
-        const monthlyDerived = Math.round(annualDerived / 12);
+        const info = getAndValidatePct();
+        let annualDerived = 0;
+        let monthlyIncome = 0;
+        let appliedFoir = 0.85; // Standard 85% FOIR for business turnover program as specified
 
-        // Underwriting Formula:
-        // Monthly Income - Existing Obligations
-        // / EMI Per Lakh * 1,00,000 = Max Loan Eligibility
+        if (info.isMultiplier) {
+            // Doctor / Professional Program:
+            // Multiplier on Gross Receipts (e.g. 50L * 3 = 1.5 Cr annual cash flow)
+            // Monthly Income = Annual / 12
+            annualDerived = Math.round(avg * info.val);
+            monthlyIncome = Math.round(annualDerived / 12);
+        } else {
+            // Turnover Percentage Program (MFG / Services / Trader):
+            // 1 Cr * 15% = 15,00,000 Annual Profit
+            // 15,00,000 * 85% FOIR = 12,75,000
+            // Per month income capacity = 12,75,000 / 12 = 1,06,250
+            annualDerived = Math.round(avg * (info.val / 100));
+            const annualFoirCapacity = Math.round(annualDerived * appliedFoir);
+            monthlyIncome = Math.round(annualFoirCapacity / 12);
+        }
+
+        // Net Capacity = Monthly Income - Existing Obligations
         const obligation = parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0;
-        const netCapacity = Math.max(0, monthlyDerived - obligation);
+        const netCapacity = Math.max(0, monthlyIncome - obligation);
 
         const currentRoi = parseFloat(loanRoiInput ? loanRoiInput.value : 8.5) || 8.5;
         const currentTenureMonths = parseTenureToMonthsLocal(tenure ? tenure.value : '20 Years');
@@ -1875,7 +1920,7 @@ function initLoanForm() {
             loanAvgTurnoverDisplay.textContent = '₹' + formatIndianNumber(avg);
         }
         if (loanMonthlyIncomeDisplay) {
-            loanMonthlyIncomeDisplay.textContent = '₹' + formatIndianNumber(monthlyDerived) + ' / month';
+            loanMonthlyIncomeDisplay.textContent = '₹' + formatIndianNumber(monthlyIncome) + ' / month';
         }
         if (loanObligationDisplay) {
             loanObligationDisplay.textContent = obligation > 0 ? '- ₹' + formatIndianNumber(obligation) : '₹0';
@@ -1893,7 +1938,7 @@ function initLoanForm() {
         if (loanTurnoverFormulaHint) {
             loanTurnoverFormulaHint.textContent = '';
         }
-        return { avg, monthlyDerived, annualDerived, obligation, netCapacity, emiPerLakh, maxLoanEligible };
+        return { avg, monthlyDerived: monthlyIncome, annualDerived, obligation, netCapacity, emiPerLakh, maxLoanEligible };
     }
 
     if (loanTurnoverAmount) loanTurnoverAmount.addEventListener('input', updateLoansTurnoverAvg);
@@ -2034,11 +2079,16 @@ function initLoanForm() {
             const rawT1 = parseFloat(String(loanTurnoverAmount ? loanTurnoverAmount.value : '').replace(/[^0-9.]/g, '')) || 0;
             const rawT2 = parseFloat(String(loanTurnoverAmountYear2 ? loanTurnoverAmountYear2.value : '').replace(/[^0-9.]/g, '')) || 0;
             const avgTurnover = (rawT1 > 0 && rawT2 > 0) ? Math.round((rawT1 + rawT2) / 2) : (rawT1 || rawT2);
-            const pctVal = parseFloat(loanTurnoverPctInput ? loanTurnoverPctInput.value : 7.5) || 7.5;
-            const mult = pctVal / 100;
+            const info = getAndValidatePct();
 
             if (!validateField(loanTurnoverAmount, rawT1 >= 500000 || avgTurnover >= 500000)) isValid = false;
-            effectiveIncome = avgTurnover * mult; // Equivalent annual derived income from 2-year average
+            if (info.isMultiplier) {
+                // Doctor / Professional: 3x Gross Receipts
+                effectiveIncome = avgTurnover * info.val;
+            } else {
+                // MFG / Services / Trader: Turnover * Margin %
+                effectiveIncome = avgTurnover * (info.val / 100);
+            }
         } else {
             const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
             const minIncome = isSalaried 

@@ -518,12 +518,18 @@ const CONFIG = {
           bizTurnoverPctSl.value = defVal;
           updateSliderFill(bizTurnoverPctSl);
         }
+        const isMultiplier = opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs';
+        const prefixEl = document.getElementById('bizTurnoverPrefix');
+        const labelEl = document.getElementById('bizTurnoverPctLabel');
+        if (prefixEl) prefixEl.textContent = isMultiplier ? 'x' : '%';
+        if (labelEl) labelEl.textContent = isMultiplier ? 'Gross Receipts Multiplier (Times)' : 'Manual Net Cash Margin % (Editable)';
+
         if (bizTurnoverPctIn) {
-          bizTurnoverPctIn.value = defVal.toFixed(1);
+          bizTurnoverPctIn.value = isMultiplier ? defVal.toString() : defVal.toFixed(1);
         }
         if (bizTurnoverMinLim && bizTurnoverMaxLim) {
-          bizTurnoverMinLim.textContent = minVal.toFixed(1) + '% (Min)';
-          bizTurnoverMaxLim.textContent = maxVal.toFixed(1) + '% (Max)';
+          bizTurnoverMinLim.textContent = isMultiplier ? minVal + 'x (Min)' : minVal.toFixed(1) + '% (Min)';
+          bizTurnoverMaxLim.textContent = isMultiplier ? maxVal + 'x (Max)' : maxVal.toFixed(1) + '% (Max)';
         }
         if (bizTurnoverNote) {
           const notes = {
@@ -620,9 +626,22 @@ const CONFIG = {
           const turnover1 = parseNumber((document.getElementById('bizTurnoverInput') || {}).value) || 20000000;
           const turnover2 = parseNumber((document.getElementById('bizTurnoverYear2Input') || {}).value) || turnover1;
           const avgTurnover = Math.round((turnover1 + turnover2) / 2);
-          const turnoverPct = parseFloat((document.getElementById('bizTurnoverPctInput') || {}).value) || 5.0;
-          const annualDerivedIncome = avgTurnover * (turnoverPct / 100);
-          totalMonthlyBusinessIncome = annualDerivedIncome / 12;
+          const opt = bizIndustrySel ? bizIndustrySel.options[bizIndustrySel.selectedIndex] : null;
+          const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs');
+          const turnoverPct = parseFloat((document.getElementById('bizTurnoverPctInput') || {}).value) || (isMultiplier ? 3.0 : 5.0);
+
+          let annualDerivedIncome = 0;
+          if (isMultiplier) {
+            // Doctor / Professional: 3x Gross Receipts
+            annualDerivedIncome = avgTurnover * turnoverPct;
+            totalMonthlyBusinessIncome = Math.round(annualDerivedIncome / 12);
+            appliedFoir = 1.0; // Monthly income directly available for EMI capacity
+          } else {
+            // Manufacturing / Services / Trader: Turnover * Margin %
+            annualDerivedIncome = avgTurnover * (turnoverPct / 100);
+            appliedFoir = 0.85; // 85% FOIR as specified
+            totalMonthlyBusinessIncome = Math.round((annualDerivedIncome * appliedFoir) / 12);
+          }
 
           // Add-backs: Rent & Remuneration
           const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
@@ -632,8 +651,8 @@ const CONFIG = {
           const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
           const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
           const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
-          const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = turnoverPct.toFixed(1) + '%';
-          const bMon = document.getElementById('bizMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(Math.round(annualDerivedIncome / 12)) + ' / mo';
+          const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = isMultiplier ? turnoverPct + 'x' : turnoverPct.toFixed(1) + '%';
+          const bMon = document.getElementById('bizMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(Math.round(totalMonthlyBusinessIncome)) + ' / mo';
           // formula text removed as per user instruction
         } else {
           // 2-Year ITR assessment (24 Months / 12 Months)
@@ -666,8 +685,8 @@ const CONFIG = {
 
         existingEmi = parseNumber((document.getElementById('bizEmiInput') || {}).value);
 
-        // Applied FOIR: 60% for Home Loan / LAP, 65% for Personal Loan
-        eligibleIncome = totalMonthlyBusinessIncome * appliedFoir;
+        // Applied FOIR: Already integrated in turnover program (85% or 100% for Doctor)
+        eligibleIncome = isTurnoverProg ? totalMonthlyBusinessIncome : (totalMonthlyBusinessIncome * appliedFoir);
 
         const elTotInc = document.getElementById('bizTotalMonthlyIncome');
         if (elTotInc) elTotInc.textContent = '₹' + fmtINR(totalMonthlyBusinessIncome);
@@ -1275,12 +1294,18 @@ const CONFIG = {
           turnoverPctSl.value = defVal;
           updateSliderFill(turnoverPctSl);
         }
+        const isMultiplier = opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs';
+        const prefixEl = document.getElementById('lapTurnoverPrefix');
+        const labelEl = document.getElementById('lapTurnoverPctLabel');
+        if (prefixEl) prefixEl.textContent = isMultiplier ? 'x' : '%';
+        if (labelEl) labelEl.textContent = isMultiplier ? 'Gross Receipts Multiplier (Times)' : 'Manual Net Cash Margin % (Editable)';
+
         if (turnoverPctIn) {
-          turnoverPctIn.value = defVal.toFixed(1);
+          turnoverPctIn.value = isMultiplier ? defVal.toString() : defVal.toFixed(1);
         }
         if (lapTurnoverMinLim && lapTurnoverMaxLim) {
-          lapTurnoverMinLim.textContent = minVal.toFixed(1) + '% (Min)';
-          lapTurnoverMaxLim.textContent = maxVal.toFixed(1) + '% (Max)';
+          lapTurnoverMinLim.textContent = isMultiplier ? minVal + 'x (Min)' : minVal.toFixed(1) + '% (Min)';
+          lapTurnoverMaxLim.textContent = isMultiplier ? maxVal + 'x (Max)' : maxVal.toFixed(1) + '% (Max)';
         }
         if (lapTurnoverNote) {
           const notes = {
@@ -1318,16 +1343,31 @@ const CONFIG = {
       const isTurnover = (progSel && progSel.value === 'turnover');
 
       let netInc = 0;
+      let appliedFoirLap = 0.60;
       if (isTurnover) {
         const turnover1 = parseNumber((turnoverIn || {}).value) || 30000000;
         const turnover2 = parseNumber((lapTurnoverYear2In || {}).value) || turnover1;
         const avgTurnover = Math.round((turnover1 + turnover2) / 2);
-        const pct = parseFloat((turnoverPctIn || {}).value) || 5.0;
-        netInc = Math.round((avgTurnover * (pct / 100)) / 12);
+        const opt = lapIndustrySel ? lapIndustrySel.options[lapIndustrySel.selectedIndex] : null;
+        const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs');
+        const pct = parseFloat((turnoverPctIn || {}).value) || (isMultiplier ? 3.0 : 5.0);
+
+        if (isMultiplier) {
+          // Doctor / Professional: 3x Gross Receipts
+          const annualDerived = avgTurnover * pct;
+          netInc = Math.round(annualDerived / 12);
+          appliedFoirLap = 1.0;
+        } else {
+          // Manufacturing / Trader / Services: 85% FOIR on margin
+          const annualDerived = avgTurnover * (pct / 100);
+          netInc = Math.round((annualDerived * 0.85) / 12);
+          appliedFoirLap = 1.0;
+        }
+
         const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
         const bT2 = document.getElementById('lapTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
         const bAvg = document.getElementById('lapAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
-        const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = pct.toFixed(1) + '%';
+        const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = isMultiplier ? pct + 'x' : pct.toFixed(1) + '%';
         const bMon = document.getElementById('lapMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(netInc) + ' / mo';
         // formula text removed as per user instruction
       } else {
@@ -1340,7 +1380,7 @@ const CONFIG = {
       const tenure = parseInt(tenIn.value, 10) || 15;
 
       const collateralLimit = propVal * ltvPct;
-      const foir = 0.60;
+      const foir = isTurnover ? appliedFoirLap : 0.60;
       const maxEmiCapacity = Math.max(0, (netInc * foir) - existingEmi);
 
       let incomeLimit = 0;

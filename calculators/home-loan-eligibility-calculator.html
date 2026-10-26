@@ -312,12 +312,12 @@
                         <div class="input-group">
                             <label for="bizIndustrySelect" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Industry / Profession Category (Bank Benchmark)</label>
                             <select id="bizIndustrySelect" class="calc-input" style="font-weight: 700; color: var(--color-navy); border-color: #fcd34d;">
-                                <option value="mfg" data-min="10" data-max="15" data-def="12">Manufacturing (10% - 15% Margin)</option>
-                                <option value="services" data-min="10" data-max="15" data-def="12">Services (10% - 15% Margin)</option>
-                                <option value="trader" data-min="5" data-max="10" data-def="7.5" selected>Trading / Wholesale / Retail (5% - 10% Margin)</option>
-                                <option value="ca" data-min="2" data-max="3" data-def="2.5">Chartered Accountant (CA Gross Receipts 2% - 3%)</option>
-                                <option value="cs" data-min="1.5" data-max="1.5" data-def="1.5">Company Secretary (CS Gross Receipts 1.5%)</option>
-                                <option value="doctor" data-min="2" data-max="3" data-def="2.5">Doctor (MBBS / Specialist Gross Receipts 2% - 3%)</option>
+                                <option value="mfg" data-min="10" data-max="15" data-def="15" data-foir="0.85">Manufacturing (10% - 15% Margin | 85% FOIR)</option>
+                                <option value="services" data-min="10" data-max="15" data-def="15" data-foir="0.85">Services (10% - 15% Margin | 85% FOIR)</option>
+                                <option value="trader" data-min="5" data-max="10" data-def="7.5" data-foir="0.85" selected>Trading / Wholesale / Retail (5% - 10% Margin)</option>
+                                <option value="ca" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Chartered Accountant (CA 3x Gross Receipts)</option>
+                                <option value="cs" data-min="1.5" data-max="1.5" data-def="1.5" data-is-multiplier="true">Company Secretary (CS 1.5x Gross Receipts)</option>
+                                <option value="doctor" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Doctor (MBBS / Specialist 3x Gross Receipts)</option>
                                 <option value="custom" data-min="1" data-max="20" data-def="5">Custom Multiplier (1% - 20%)</option>
                             </select>
                         </div>
@@ -325,11 +325,11 @@
                         <!-- Manual Percentage Margin Field with bracket limits -->
                         <div class="input-group">
                             <div class="input-header">
-                                <label for="bizTurnoverPctInput" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Manual Net Cash Margin % (Editable)</label>
+                                <label for="bizTurnoverPctInput" id="bizTurnoverPctLabel" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Manual Net Cash Margin % (Editable)</label>
                                 <span class="input-badge" id="bizTurnoverPctBadge">7.5%</span>
                             </div>
                             <div class="input-with-symbol">
-                                <span class="currency-prefix">%</span>
+                                <span class="currency-prefix" id="bizTurnoverPrefix">%</span>
                                 <input type="text" id="bizTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage" style="border-color: #fcd34d; font-weight: 700;">
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #78350f; font-weight: 700; margin-top: 3px;">
