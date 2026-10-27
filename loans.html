@@ -377,11 +377,11 @@
                                 </div>
                             </div>
 
-                            <!-- Salaried Net Salary FOIR Fit Option (Auto-calculated on Salary, with Manual 50% - 70% Option) -->
+                            <!-- Salaried Net Salary FOIR Fit Option (Manual FOIR 65% Editable: 50% - 70%) -->
                             <div class="form-row" id="salariedCompanyCatRow" style="display: grid; margin-bottom: 16px;">
                                 <div class="form-field" style="grid-column: 1 / -1; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                        <label for="loanSalariedCustomFoir" style="font-size: 0.85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0;">Net Salary FOIR Fit Option (50% - 70%)</label>
+                                        <label for="loanSalariedCustomFoir" style="font-size: 0.85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0;">Manual FOIR (%): (Editable 50% - 70%)</label>
                                         <span id="loanSalariedFoirBadge" style="font-size: 0.76rem; font-weight: 700; color: #ffffff; background: #1e3a8a; padding: 3px 10px; border-radius: 4px;">65% FOIR</span>
                                     </div>
                                     <div style="position: relative; display: flex; align-items: center;">
@@ -389,11 +389,11 @@
                                         <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="65" min="50" max="70" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
                                     </div>
                                     <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 4px;">
-                                        <span>50% (Auto: ₹30k-45k)</span>
-                                        <span>65% (Auto: ₹50k-1L)</span>
-                                        <span>70% (Auto: ₹1L+)</span>
+                                        <span>50% (Min)</span>
+                                        <span>Default: 65%</span>
+                                        <span>70% (Max)</span>
                                     </div>
-                                    <span class="field-hint" style="color: #1e3a8a; font-weight: 600; margin-top: 4px;">Auto-calculated based on salary slab: ₹30k–₹45k (50%), ₹50k–₹1L (65%), ₹1L+ (70%). You can also manually adjust between 50% - 70%.</span>
+                                    <span class="field-hint" style="color: #1e3a8a; font-weight: 600; margin-top: 4px;">Default is 65% FOIR. You can manually adjust between 50% and 70% to increase or decrease eligibility.</span>
                                 </div>
                             </div>
 
