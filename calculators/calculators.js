@@ -912,7 +912,7 @@ const CONFIG = {
         existingEmi = parseNumber((document.getElementById('bizEmiInput') || {}).value);
 
         // Applied FOIR: Already integrated in turnover program (85% or 100% for Doctor)
-        eligibleIncome = isTurnoverProg ? totalMonthlyBusinessIncome : (totalMonthlyBusinessIncome * appliedFoir);
+        eligibleIncome = (isTurnoverProg || isLrdProg || isLrdIndustry) ? totalMonthlyBusinessIncome : (totalMonthlyBusinessIncome * appliedFoir);
 
         const elTotInc = document.getElementById('bizTotalMonthlyIncome');
         if (elTotInc) elTotInc.textContent = '₹' + fmtINR(totalMonthlyBusinessIncome);
