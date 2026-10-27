@@ -450,6 +450,40 @@ const CONFIG = {
     bindSync(document.getElementById('salRentInput'), document.getElementById('salRentSlider'), 0, 500000, 1000, recalc);
     bindSync(document.getElementById('salEmiInput'), document.getElementById('salEmiSlider'), 0, 500000, 500, recalc);
 
+    const salCompCatGroup = document.getElementById('salCompCatGroup');
+    const salCompCategory = document.getElementById('salCompanyCategory');
+    const salCustomFoirIn = document.getElementById('salCustomFoirInput');
+    const salCompFoirBadge = document.getElementById('salCompFoirBadge');
+
+    if (salCompCategory) {
+      salCompCategory.addEventListener('change', () => {
+        const opt = salCompCategory.options[salCompCategory.selectedIndex];
+        const f = opt ? opt.dataset.foir : '70';
+        if (salCustomFoirIn) salCustomFoirIn.value = f;
+        if (salCompFoirBadge) salCompFoirBadge.textContent = f + '% FOIR';
+        recalc();
+      });
+    }
+
+    if (salCustomFoirIn) {
+      salCustomFoirIn.addEventListener('input', () => {
+        let v = parseFloat(salCustomFoirIn.value);
+        if (!isNaN(v) && salCompFoirBadge) {
+          if (v > 70) v = 70;
+          salCompFoirBadge.textContent = v + '% FOIR';
+        }
+        recalc();
+      });
+      salCustomFoirIn.addEventListener('blur', () => {
+        let v = parseFloat(salCustomFoirIn.value);
+        if (isNaN(v) || v < 45) v = 45;
+        if (v > 70) v = 70;
+        salCustomFoirIn.value = v;
+        if (salCompFoirBadge) salCompFoirBadge.textContent = v + '% FOIR';
+        recalc();
+      });
+    }
+
     // Bind Business inputs (2 Years ITR, Depreciation, Salary/Remuneration, Rent, Obligations)
     bindSync(document.getElementById('bizProfitInput'), document.getElementById('bizProfitSlider'), 100000, 20000000, 25000, recalc);
     bindSync(document.getElementById('bizProfit2Input'), document.getElementById('bizProfit2Slider'), 100000, 20000000, 25000, recalc);
@@ -613,6 +647,37 @@ const CONFIG = {
         const bonus = parseNumber((document.getElementById('salBonusInput') || {}).value);
         const rent = parseNumber((document.getElementById('salRentInput') || {}).value);
         existingEmi = parseNumber((document.getElementById('salEmiInput') || {}).value);
+
+        // Toggle company category selector when salary > 1 Lakh
+        if (salCompCatGroup) {
+          salCompCatGroup.style.display = (salary > 100000) ? 'block' : 'none';
+        }
+
+        // Tiered Salaried FOIR Benchmark:
+        // 30k - 45k: 45% - 50% (Default 50%)
+        // 50k - 1L: 60% - 65% (Default 65%)
+        // > 1L: 60% - 70% manual FOIR as per company category (Super A=70%, A=68%, B=65%, C=60%)
+        let salFoir = 0.50;
+        if (salary < 30000) {
+          salFoir = 0.45;
+        } else if (salary <= 45000) {
+          salFoir = 0.50;
+        } else if (salary < 50000) {
+          salFoir = 0.55;
+        } else if (salary <= 100000) {
+          salFoir = 0.65;
+        } else {
+          // Salary above 1 Lakh: Manual / Company Category (60% to 70%)
+          const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
+          if (customVal && !isNaN(customVal)) {
+            salFoir = Math.min(0.70, Math.max(0.45, customVal / 100));
+          } else {
+            const opt = salCompCategory ? salCompCategory.options[salCompCategory.selectedIndex] : null;
+            salFoir = opt ? (parseFloat(opt.dataset.foir) / 100) : 0.70;
+          }
+        }
+
+        appliedFoir = salFoir;
 
         // Salaried: FOIR applied to net monthly salary + 50% bonus/12 + 50% rent
         const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.5);

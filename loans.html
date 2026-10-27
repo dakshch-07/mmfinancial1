@@ -365,6 +365,31 @@
                                 </div>
                             </div>
 
+                            <!-- Salaried Company Category Selection for Salary Above 1 Lakh (60% - 70% FOIR) -->
+                            <div class="form-row" id="salariedCompanyCatRow" style="display: none; margin-bottom: 16px;">
+                                <div class="form-field">
+                                    <label for="loanCompanyCategory" style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a;">Company Category (For Salary &gt; ₹1 Lakh)</label>
+                                    <select id="loanCompanyCategory" name="loanCompanyCategory" class="form-select" style="border-color: #93c5fd;">
+                                        <option value="super_a" data-foir="70" selected>Super A: Top MNC / Fortune 500 / Central PSU (70% FOIR)</option>
+                                        <option value="cat_a" data-foir="68">Category A: Top Listed Indian Corporates (68% FOIR)</option>
+                                        <option value="cat_b" data-foir="65">Category B: Mid-Size Corporate / Reputed Pvt Ltd (65% FOIR)</option>
+                                        <option value="cat_c" data-foir="60">Category C / Others: Standard Pvt Ltd / LLP / Firms (60% FOIR)</option>
+                                    </select>
+                                    <span class="field-hint">FOIR is determined between 60% and 70% based on lending bank's employer categorization.</span>
+                                </div>
+                                <div class="form-field">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <label for="loanSalariedCustomFoir" style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a;">Applied Salaried FOIR (%)</label>
+                                        <span id="loanSalariedFoirBadge" style="font-size: 0.72rem; font-weight: 700; color: #1e3a8a; background: #dbeafe; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">70% FOIR</span>
+                                    </div>
+                                    <div style="position: relative; display: flex; align-items: center;">
+                                        <span style="position: absolute; right: 12px; font-weight: 700; color: #1e3a8a; pointer-events: none;">%</span>
+                                        <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="70" min="45" max="70" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
+                                    </div>
+                                    <span class="field-hint">Range: 60% to 70% as per employer category.</span>
+                                </div>
+                            </div>
+
                             <!-- Optional Additions Accordion (Bonus, Rental Income, ITR Add-backs) -->
                             <div class="additional-income-accordion" id="addIncomeAccordion">
                                 <button type="button" class="btn-toggle-add-income" id="toggleAddIncomeBtn" aria-expanded="false">

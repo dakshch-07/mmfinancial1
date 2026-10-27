@@ -1407,11 +1407,18 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'New to Credit': { label: 'New to Credit (No History)', roiAdjustment: 0.50, foirAdjustment: -0.05, eligible: true }
     },
     salariedFoirSlabs: [
-        { min: 0, max: 35000, foir: 0.45, label: '45% FOIR' },
-        { min: 35001, max: 75000, foir: 0.50, label: '50% FOIR' },
-        { min: 75001, max: 150000, foir: 0.60, label: '60% FOIR' },
-        { min: 150001, max: Infinity, foir: 0.65, label: '65% FOIR' }
+        { min: 0, max: 29999, foir: 0.45, minFoir: 0.45, maxFoir: 0.45, label: '45% FOIR (Salary up to ₹30k)' },
+        { min: 30000, max: 45000, foir: 0.50, minFoir: 0.45, maxFoir: 0.50, label: '45% - 50% FOIR (Salary ₹30k - ₹45k)' },
+        { min: 45001, max: 49999, foir: 0.55, minFoir: 0.50, maxFoir: 0.60, label: '55% FOIR (Salary ₹45k - ₹50k)' },
+        { min: 50000, max: 100000, foir: 0.65, minFoir: 0.60, maxFoir: 0.65, label: '60% - 65% FOIR (Salary ₹50k - ₹1L)' },
+        { min: 100001, max: Infinity, foir: 0.70, minFoir: 0.60, maxFoir: 0.70, label: '60% - 70% FOIR (Salary > ₹1L / Company Cat)' }
     ],
+    companyCategories: {
+        'super_a': { label: 'Super A (Top MNC / Fortune 500 / PSUs)', foir: 0.70 },
+        'cat_a': { label: 'Category A (Listed Corporate / Top Indian Firm)', foir: 0.68 },
+        'cat_b': { label: 'Category B (Mid Corporate / Reputed Pvt Ltd)', foir: 0.65 },
+        'cat_c': { label: 'Category C / Others (Standard Pvt Ltd / LLP)', foir: 0.60 }
+    },
     businessFoirSlabs: [
         { min: 0, max: 50000, foir: 0.50, label: '50% FOIR' },
         { min: 50001, max: 100000, foir: 0.60, label: '60% FOIR' },
@@ -1508,8 +1515,21 @@ function computeLocalEligibility(params) {
         const slab = LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.find(
             s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
         ) || LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs[LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.length - 1];
-        appliedFoir = slab.foir;
-        foirLabel = slab.label;
+
+        // Check if custom / manual company category FOIR is passed
+        const customFoir = parseFloat(params.customFoir || params.salariedFoir);
+        const compCat = String(params.companyCategory || params.employerCategory || '').toLowerCase();
+
+        if (!isNaN(customFoir) && customFoir >= 0.40 && customFoir <= 0.75) {
+            appliedFoir = customFoir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Custom Benchmarked)`;
+        } else if (grossMonthlyIncome > 100000 && compCat && LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat]) {
+            appliedFoir = LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].foir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (${LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].label})`;
+        } else {
+            appliedFoir = slab.foir;
+            foirLabel = slab.label;
+        }
     } else {
         const isTurnoverProg = (params.businessProgram === 'turnover');
         const netProfit = Math.max(0, parseFloat(params.loanIncome) || 0);
@@ -1717,6 +1737,9 @@ function initLoanForm() {
             }
         }
 
+        // Toggle Company Category Row for Salaried earning > ₹1 Lakh
+        updateSalariedCompanyCategoryView();
+
         // Update Turnover / Gross Receipts labels dynamically
         if (isTurnover) {
             const multOpt = loanTurnoverMultiplier ? loanTurnoverMultiplier.options[loanTurnoverMultiplier.selectedIndex] : null;
@@ -1750,6 +1773,56 @@ function initLoanForm() {
             }
         }
         updateLoansTurnoverAvg();
+    }
+
+    const salariedCompanyCatRow = document.getElementById('salariedCompanyCatRow');
+    const loanCompanyCategory = document.getElementById('loanCompanyCategory');
+    const loanSalariedCustomFoir = document.getElementById('loanSalariedCustomFoir');
+    const loanSalariedFoirBadge = document.getElementById('loanSalariedFoirBadge');
+
+    function updateSalariedCompanyCategoryView() {
+        const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
+        const empVal = (empType ? empType.value : '').toLowerCase();
+        const isSalaried = empVal.includes('salaried');
+        const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
+
+        if (isSalaried && !isTurnover && numIncome > 100000) {
+            if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'grid';
+        } else {
+            if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'none';
+        }
+    }
+
+    if (loanCompanyCategory) {
+        loanCompanyCategory.addEventListener('change', () => {
+            const opt = loanCompanyCategory.options[loanCompanyCategory.selectedIndex];
+            const foirVal = opt ? opt.dataset.foir : '70';
+            if (loanSalariedCustomFoir) loanSalariedCustomFoir.value = foirVal;
+            if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${foirVal}% FOIR`;
+        });
+    }
+
+    if (loanSalariedCustomFoir) {
+        loanSalariedCustomFoir.addEventListener('input', () => {
+            let v = parseFloat(loanSalariedCustomFoir.value);
+            if (!isNaN(v) && loanSalariedFoirBadge) {
+                if (v > 70) v = 70;
+                loanSalariedFoirBadge.textContent = `${v}% FOIR`;
+            }
+        });
+        loanSalariedCustomFoir.addEventListener('blur', () => {
+            let v = parseFloat(loanSalariedCustomFoir.value);
+            if (isNaN(v) || v < 45) v = 45;
+            if (v > 70) v = 70;
+            loanSalariedCustomFoir.value = v;
+            if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${v}% FOIR`;
+        });
+    }
+
+    if (income) {
+        income.addEventListener('input', () => {
+            updateSalariedCompanyCategoryView();
+        });
     }
 
     const loanTurnoverPctInput = document.getElementById('loanTurnoverPctInput');
@@ -2124,6 +2197,8 @@ function initLoanForm() {
             rentalIncome: parseFloat(String(loanRentIncome ? loanRentIncome.value : '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
             directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
+            companyCategory: loanCompanyCategory ? loanCompanyCategory.value : 'super_a',
+            customFoir: (isSalaried && effectiveIncome > 100000 && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
             formStartTime: userStartTime
         };
 

@@ -34,13 +34,22 @@ const LOAN_ELIGIBILITY_CONFIG = {
     },
 
     // 2. SALARIED FOIR SLABS (Fixed Obligation to Income Ratio)
-    // Slabs evaluated by Monthly Net Take-Home Salary (₹)
+    // Slabs: 30k-45k -> 45%-50% | 50k-1L -> 60%-65% | 1L above -> 60%-70% manual FOIR as per company category
     salariedFoirSlabs: [
-        { min: 0, max: 35000, foir: 0.45, label: '45% FOIR (Salary up to ₹35,000)' },
-        { min: 35001, max: 75000, foir: 0.50, label: '50% FOIR (Salary ₹35,001 - ₹75,000)' },
-        { min: 75001, max: 150000, foir: 0.60, label: '60% FOIR (Salary ₹75,001 - ₹1,50,000)' },
-        { min: 150001, max: Infinity, foir: 0.65, label: '65% FOIR (Salary > ₹1,50,000)' }
+        { min: 0, max: 29999, foir: 0.45, minFoir: 0.45, maxFoir: 0.45, label: '45% FOIR (Salary up to ₹30,000)' },
+        { min: 30000, max: 45000, foir: 0.50, minFoir: 0.45, maxFoir: 0.50, label: '45% - 50% FOIR (Salary ₹30,000 - ₹45,000)' },
+        { min: 45001, max: 49999, foir: 0.55, minFoir: 0.50, maxFoir: 0.60, label: '55% FOIR (Salary ₹45,001 - ₹49,999)' },
+        { min: 50000, max: 100000, foir: 0.65, minFoir: 0.60, maxFoir: 0.65, label: '60% - 65% FOIR (Salary ₹50,000 - ₹1,00,000)' },
+        { min: 100001, max: Infinity, foir: 0.70, minFoir: 0.60, maxFoir: 0.70, label: '60% - 70% FOIR (Salary > ₹1,00,000 / Company Category Super A / A / B / C)' }
     ],
+
+    // Company Categories for Salaried Above 1 Lakh FOIR determination (60% to 70%)
+    companyCategories: {
+        'super_a': { label: 'Super A (Top MNC / Fortune 500 / PSUs)', foir: 0.70 },
+        'cat_a': { label: 'Category A (Listed Corporate / Top Indian Firm)', foir: 0.68 },
+        'cat_b': { label: 'Category B (Mid Corporate / Reputed Pvt Ltd)', foir: 0.65 },
+        'cat_c': { label: 'Category C / Others (Standard Pvt Ltd / LLP)', foir: 0.60 }
+    },
 
     // 3. BUSINESS FOIR SLABS
     // Slabs evaluated by derived Monthly Income from ITR (₹)
@@ -183,8 +192,20 @@ function computeLoanEligibility(params) {
             s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
         ) || LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs[LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.length - 1];
 
-        appliedFoir = slab.foir;
-        foirLabel = slab.label;
+        // Check if custom / manual company category FOIR is passed
+        const customFoir = parseFloat(params.customFoir || params.salariedFoir);
+        const compCat = String(params.companyCategory || params.employerCategory || '').toLowerCase();
+
+        if (!isNaN(customFoir) && customFoir >= 0.40 && customFoir <= 0.75) {
+            appliedFoir = customFoir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Custom Benchmarked)`;
+        } else if (grossMonthlyIncome > 100000 && compCat && LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat]) {
+            appliedFoir = LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].foir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (${LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].label})`;
+        } else {
+            appliedFoir = slab.foir;
+            foirLabel = slab.label;
+        }
     } else {
         // Business / Self-Employed
         const netProfit = Math.max(0, parseFloat(params.loanIncome) || 0);
