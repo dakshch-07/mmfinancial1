@@ -294,12 +294,18 @@
                                 <!-- Row 2: Current & Previous Financial Year Turnover / Gross Receipts -->
                                 <div class="form-row" style="margin-bottom: 12px;">
                                     <div class="form-field">
-                                        <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel">Current Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                            <label for="loanTurnoverAmount" id="loanTurnoverAmountLabel" style="margin-bottom: 0;">Current Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                            <span class="input-badge" id="loanTurnoverAmountBadge">₹0</span>
+                                        </div>
                                         <input type="text" id="loanTurnoverAmount" name="loanTurnoverAmount" placeholder="e.g. ₹1,80,00,000" class="form-input" inputmode="numeric">
                                         <span class="field-hint">Latest / Current Financial Year GST / 26AS</span>
                                     </div>
                                     <div class="form-field">
-                                        <label for="loanTurnoverAmountYear2" id="loanTurnoverAmountYear2Label">Previous Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                            <label for="loanTurnoverAmountYear2" id="loanTurnoverAmountYear2Label" style="margin-bottom: 0;">Previous Financial Year Gross Turnover / Receipts (₹) <span class="req">*</span></label>
+                                            <span class="input-badge" id="loanTurnoverAmountYear2Badge">₹0</span>
+                                        </div>
                                         <input type="text" id="loanTurnoverAmountYear2" name="loanTurnoverAmountYear2" placeholder="e.g. ₹2,20,00,000" class="form-input" inputmode="numeric">
                                         <span class="field-hint">Previous Financial Year GST / 26AS</span>
                                     </div>
@@ -345,7 +351,10 @@
                             <!-- Required Loan Amount & Monthly Salary / Annual Profit -->
                             <div class="form-row">
                                 <div class="form-field">
-                                    <label for="loanAmount">Required Loan Amount <span class="req">*</span></label>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                        <label for="loanAmount" style="margin-bottom: 0;">Required Loan Amount <span class="req">*</span></label>
+                                        <span class="input-badge" id="loanAmountBadge">₹0</span>
+                                    </div>
                                     <input type="text" id="loanAmount" name="loanAmount" placeholder="e.g. ₹50,00,000" required class="form-input" inputmode="numeric">
                                     <span class="field-error" id="loanAmountError">Please enter loan amount needed</span>
                                     <div class="form-chips-group">
@@ -358,7 +367,10 @@
                                     </div>
                                 </div>
                                 <div class="form-field" id="loanIncomeField">
-                                    <label for="loanIncome" id="loanIncomeLabel">Monthly Net Salary <span class="req">*</span></label>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                        <label for="loanIncome" id="loanIncomeLabel" style="margin-bottom: 0;">Monthly Net Salary <span class="req">*</span></label>
+                                        <span class="input-badge" id="loanIncomeBadge">₹0</span>
+                                    </div>
                                     <input type="text" id="loanIncome" name="loanIncome" placeholder="e.g. ₹85,000 / month" required class="form-input" inputmode="numeric">
                                     <span class="field-error" id="loanIncomeError">Please enter your monthly salary</span>
                                     <span class="field-hint" id="loanIncomeHint">Net monthly salary credited to bank account</span>
@@ -400,12 +412,18 @@
                                     <!-- Salaried Additional Income -->
                                     <div class="form-row add-income-salaried-fields" id="salariedAddFields">
                                         <div class="form-field">
-                                            <label for="loanBonus">Annual Performance Bonus (₹)</label>
-                                            <input type="text" id="loanBonus" name="loanBonus" placeholder="e.g. ₹1,50,000 / year" class="form-input" inputmode="numeric">
+                                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                                <label for="loanBonus" style="margin-bottom: 0;">Annual Performance Bonus (₹)</label>
+                                                <span class="input-badge" id="loanBonusBadge">₹0</span>
+                                            </div>
+                                            <input type="text" id="loanBonus" name="loanBonus" placeholder="e.g. ₹1,50,00,000 / year" class="form-input" inputmode="numeric">
                                             <span class="field-hint">50% considered towards monthly EMI capacity</span>
                                         </div>
                                         <div class="form-field">
-                                            <label for="loanRentIncome">Monthly Rental Income Received (₹)</label>
+                                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                                <label for="loanRentIncome" style="margin-bottom: 0;">Monthly Rental Income Received (₹)</label>
+                                                <span class="input-badge" id="loanRentIncomeBadge">₹0</span>
+                                            </div>
                                             <input type="text" id="loanRentIncome" name="loanRentIncome" placeholder="e.g. ₹20,000 / month" class="form-input" inputmode="numeric">
                                             <span class="field-hint">50% considered with registered rent agreement</span>
                                         </div>
@@ -413,12 +431,18 @@
                                     <!-- Business Additional ITR Add-backs -->
                                     <div class="form-row add-income-business-fields" id="businessAddFields" style="display: none;">
                                         <div class="form-field">
-                                            <label for="loanDepreciation">Annual Depreciation as per ITR (₹)</label>
+                                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                                <label for="loanDepreciation" style="margin-bottom: 0;">Annual Depreciation as per ITR (₹)</label>
+                                                <span class="input-badge" id="loanDepreciationBadge">₹0</span>
+                                            </div>
                                             <input type="text" id="loanDepreciation" name="loanDepreciation" placeholder="e.g. ₹2,00,000" class="form-input" inputmode="numeric">
                                             <span class="field-hint">Non-cash expense added back 100% to profit</span>
                                         </div>
                                         <div class="form-field">
-                                            <label for="loanDirectorSalary">Partner / Director Remuneration (₹)</label>
+                                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                                <label for="loanDirectorSalary" style="margin-bottom: 0;">Partner / Director Remuneration (₹)</label>
+                                                <span class="input-badge" id="loanDirectorSalaryBadge">₹0</span>
+                                            </div>
                                             <input type="text" id="loanDirectorSalary" name="loanDirectorSalary" placeholder="e.g. ₹3,50,000" class="form-input" inputmode="numeric">
                                             <span class="field-hint">Added back 100% to business cash profit</span>
                                         </div>
@@ -429,7 +453,10 @@
                             <!-- Existing EMIs & Preferred Loan Tenure -->
                             <div class="form-row">
                                 <div class="form-field">
-                                    <label for="loanExistingEmi">Existing Monthly EMIs / Obligations</label>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                        <label for="loanExistingEmi" style="margin-bottom: 0;">Existing Monthly EMIs / Obligations</label>
+                                        <span class="input-badge" id="loanExistingEmiBadge">₹0</span>
+                                    </div>
                                     <input type="text" id="loanExistingEmi" name="loanExistingEmi" placeholder="e.g. ₹12,000 / month (or 0)" class="form-input" inputmode="numeric">
                                     <span class="field-hint">Total ongoing personal, car, or home loan EMIs</span>
                                 </div>

@@ -7173,3 +7173,15 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.5;
     margin: 0;
 }
+
+/* Red Lakhs & Crores Input Badge */
+.input-badge {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--color-brick);
+    background-color: #fee2e2;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+

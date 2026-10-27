@@ -69,6 +69,23 @@ const CONFIG = {
     return isFinite(num) && num >= 0 ? num : 0;
   }
 
+  function badgeWordINR(val) {
+    if (!isFinite(val) || val <= 0) return '₹0';
+    if (val >= 1e7) {
+      const cr = val / 1e7;
+      return '₹' + cr.toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+    }
+    if (val >= 1e5) {
+      const lk = val / 1e5;
+      return '₹' + lk.toFixed(2).replace(/\.?0+$/, '') + ' Lakh';
+    }
+    if (val >= 1e3) {
+      const th = val / 1e3;
+      return '₹' + th.toFixed(1).replace(/\.?0+$/, '') + ' K';
+    }
+    return '₹' + fmtINR(val);
+  }
+
   function wordFormINR(val) {
     if (!isFinite(val) || val <= 0) return '0 Lakh';
     if (val >= 1e7) {
@@ -164,9 +181,9 @@ const CONFIG = {
     inputEl.addEventListener('blur', () => {
       const curMin = parseFloat(sliderEl.min);
       const curMax = parseFloat(sliderEl.max);
-      let val = isFloat ? (parseFloat(inputEl.value) || curMin) : parseNumber(inputEl.value);
-      val = Math.max(curMin, Math.min(curMax, val));
-      inputEl.value = isFloat ? val.toFixed(2) : fmtINR(val);
+      let val = isFloat ? (parseFloat(inputEl.value) || 0) : parseNumber(inputEl.value);
+      if (val > 0) val = Math.max(curMin, Math.min(curMax, val));
+      inputEl.value = val === 0 ? '' : (isFloat ? val.toFixed(2) : fmtINR(val));
       sliderEl.value = val;
       updateSliderFill(sliderEl);
       if (onChange) onChange();
@@ -688,9 +705,9 @@ const CONFIG = {
         let totalMonthlyBusinessIncome = 0;
 
         if (isTurnoverProg) {
-          const turnover1 = parseNumber((document.getElementById('bizTurnoverInput') || {}).value) || 20000000;
-          const turnover2 = parseNumber((document.getElementById('bizTurnoverYear2Input') || {}).value) || turnover1;
-          const avgTurnover = Math.round((turnover1 + turnover2) / 2);
+          const turnover1 = parseNumber((document.getElementById('bizTurnoverInput') || {}).value);
+          const turnover2 = parseNumber((document.getElementById('bizTurnoverYear2Input') || {}).value);
+          const avgTurnover = (turnover1 > 0 && turnover2 > 0) ? Math.round((turnover1 + turnover2) / 2) : (turnover1 || turnover2 || 0);
           const opt = bizIndustrySel ? bizIndustrySel.options[bizIndustrySel.selectedIndex] : null;
           const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs');
           const turnoverPct = parseFloat((document.getElementById('bizTurnoverPctInput') || {}).value) || (isMultiplier ? 3.0 : 5.0);
@@ -713,9 +730,9 @@ const CONFIG = {
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
           totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.5);
 
-          const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
-          const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
-          const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
+          const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = badgeWordINR(turnover1);
+          const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = badgeWordINR(turnover2);
+          const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = badgeWordINR(avgTurnover);
           const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = isMultiplier ? turnoverPct + 'x' : turnoverPct.toFixed(1) + '%';
           const bMon = document.getElementById('bizMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(Math.round(totalMonthlyBusinessIncome)) + ' / mo';
           // formula text removed as per user instruction
@@ -773,17 +790,17 @@ const CONFIG = {
       }
 
       // Update Input Badges
-      const salSalB = document.getElementById('salSalaryBadge'); if (salSalB) salSalB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('salSalaryInput') || {}).value));
-      const salBonB = document.getElementById('salBonusBadge'); if (salBonB) salBonB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('salBonusInput') || {}).value));
-      const salRentB = document.getElementById('salRentBadge'); if (salRentB) salRentB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('salRentInput') || {}).value));
-      const salEmiB = document.getElementById('salEmiBadge'); if (salEmiB) salEmiB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('salEmiInput') || {}).value));
+      const salSalB = document.getElementById('salSalaryBadge'); if (salSalB) salSalB.textContent = badgeWordINR(parseNumber((document.getElementById('salSalaryInput') || {}).value));
+      const salBonB = document.getElementById('salBonusBadge'); if (salBonB) salBonB.textContent = badgeWordINR(parseNumber((document.getElementById('salBonusInput') || {}).value));
+      const salRentB = document.getElementById('salRentBadge'); if (salRentB) salRentB.textContent = badgeWordINR(parseNumber((document.getElementById('salRentInput') || {}).value));
+      const salEmiB = document.getElementById('salEmiBadge'); if (salEmiB) salEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('salEmiInput') || {}).value));
 
-      const bizProfB = document.getElementById('bizProfitBadge'); if (bizProfB) bizProfB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizProfitInput') || {}).value));
-      const bizProf2B = document.getElementById('bizProfit2Badge'); if (bizProf2B) bizProf2B.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizProfit2Input') || {}).value));
-      const bizDepB = document.getElementById('bizDepreciationBadge'); if (bizDepB) bizDepB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizDepreciationInput') || {}).value));
-      const bizSalB = document.getElementById('bizSalaryBadge'); if (bizSalB) bizSalB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizSalaryInput') || {}).value));
-      const bizRentB = document.getElementById('bizRentBadge'); if (bizRentB) bizRentB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizRentInput') || {}).value));
-      const bizEmiB = document.getElementById('bizEmiBadge'); if (bizEmiB) bizEmiB.textContent = '₹' + fmtINR(parseNumber((document.getElementById('bizEmiInput') || {}).value));
+      const bizProfB = document.getElementById('bizProfitBadge'); if (bizProfB) bizProfB.textContent = badgeWordINR(parseNumber((document.getElementById('bizProfitInput') || {}).value));
+      const bizProf2B = document.getElementById('bizProfit2Badge'); if (bizProf2B) bizProf2B.textContent = badgeWordINR(parseNumber((document.getElementById('bizProfit2Input') || {}).value));
+      const bizDepB = document.getElementById('bizDepreciationBadge'); if (bizDepB) bizDepB.textContent = badgeWordINR(parseNumber((document.getElementById('bizDepreciationInput') || {}).value));
+      const bizSalB = document.getElementById('bizSalaryBadge'); if (bizSalB) bizSalB.textContent = badgeWordINR(parseNumber((document.getElementById('bizSalaryInput') || {}).value));
+      const bizRentB = document.getElementById('bizRentBadge'); if (bizRentB) bizRentB.textContent = badgeWordINR(parseNumber((document.getElementById('bizRentInput') || {}).value));
+      const bizEmiB = document.getElementById('bizEmiBadge'); if (bizEmiB) bizEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('bizEmiInput') || {}).value));
 
       const rateB = document.getElementById('eligRateBadge'); if (rateB) rateB.textContent = rate.toFixed(2) + '%';
       const tenB = document.getElementById('eligTenureBadge'); if (tenB) tenB.textContent = tenure + ' Years';
@@ -940,7 +957,7 @@ const CONFIG = {
       const emiRes = calculateEmi(P, rate, tenureYears, tenureMonths);
 
       // Badges
-      const amtBadge = document.getElementById('emiAmountBadge'); if (amtBadge) amtBadge.textContent = '₹' + fmtINR(P);
+      const amtBadge = document.getElementById('emiAmountBadge'); if (amtBadge) amtBadge.textContent = badgeWordINR(P);
       const rateBadge = document.getElementById('emiRateBadge'); if (rateBadge) rateBadge.textContent = rate.toFixed(2) + '%';
       const tenBadge = document.getElementById('emiTenureBadge'); 
       if (tenBadge) {
@@ -1058,7 +1075,7 @@ const CONFIG = {
       const breakEvenMonths = monthlySavings > 0 ? Math.ceil(fees / monthlySavings) : 0;
 
       const badgeP = document.getElementById('compPrincipalBadge');
-      if (badgeP) badgeP.textContent = '₹' + fmtINR(P);
+      if (badgeP) badgeP.textContent = badgeWordINR(P);
 
       animateNumber(document.getElementById('compNetSavings'), netSavings);
       const wordsEl = document.getElementById('compNetSavingsWords');
@@ -1410,8 +1427,8 @@ const CONFIG = {
       let netInc = 0;
       let appliedFoirLap = 0.60;
       if (isTurnover) {
-        const turnover1 = parseNumber((turnoverIn || {}).value) || 30000000;
-        const turnover2 = parseNumber((lapTurnoverYear2In || {}).value) || turnover1;
+        const turnover1 = parseNumber((turnoverIn || {}).value);
+        const turnover2 = parseNumber((lapTurnoverYear2In || {}).value);
         const avgTurnover = Math.round((turnover1 + turnover2) / 2);
         const opt = lapIndustrySel ? lapIndustrySel.options[lapIndustrySel.selectedIndex] : null;
         const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs');
@@ -1429,15 +1446,15 @@ const CONFIG = {
           appliedFoirLap = 1.0;
         }
 
-        const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = '₹' + fmtINR(turnover1);
-        const bT2 = document.getElementById('lapTurnoverYear2Badge'); if (bT2) bT2.textContent = '₹' + fmtINR(turnover2);
-        const bAvg = document.getElementById('lapAvgTurnoverBadge'); if (bAvg) bAvg.textContent = '₹' + fmtINR(avgTurnover);
+        const bT = document.getElementById('lapTurnoverBadge'); if (bT) bT.textContent = badgeWordINR(turnover1);
+        const bT2 = document.getElementById('lapTurnoverYear2Badge'); if (bT2) bT2.textContent = badgeWordINR(turnover2);
+        const bAvg = document.getElementById('lapAvgTurnoverBadge'); if (bAvg) bAvg.textContent = badgeWordINR(avgTurnover);
         const bTP = document.getElementById('lapTurnoverPctBadge'); if (bTP) bTP.textContent = isMultiplier ? pct + 'x' : pct.toFixed(1) + '%';
         const bMon = document.getElementById('lapMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(netInc) + ' / mo';
         // formula text removed as per user instruction
       } else {
         netInc = parseNumber(incIn.value);
-        const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = '₹' + fmtINR(netInc);
+        const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = badgeWordINR(netInc);
       }
 
       const existingEmi = parseNumber(emiIn.value);
@@ -1459,7 +1476,7 @@ const CONFIG = {
       const finalSanction = Math.min(collateralLimit, incomeLimit);
       const res = calculateEmi(finalSanction, rate, tenure);
 
-      const bP = document.getElementById('lapPropValueBadge'); if (bP) bP.textContent = '₹' + fmtINR(propVal);
+      const bP = document.getElementById('lapPropValueBadge'); if (bP) bP.textContent = badgeWordINR(propVal);
 
       animateNumber(document.getElementById('lapMaxLoan'), finalSanction);
       const wordsEl = document.getElementById('lapMaxLoanWords');
@@ -1515,7 +1532,7 @@ const CONFIG = {
 
       const res = calculateFdMaturity(P, rate, years, 0, comp);
 
-      const bA = document.getElementById('fdAmountBadge'); if (bA) bA.textContent = '₹' + fmtINR(P);
+      const bA = document.getElementById('fdAmountBadge'); if (bA) bA.textContent = badgeWordINR(P);
       const bR = document.getElementById('fdRateBadge'); if (bR) bR.textContent = rate.toFixed(2) + '%';
       const bT = document.getElementById('fdTenureBadge'); if (bT) bT.textContent = years + ' Years';
 
@@ -1562,7 +1579,7 @@ const CONFIG = {
 
       const res = calculateRdMaturity(dep, rate, months);
 
-      const bD = document.getElementById('rdDepositBadge'); if (bD) bD.textContent = '₹' + fmtINR(dep);
+      const bD = document.getElementById('rdDepositBadge'); if (bD) bD.textContent = badgeWordINR(dep);
       const bR = document.getElementById('rdRateBadge'); if (bR) bR.textContent = rate.toFixed(2) + '%';
       const bM = document.getElementById('rdMonthsBadge'); if (bM) bM.textContent = months + ' Months (' + (months / 12).toFixed(1) + ' Yrs)';
 
@@ -1615,7 +1632,7 @@ const CONFIG = {
       const totalDeposited = reqMonthly * months;
       const interestEarned = Math.max(0, target - totalDeposited);
 
-      const bT = document.getElementById('dreamTargetBadge'); if (bT) bT.textContent = '₹' + fmtINR(target);
+      const bT = document.getElementById('dreamTargetBadge'); if (bT) bT.textContent = badgeWordINR(target);
       const bY = document.getElementById('dreamYearsBadge'); if (bY) bY.textContent = years + ' Years';
       const bR = document.getElementById('dreamRateBadge'); if (bR) bR.textContent = rate.toFixed(1) + '%';
 
@@ -1694,12 +1711,12 @@ const CONFIG = {
         const stepUp = parseFloat(stepSl.value) || 0;
         res = calculateSipMaturity(monthly, rate, years, stepUp);
 
-        const bS = document.getElementById('sipAmountBadge'); if (bS) bS.textContent = '₹' + fmtINR(monthly);
+        const bS = document.getElementById('sipAmountBadge'); if (bS) bS.textContent = badgeWordINR(monthly);
       } else {
         const lump = parseNumber(lumpAmtIn.value);
         res = calculateLumpsumMaturity(lump, rate, years);
 
-        const bL = document.getElementById('lumpAmountBadge'); if (bL) bL.textContent = '₹' + fmtINR(lump);
+        const bL = document.getElementById('lumpAmountBadge'); if (bL) bL.textContent = badgeWordINR(lump);
       }
 
       const bR = document.getElementById('sipRateBadge'); if (bR) bR.textContent = rate.toFixed(1) + '%';
@@ -1753,7 +1770,7 @@ const CONFIG = {
 
       const totalInterest = balance - totalInvested;
 
-      const bD = document.getElementById('ppfDepositBadge'); if (bD) bD.textContent = '₹' + fmtINR(yearly);
+      const bD = document.getElementById('ppfDepositBadge'); if (bD) bD.textContent = badgeWordINR(yearly);
 
       animateNumber(document.getElementById('ppfMaturityVal'), balance);
       const wordsEl = document.getElementById('ppfMaturityWords');
@@ -1810,7 +1827,7 @@ const CONFIG = {
 
       const totalInterest = balance - totalInvested;
 
-      const bD = document.getElementById('ssyDepositBadge'); if (bD) bD.textContent = '₹' + fmtINR(yearly);
+      const bD = document.getElementById('ssyDepositBadge'); if (bD) bD.textContent = badgeWordINR(yearly);
       const bA = document.getElementById('ssyAgeBadge'); if (bA) bA.textContent = childAge + ' Years';
 
       animateNumber(document.getElementById('ssyMaturityVal'), balance);

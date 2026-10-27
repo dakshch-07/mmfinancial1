@@ -1928,16 +1928,47 @@ function initLoanForm() {
         empType.addEventListener('change', updateIncomeLabel);
     }
 
-    // Live Indian Currency Formatting on Input
-    function formatCurrencyInput(input) {
+    // Format amount into clean Lakhs & Crores badge (e.g. ₹50 Lakh, ₹2.50 Cr)
+    function badgeWordINR(val) {
+        if (!isFinite(val) || val <= 0) return '₹0';
+        if (val >= 1e7) {
+            const cr = val / 1e7;
+            return '₹' + cr.toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+        }
+        if (val >= 1e5) {
+            const lk = val / 1e5;
+            return '₹' + lk.toFixed(2).replace(/\.?0+$/, '') + ' Lakh';
+        }
+        if (val >= 1e3) {
+            const th = val / 1e3;
+            return '₹' + th.toFixed(1).replace(/\.?0+$/, '') + ' K';
+        }
+        return '₹' + Math.round(val).toLocaleString('en-IN');
+    }
+
+    // Live Indian Currency Formatting on Input & Dynamic Red Badge Display
+    function formatCurrencyInput(input, badgeId) {
         if (!input) return;
+        const updateBadge = () => {
+            if (badgeId) {
+                const badge = document.getElementById(badgeId);
+                if (badge) {
+                    const clean = input.value.replace(/[^0-9]/g, '');
+                    const val = clean ? parseInt(clean, 10) : 0;
+                    badge.textContent = badgeWordINR(val);
+                }
+            }
+        };
         input.addEventListener('input', () => {
             const cleanVal = input.value.replace(/[^0-9]/g, '');
             if (cleanVal) {
                 const formatted = '₹' + formatIndianNumber(parseInt(cleanVal, 10));
                 input.value = formatted;
             }
+            updateBadge();
         });
+        input.addEventListener('change', updateBadge);
+        updateBadge();
     }
 
     const loanTurnoverAmountYear2 = document.getElementById('loanTurnoverAmountYear2');
@@ -2020,8 +2051,22 @@ function initLoanForm() {
     if (loanRoiInput) loanRoiInput.addEventListener('input', updateLoansTurnoverAvg);
     if (tenure) tenure.addEventListener('change', updateLoansTurnoverAvg);
 
-    [amount, income, emi, loanBonus, loanRentIncome, loanDepreciation, loanDirectorSalary, loanTurnoverAmount, loanTurnoverAmountYear2].forEach(el => {
-        formatCurrencyInput(el);
+    const fieldBadgeMap = [
+        { el: amount, badgeId: 'loanAmountBadge' },
+        { el: income, badgeId: 'loanIncomeBadge' },
+        { el: emi, badgeId: 'loanExistingEmiBadge' },
+        { el: loanBonus, badgeId: 'loanBonusBadge' },
+        { el: loanRentIncome, badgeId: 'loanRentIncomeBadge' },
+        { el: loanDepreciation, badgeId: 'loanDepreciationBadge' },
+        { el: loanDirectorSalary, badgeId: 'loanDirectorSalaryBadge' },
+        { el: loanTurnoverAmount, badgeId: 'loanTurnoverAmountBadge' },
+        { el: loanTurnoverAmountYear2, badgeId: 'loanTurnoverAmountYear2Badge' }
+    ];
+
+    fieldBadgeMap.forEach(item => {
+        if (item.el) {
+            formatCurrencyInput(item.el, item.badgeId);
+        }
     });
 
     // Tenure chip and optgroup sync
