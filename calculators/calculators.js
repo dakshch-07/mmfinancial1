@@ -474,7 +474,7 @@ const CONFIG = {
     let salFoirUserManual = false;
 
     if (salCustomFoirIn) {
-      if (salCustomFoirSl) bindSync(salCustomFoirIn, salCustomFoirSl, 50, 70, 1, recalc, true);
+      if (salCustomFoirSl) bindSync(salCustomFoirIn, salCustomFoirSl, 60, 70, 1, recalc, true);
 
       salCustomFoirIn.addEventListener('input', () => {
         salFoirUserManual = true;
@@ -487,7 +487,7 @@ const CONFIG = {
       });
       salCustomFoirIn.addEventListener('blur', () => {
         let v = parseFloat(salCustomFoirIn.value);
-        if (isNaN(v) || v < 50) v = 50;
+        if (isNaN(v) || v < 60) v = 60;
         if (v > 70) v = 70;
         salCustomFoirIn.value = v;
         if (salCustomFoirSl) {
@@ -2501,7 +2501,6 @@ const CONFIG = {
         });
       }
 
-      re
     // Manual PF & Insurance optional inputs
     const eligPfIn = widget.querySelector('#customPfInput');
     const eligInsIn = widget.querySelector('#customInsuranceInput');
