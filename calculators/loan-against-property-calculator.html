@@ -225,26 +225,76 @@
     <div class="calc-widget" id="calcWidget" data-widget-type="lap" data-calc-id="loan-against-property-calculator">
         <div class="calc-widget-grid">
             <div class="calc-card inputs-card">
+                <!-- Property Market Value (MV) Input with Badge -->
                 <div class="input-group">
                     <div class="input-header">
                         <label for="lapPropValueInput">Property Market Value (₹)</label>
-                        <span class="input-badge" id="lapPropValueBadge">₹1,00,00,000</span>
+                        <span class="input-badge" id="lapPropValueBadge">₹0</span>
                     </div>
                     <div class="input-with-symbol">
                         <span class="currency-prefix">₹</span>
-                        <input type="text" id="lapPropValueInput" class="calc-input" value="1,00,00,000" inputmode="numeric">
+                        <input type="text" id="lapPropValueInput" class="calc-input" value="" placeholder="e.g. 1,00,00,000" inputmode="numeric">
                     </div>
                     <input type="range" id="lapPropValueSlider" class="calc-slider" min="2000000" max="100000000" step="100000" value="10000000">
                     <div class="slider-limits"><span>₹20 Lakh</span><span>₹10 Crore</span></div>
                 </div>
 
+                <!-- Property Category Selector -->
                 <div class="input-group">
-                    <label for="lapPropTypeSelect" style="font-size:0.78rem; font-weight:700;">Property Category & Maximum LTV</label>
-                    <select id="lapPropTypeSelect" class="calc-input">
-                        <option value="0.65" selected>Residential Property (Up to 65% LTV)</option>
-                        <option value="0.55">Commercial Property (Up to 55% LTV)</option>
-                        <option value="0.50">Industrial / Plot (Up to 50% LTV)</option>
+                    <label for="lapPropTypeSelect" style="font-size:0.78rem; font-weight:700;">Property Category &amp; Market Value LTV</label>
+                    <select id="lapPropTypeSelect" class="calc-input" style="font-weight: 700; color: var(--color-navy);">
+                        <option value="housing" data-min="50" data-max="98" data-def="75" selected>Housing / Residential Property (50% - 98% LTV)</option>
+                        <option value="commercial" data-min="60" data-max="90" data-def="75">Commercial Property (60% - 90% LTV)</option>
+                        <option value="industrial" data-min="45" data-max="80" data-def="75">Industrial Property (45% - 80% LTV)</option>
                     </select>
+                </div>
+
+                <!-- Property Market Value LTV % (Manual Entry & Slider) -->
+                <div class="input-group" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                    <div class="input-header">
+                        <label for="lapMvLtvInput" style="font-size: 0.78rem; font-weight: 700; color: #1e3a8a;">Market Value (MV) LTV Loan % (Editable)</label>
+                        <span class="input-badge" id="lapMvLtvBadge" style="background: rgba(30, 58, 138, 0.1); color: #1e3a8a;">75%</span>
+                    </div>
+                    <div class="input-with-symbol">
+                        <span class="currency-prefix">%</span>
+                        <input type="text" id="lapMvLtvInput" class="calc-input" value="75" inputmode="decimal" style="font-weight: 700; color: var(--color-navy);">
+                    </div>
+                    <input type="range" id="lapMvLtvSlider" class="calc-slider" min="50" max="98" step="1" value="75">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 3px;">
+                        <span id="lapMvLtvMinLimit">50% (Min)</span>
+                        <span id="lapMvLtvMaxLimit">98% (Max)</span>
+                    </div>
+                    <span id="lapMvLtvNote" style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Housing Property: Bank loan limit ranges from 50% to 98% of certified Market Value.</span>
+                </div>
+
+                <!-- Agreement Value (Registered Value) & Agreement LTV (45% - 95%) -->
+                <div class="input-group" style="background: #fdf4ff; border: 1.5px solid #f0abfc; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                    <div class="input-header">
+                        <label for="lapAgreementValueInput" style="font-size: 0.78rem; font-weight: 700; color: #86198f;">Agreement Value (Registered / Documented Value ₹)</label>
+                        <span class="input-badge" id="lapAgreementValueBadge" style="background: rgba(134, 25, 143, 0.1); color: #86198f;">₹0</span>
+                    </div>
+                    <div class="input-with-symbol">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" id="lapAgreementValueInput" class="calc-input" value="" placeholder="e.g. 80,00,000 (Optional / As per deed)" inputmode="numeric" style="border-color: #f0abfc;">
+                    </div>
+                    <span style="font-size: 0.72rem; color: #86198f; margin-top: 4px; display: block;">As per registered sale agreement / registered document deed.</span>
+
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #f5d0fe;">
+                        <div class="input-header">
+                            <label for="lapAgreementLtvInput" style="font-size: 0.78rem; font-weight: 700; color: #86198f;">Agreement Value Loan % (45% - 95%)</label>
+                            <span class="input-badge" id="lapAgreementLtvBadge" style="background: rgba(134, 25, 143, 0.1); color: #86198f;">90%</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">%</span>
+                            <input type="text" id="lapAgreementLtvInput" class="calc-input" value="90" inputmode="decimal" style="border-color: #f0abfc; font-weight: 700; color: #86198f;">
+                        </div>
+                        <input type="range" id="lapAgreementLtvSlider" class="calc-slider" min="45" max="95" step="1" value="90">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #86198f; font-weight: 700; margin-top: 3px;">
+                            <span>45% (Min)</span>
+                            <span>95% (Max)</span>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #86198f; margin-top: 4px; display: block;">Loan sanctioned up to 45% - 95% of Agreement Value.</span>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -379,7 +429,15 @@
 
                 <div class="result-metrics-grid">
                     <div class="metric-box">
-                        <span class="metric-title">Collateral Limit (LTV)</span>
+                        <span class="metric-title" id="lapMvLimitTitle">MV Limit (75%)</span>
+                        <span class="metric-val">₹<span id="lapMvLimitVal">0</span></span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title" id="lapAgreeLimitTitle">Agreement Limit (90%)</span>
+                        <span class="metric-val">₹<span id="lapAgreementLimitVal">0</span></span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title">Effective Collateral Limit</span>
                         <span class="metric-val">₹<span id="lapCollateralLimit">0</span></span>
                     </div>
                     <div class="metric-box">

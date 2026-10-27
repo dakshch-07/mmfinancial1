@@ -1315,6 +1315,16 @@ const CONFIG = {
     const propIn = document.getElementById('lapPropValueInput');
     const propSl = document.getElementById('lapPropValueSlider');
     const propSel = document.getElementById('lapPropTypeSelect');
+    const mvLtvIn = document.getElementById('lapMvLtvInput');
+    const mvLtvSl = document.getElementById('lapMvLtvSlider');
+    const mvLtvMinLim = document.getElementById('lapMvLtvMinLimit');
+    const mvLtvMaxLim = document.getElementById('lapMvLtvMaxLimit');
+    const mvLtvNote = document.getElementById('lapMvLtvNote');
+
+    const agreeValIn = document.getElementById('lapAgreementValueInput');
+    const agreeLtvIn = document.getElementById('lapAgreementLtvInput');
+    const agreeLtvSl = document.getElementById('lapAgreementLtvSlider');
+
     const progSel = document.getElementById('lapProgramSelect');
     const incGroup = document.getElementById('lapIncomeGroup');
     const turnoverGroup = document.getElementById('lapTurnoverGroup');
@@ -1330,6 +1340,90 @@ const CONFIG = {
 
     bindSync(propIn, propSl, 2000000, 100000000, 100000, recalc);
     bindSync(incIn, incSl, 30000, 2000000, 5000, recalc);
+
+    // MV LTV Slider & Input Synchronization (Housing: 50-98%, Commercial: 60-90%, Industrial: 45-80%)
+    if (mvLtvIn && mvLtvSl) {
+      bindSync(mvLtvIn, mvLtvSl, 45, 98, 1, recalc, true);
+      mvLtvIn.addEventListener('input', () => {
+        const opt = propSel ? propSel.options[propSel.selectedIndex] : null;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 98) : 98;
+        let v = parseFloat(mvLtvIn.value);
+        if (!isNaN(v) && v > maxVal) {
+          mvLtvIn.value = maxVal;
+        }
+        recalc();
+      });
+      mvLtvIn.addEventListener('blur', () => {
+        const opt = propSel ? propSel.options[propSel.selectedIndex] : null;
+        const minVal = opt ? (parseFloat(opt.dataset.min) || 45) : 45;
+        const maxVal = opt ? (parseFloat(opt.dataset.max) || 98) : 98;
+        let v = parseFloat(mvLtvIn.value);
+        if (isNaN(v) || v < minVal) v = minVal;
+        if (v > maxVal) v = maxVal;
+        mvLtvIn.value = v;
+        if (mvLtvSl) {
+          mvLtvSl.value = v;
+          updateSliderFill(mvLtvSl);
+        }
+        recalc();
+      });
+    }
+
+    // Agreement Value & Agreement LTV Synchronization (45% - 95%)
+    if (agreeValIn) {
+      agreeValIn.addEventListener('input', recalc);
+    }
+    if (agreeLtvIn && agreeLtvSl) {
+      bindSync(agreeLtvIn, agreeLtvSl, 45, 95, 1, recalc, true);
+      agreeLtvIn.addEventListener('input', () => {
+        let v = parseFloat(agreeLtvIn.value);
+        if (!isNaN(v) && v > 95) agreeLtvIn.value = 95;
+        recalc();
+      });
+      agreeLtvIn.addEventListener('blur', () => {
+        let v = parseFloat(agreeLtvIn.value);
+        if (isNaN(v) || v < 45) v = 45;
+        if (v > 95) v = 95;
+        agreeLtvIn.value = v;
+        if (agreeLtvSl) {
+          agreeLtvSl.value = v;
+          updateSliderFill(agreeLtvSl);
+        }
+        recalc();
+      });
+    }
+
+    // Property Category Change Listener (Industrial 45-80%, Commercial 60-90%, Housing 50-98%)
+    if (propSel) {
+      propSel.addEventListener('change', () => {
+        const opt = propSel.options[propSel.selectedIndex];
+        const minVal = parseFloat(opt.dataset.min) || 50;
+        const maxVal = parseFloat(opt.dataset.max) || 98;
+        const defVal = parseFloat(opt.dataset.def) || 75;
+
+        if (mvLtvSl) {
+          mvLtvSl.min = minVal;
+          mvLtvSl.max = maxVal;
+          mvLtvSl.value = defVal;
+          updateSliderFill(mvLtvSl);
+        }
+        if (mvLtvIn) {
+          mvLtvIn.value = defVal;
+        }
+        if (mvLtvMinLim) mvLtvMinLim.textContent = minVal + '% (Min)';
+        if (mvLtvMaxLim) mvLtvMaxLim.textContent = maxVal + '% (Max)';
+
+        if (mvLtvNote) {
+          const notes = {
+            housing: 'Housing / Residential: Bank loan limit ranges from 50% to 98% of certified Market Value.',
+            commercial: 'Commercial Property: Bank loan limit ranges from 60% to 90% of certified Market Value.',
+            industrial: 'Industrial Property: Bank loan limit ranges from 45% to 80% of certified Market Value.'
+          };
+          mvLtvNote.textContent = notes[propSel.value] || 'Property valuation norm applied.';
+        }
+        recalc();
+      });
+    }
 
     const lapTurnoverYear2In = document.getElementById('lapTurnoverYear2Input');
     const lapTurnoverYear2Sl = document.getElementById('lapTurnoverYear2Slider');
@@ -1420,14 +1514,16 @@ const CONFIG = {
       });
     }
 
-    if (propSel) propSel.addEventListener('change', recalc);
     if (emiIn) emiIn.addEventListener('input', recalc);
     if (rateIn) rateIn.addEventListener('input', recalc);
     if (tenIn) tenIn.addEventListener('input', recalc);
 
     function recalc() {
-      const propVal = parseNumber(propIn.value);
-      const ltvPct = parseFloat(propSel.value) || 0.65;
+      const propVal = parseNumber((propIn || {}).value);
+      const mvLtvVal = parseFloat((mvLtvIn || {}).value) || 75;
+      const agreeVal = parseNumber((agreeValIn || {}).value);
+      const agreeLtvVal = parseFloat((agreeLtvIn || {}).value) || 90;
+
       const isTurnover = (progSel && progSel.value === 'turnover');
 
       let netInc = 0;
@@ -1435,7 +1531,7 @@ const CONFIG = {
       if (isTurnover) {
         const turnover1 = parseNumber((turnoverIn || {}).value);
         const turnover2 = parseNumber((lapTurnoverYear2In || {}).value);
-        const avgTurnover = Math.round((turnover1 + turnover2) / 2);
+        const avgTurnover = (turnover1 > 0 && turnover2 > 0) ? Math.round((turnover1 + turnover2) / 2) : (turnover1 || turnover2 || 0);
         const opt = lapIndustrySel ? lapIndustrySel.options[lapIndustrySel.selectedIndex] : null;
         const isMultiplier = opt && (opt.dataset.isMultiplier === 'true' || opt.value === 'doctor' || opt.value === 'ca' || opt.value === 'cs');
         const pct = parseFloat((turnoverPctIn || {}).value) || (isMultiplier ? 3.0 : 5.0);
@@ -1459,15 +1555,24 @@ const CONFIG = {
         const bMon = document.getElementById('lapMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(netInc) + ' / mo';
         // formula text removed as per user instruction
       } else {
-        netInc = parseNumber(incIn.value);
+        netInc = parseNumber((incIn || {}).value);
         const bI = document.getElementById('lapIncomeBadge'); if (bI) bI.textContent = badgeWordINR(netInc);
       }
 
-      const existingEmi = parseNumber(emiIn.value);
-      const rate = parseFloat(rateIn.value) || 9.5;
-      const tenure = parseInt(tenIn.value, 10) || 15;
+      const existingEmi = parseNumber((emiIn || {}).value);
+      const rate = parseFloat((rateIn || {}).value) || 9.5;
+      const tenure = parseInt((tenIn || {}).value, 10) || 15;
 
-      const collateralLimit = propVal * ltvPct;
+      // 1. Collateral Market Value Limit (MV x 75% or selected LTV)
+      const mvCollateralLimit = Math.round(propVal * (mvLtvVal / 100));
+
+      // 2. Agreement Value Limit (Agreement Value x 45% - 95%)
+      const agreeCollateralLimit = agreeVal > 0 ? Math.round(agreeVal * (agreeLtvVal / 100)) : 0;
+
+      // Effective Collateral Limit: If agreement value is entered, banks limit to min(MV limit, Agreement limit)
+      const effectiveCollateralLimit = agreeVal > 0 ? Math.min(mvCollateralLimit, agreeCollateralLimit) : mvCollateralLimit;
+
+      // 3. Income Limit (FOIR capacity)
       const foir = isTurnover ? appliedFoirLap : 0.60;
       const maxEmiCapacity = Math.max(0, (netInc * foir) - existingEmi);
 
@@ -1479,16 +1584,30 @@ const CONFIG = {
         incomeLimit = Math.floor((maxEmiCapacity / emiPerLakh) * 100000 / 1000) * 1000;
       }
 
-      const finalSanction = Math.min(collateralLimit, incomeLimit);
+      // Final Binding Sanction is lower of Collateral limit and Income repayment capacity
+      const finalSanction = (propVal > 0 && netInc > 0) ? Math.min(effectiveCollateralLimit, incomeLimit) : (propVal > 0 ? effectiveCollateralLimit : incomeLimit);
       const res = calculateEmi(finalSanction, rate, tenure);
 
+      // Update Badges
       const bP = document.getElementById('lapPropValueBadge'); if (bP) bP.textContent = badgeWordINR(propVal);
+      const bMvLtv = document.getElementById('lapMvLtvBadge'); if (bMvLtv) bMvLtv.textContent = mvLtvVal + '%';
+      const bAgree = document.getElementById('lapAgreementValueBadge'); if (bAgree) bAgree.textContent = badgeWordINR(agreeVal);
+      const bAgreeLtv = document.getElementById('lapAgreementLtvBadge'); if (bAgreeLtv) bAgreeLtv.textContent = agreeLtvVal + '%';
 
       animateNumber(document.getElementById('lapMaxLoan'), finalSanction);
       const wordsEl = document.getElementById('lapMaxLoanWords');
       if (wordsEl) wordsEl.textContent = wordFormINR(finalSanction);
 
-      animateNumber(document.getElementById('lapCollateralLimit'), collateralLimit);
+      // Update Breakdown Metric Boxes
+      const mvLimitTitle = document.getElementById('lapMvLimitTitle');
+      if (mvLimitTitle) mvLimitTitle.textContent = 'MV Limit (' + mvLtvVal + '%)';
+      animateNumber(document.getElementById('lapMvLimitVal'), mvCollateralLimit);
+
+      const agreeLimitTitle = document.getElementById('lapAgreeLimitTitle');
+      if (agreeLimitTitle) agreeLimitTitle.textContent = 'Agreement Limit (' + agreeLtvVal + '%)';
+      animateNumber(document.getElementById('lapAgreementLimitVal'), agreeCollateralLimit);
+
+      animateNumber(document.getElementById('lapCollateralLimit'), effectiveCollateralLimit);
       animateNumber(document.getElementById('lapIncomeLimit'), incomeLimit);
       animateNumber(document.getElementById('lapMonthlyEmi'), res.emi);
       animateNumber(document.getElementById('lapTotalPayable'), res.totalPayable);
@@ -1509,7 +1628,7 @@ const CONFIG = {
       updateWhatsAppCta(
         document.getElementById('lapWhatsAppBtn'),
         'Loan Against Property (LAP) Calculator',
-        `Property Value: ₹${fmtINR(propVal)}, Income: ₹${fmtINR(netInc)}/mo, Collateral Limit: ₹${fmtINR(collateralLimit)}, Eligible LAP: ₹${fmtINR(finalSanction)}, Monthly EMI: ₹${fmtINR(res.emi)}`
+        'Market Value: ₹' + fmtINR(propVal) + ' (' + mvLtvVal + '%), Agreement Value: ₹' + fmtINR(agreeVal) + ' (' + agreeLtvVal + '%), Income: ₹' + fmtINR(netInc) + '/mo, Effective Collateral Limit: ₹' + fmtINR(effectiveCollateralLimit) + ', Eligible LAP: ₹' + fmtINR(finalSanction) + ', Monthly EMI: ₹' + fmtINR(res.emi)
       );
     }
 
