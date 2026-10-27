@@ -45,8 +45,8 @@ const CONFIG = {
       noticeOfIntimationGovt: 15000,   // Loan amount up to 30 Lacs: 15,000 Govt
       noticeVendorMin: 1800,           // Vendor fee 1,800 - 3,000 as per bank
       noticeVendorMax: 3000,
-      notaryFrankingMin: 2000,         // Notary & franking 2,000 - 5,000 as per bank
-      notaryFrankingMax: 5000
+      notaryFrankingMin: 3500,         // Notary & Franking with Document Charges 3,500 - 10,000 as per bank
+      notaryFrankingMax: 10000
     }
   }
 };
@@ -627,18 +627,26 @@ const CONFIG = {
       cibilSel.addEventListener('change', () => {
         const val = cibilSel.value;
         if (cibilBadge) {
-          cibilBadge.textContent = val === '750+' ? '750+ (Prime)' : val;
+          if (val === '750-900' || val === '750+' || val === '800+') {
+            cibilBadge.textContent = (val === '750-900' || val === '750+') ? '750 - 900 (Manual ROI)' : '800 - 900 (Super Prime)';
+          } else {
+            cibilBadge.textContent = val;
+          }
         }
-        // Benchmark rate adjustments based on CIBIL
+        // Benchmark rate adjustments based on CIBIL (750-900 allows manual rate entry)
         let base = defaultRate;
-        if (val === '700-749') base += 0.25;
+        if (val === '750-900' || val === '750+') {
+          // Keep current manual interest rate untouched or default prime
+          const rateIn = document.getElementById('eligRateInput');
+          if (rateIn && parseFloat(rateIn.value) > 0) base = parseFloat(rateIn.value);
+        } else if (val === '700-749') base += 0.25;
         else if (val === '650-699') base += 0.75;
         else if (val === 'Below 650') base += 1.50;
         else if (val === 'New to Credit') base += 0.50;
 
         const rateIn = document.getElementById('eligRateInput');
         const rateSl = document.getElementById('eligRateSlider');
-        if (rateIn) rateIn.value = base.toFixed(2);
+        if (rateIn && (val !== '750-900' && val !== '750+')) rateIn.value = base.toFixed(2);
         if (rateSl) rateSl.value = base.toFixed(2);
         recalc();
       });
@@ -670,28 +678,21 @@ const CONFIG = {
           salCompCatGroup.style.display = (salary > 100000) ? 'block' : 'none';
         }
 
-        // Tiered Salaried FOIR Benchmark:
-        // 30k - 45k: 45% - 50% (Default 50%)
-        // 50k - 1L: 60% - 65% (Default 65%)
-        // > 1L: 60% - 70% manual FOIR as per company category (Super A=70%, A=68%, B=65%, C=60%)
-        let salFoir = 0.50;
-        if (salary < 30000) {
-          salFoir = 0.45;
-        } else if (salary <= 45000) {
+        // Net Salary FOIR (Manual Fit Option & Company Category Benchmark)
+        const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
+        let salFoir = 0.60;
+        if (customVal && !isNaN(customVal) && customVal >= 30 && customVal <= 85) {
+          // User defined manual net salary FOIR fit option
+          salFoir = customVal / 100;
+        } else if (salary > 100000) {
+          const opt = salCompCategory ? salCompCategory.options[salCompCategory.selectedIndex] : null;
+          salFoir = opt ? (parseFloat(opt.dataset.foir) / 100) : 0.70;
+        } else if (salary <= 45000 && salary >= 30000) {
           salFoir = 0.50;
-        } else if (salary < 50000) {
-          salFoir = 0.55;
-        } else if (salary <= 100000) {
+        } else if (salary < 30000 && salary > 0) {
+          salFoir = 0.45;
+        } else if (salary <= 100000 && salary > 45000) {
           salFoir = 0.65;
-        } else {
-          // Salary above 1 Lakh: Manual / Company Category (60% to 70%)
-          const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
-          if (customVal && !isNaN(customVal)) {
-            salFoir = Math.min(0.70, Math.max(0.45, customVal / 100));
-          } else {
-            const opt = salCompCategory ? salCompCategory.options[salCompCategory.selectedIndex] : null;
-            salFoir = opt ? (parseFloat(opt.dataset.foir) / 100) : 0.70;
-          }
         }
 
         appliedFoir = salFoir;
@@ -816,12 +817,17 @@ const CONFIG = {
       if (foirEl) foirEl.textContent = Math.round(appliedFoir * 100);
       animateNumber(document.getElementById('eligTotalPayable'), totalPayable);
 
-      // Render Indicative Statutory Charges on Eligibility Card
+      // Render Indicative Statutory Charges on Eligibility Card (Calculated on Required Loan Amount if entered, else Max Eligibility)
       const chargesContainer = widget.querySelector('.statutory-charges-box');
+      const reqAmtIn = document.getElementById('eligReqLoanInput');
+      const manualReqLoan = reqAmtIn ? parseNumber(reqAmtIn.value) : 0;
+      const chargeBaseAmount = manualReqLoan > 0 ? manualReqLoan : maxLoan;
       if (chargesContainer) {
-        const stampDuty = Math.round(maxLoan * CONFIG.defaults.charges.stampDutyRate);
+        const stampDuty = Math.round(chargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
         const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+        const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
+        if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('(₹' + fmtINR(chargeBaseAmount) + ')') : '';
       }
 
       updateWhatsAppCta(
@@ -1487,12 +1493,17 @@ const CONFIG = {
       animateNumber(document.getElementById('lapMonthlyEmi'), res.emi);
       animateNumber(document.getElementById('lapTotalPayable'), res.totalPayable);
 
-      // Render Indicative Statutory Charges on LAP Result Card
+      // Render Indicative Statutory Charges on LAP Result Card (Calculated on Required Loan Amount if entered, else Final Sanction)
       const chargesContainer = widget.querySelector('.statutory-charges-box');
+      const lapReqAmtIn = document.getElementById('lapReqLoanInput');
+      const manualLapReqLoan = lapReqAmtIn ? parseNumber(lapReqAmtIn.value) : 0;
+      const lapChargeBaseAmount = manualLapReqLoan > 0 ? manualLapReqLoan : finalSanction;
       if (chargesContainer) {
-        const stampDuty = Math.round(finalSanction * CONFIG.defaults.charges.stampDutyRate);
+        const stampDuty = Math.round(lapChargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
         const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+        const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
+        if (baseDisplayEl) baseDisplayEl.textContent = lapChargeBaseAmount > 0 ? ('(₹' + fmtINR(lapChargeBaseAmount) + ')') : '';
       }
 
       updateWhatsAppCta(

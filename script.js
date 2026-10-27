@@ -1450,8 +1450,8 @@ const LOAN_ELIGIBILITY_CONFIG = {
         noticeOfIntimationGovt: 15000,   // Notice of Intimation Govt up to 30 Lacs
         noticeVendorMin: 1800,           // Vendor fees 1,800 - 3,000 as per bank
         noticeVendorMax: 3000,
-        notaryFrankingMin: 2000,         // Notary & Franking 2,000 - 5,000 as per bank
-        notaryFrankingMax: 5000
+        notaryFrankingMin: 3500,         // Notary & Franking with Document Charges 3,500 - 10,000 as per bank
+        notaryFrankingMax: 10000
     }
 };
 
@@ -1575,7 +1575,7 @@ function computeLocalEligibility(params) {
     const stampDuty = Math.round(reqAmount * LOAN_ELIGIBILITY_CONFIG.statutoryCharges.stampDutyRate);
     const noticeGovt = (reqAmount <= 3000000 && reqAmount > 0) ? LOAN_ELIGIBILITY_CONFIG.statutoryCharges.noticeOfIntimationGovt : 15000;
     const noticeVendor = '₹1,800 - ₹3,000';
-    const notaryFranking = '₹2,000 - ₹5,000';
+    const notaryFranking = '₹3,500 - ₹10,000 (With Document Charges)';
 
     const tips = [];
     if (!isEligible) {
@@ -1786,7 +1786,8 @@ function initLoanForm() {
         const isSalaried = empVal.includes('salaried');
         const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
 
-        if (isSalaried && !isTurnover && numIncome > 100000) {
+        // Show company category & manual Net Salary FOIR fit option for Salaried users
+        if (isSalaried && !isTurnover) {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'grid';
         } else {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'none';
@@ -2124,10 +2125,20 @@ function initLoanForm() {
     function updateBenchmarkRoi() {
         if (!loanRoiInput) return;
         const selType = loanType ? loanType.value : 'Home Loan';
-        const selCibil = cibilSelect ? cibilSelect.value : '800+';
+        const selCibil = cibilSelect ? cibilSelect.value : '750-900';
+        
+        // For CIBIL 750-900, allow user to set their custom manual ROI or use benchmark
+        if (selCibil === '750-900' || selCibil === '800+' || selCibil === '775-799' || selCibil === '750-774') {
+            const currentVal = parseFloat(loanRoiInput.value);
+            if (currentVal > 0) {
+                if (loanRoiBadge) loanRoiBadge.textContent = `${currentVal.toFixed(2)}%`;
+                return;
+            }
+        }
+        
         const catRoi = LOAN_ELIGIBILITY_CONFIG.roiByCategory[selType] || LOAN_ELIGIBILITY_CONFIG.defaultRoi;
         const cibilObj = LOAN_ELIGIBILITY_CONFIG.cibilSlabs[selCibil] || LOAN_ELIGIBILITY_CONFIG.cibilSlabs['750+'];
-        const suggestedRoi = (catRoi + (cibilObj.roiAdjustment || 0)).toFixed(2);
+        const suggestedRoi = (catRoi + (cibilObj ? (cibilObj.roiAdjustment || 0) : 0)).toFixed(2);
         
         loanRoiInput.value = suggestedRoi;
         if (loanRoiBadge) loanRoiBadge.textContent = `${suggestedRoi}%`;
@@ -2243,7 +2254,7 @@ function initLoanForm() {
             depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
             directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
             companyCategory: loanCompanyCategory ? loanCompanyCategory.value : 'super_a',
-            customFoir: (isSalaried && effectiveIncome > 100000 && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
+            customFoir: (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
             formStartTime: userStartTime
         };
 
@@ -2373,8 +2384,8 @@ function initLoanForm() {
                                 <span>₹15,000 (up to 30L) + Vendor (₹1,800 - ₹3,000)</span>
                             </div>
                             <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Notary &amp; Franking Charges:</strong>
-                                <span>₹2,000 - ₹5,000 (As per bank)</span>
+                                <strong style="color: #166534; display: block;">Notary &amp; Franking with Document Charges:</strong>
+                                <span>₹3,500 - ₹10,000 (As per bank &amp; loan documentation)</span>
                             </div>
                             <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
                                 <strong style="color: #166534; display: block;">Processing Fee &amp; Insurance:</strong>

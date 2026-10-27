@@ -107,8 +107,8 @@ const LOAN_ELIGIBILITY_CONFIG = {
         noticeOfIntimationGovt: 15000, // Fixed Govt. fee for loan amounts up to ₹30 Lakhs
         noticeOfIntimationVendorMin: 1800, // ₹1,800 vendor/filing fee min
         noticeOfIntimationVendorMax: 3000, // ₹3,000 vendor/filing fee max
-        notaryFrankingMin: 2000, // ₹2,000 min
-        notaryFrankingMax: 5000, // ₹5,000 max
+        notaryFrankingMin: 3500, // ₹3,500 min with document charges
+        notaryFrankingMax: 10000, // ₹5,000 max
         processingFeeNote: 'As per bank / NBFC policy (Typically 0.25% - 0.50% + GST)',
         insuranceNote: 'As per bank / NBFC & age profile (Property & Loan Term Shield)'
     },
@@ -254,7 +254,7 @@ function computeLoanEligibility(params) {
     const stampDuty = Math.round(reqAmount * LOAN_ELIGIBILITY_CONFIG.statutoryCharges.stampDutyRate);
     const noticeGovt = (reqAmount <= 3000000 && reqAmount > 0) ? LOAN_ELIGIBILITY_CONFIG.statutoryCharges.noticeOfIntimationGovt : 15000;
     const noticeVendor = '₹1,800 - ₹3,000';
-    const notaryFranking = '₹2,000 - ₹5,000';
+    const notaryFranking = '₹3,500 - ₹10,000 (With Document Charges)';
 
     // Generate Tailored Tips if Ineligible
     const tips = [];

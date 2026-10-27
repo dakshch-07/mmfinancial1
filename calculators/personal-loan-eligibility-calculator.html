@@ -254,9 +254,9 @@
                     </div>
 
                     <!-- Company Category Selection for Salary Above 1 Lakh (60% - 70% FOIR) -->
-                    <div class="input-group" id="salCompCatGroup" style="display: none; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px;">
+                    <div class="input-group" id="salCompCatGroup" style="display: block; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px;">
                         <div class="input-header">
-                            <label for="salCompanyCategory" style="color: #1e3a8a; font-weight: 700;">Company Category (For Salary &gt; ₹1 Lakh)</label>
+                            <label for="salCompanyCategory" style="color: #1e3a8a; font-weight: 700;">Company Category &amp; Benchmark</label>
                             <span class="input-badge" id="salCompFoirBadge" style="background: #1e3a8a; color: #ffffff;">70% FOIR</span>
                         </div>
                         <select id="salCompanyCategory" class="calc-input" style="border-color: #93c5fd; font-weight: 700; color: #1e3a8a; margin-top: 4px;">
@@ -266,7 +266,7 @@
                             <option value="cat_c" data-foir="60">Category C / Others: Standard Pvt Ltd / LLP (60% FOIR)</option>
                         </select>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                            <label for="salCustomFoirInput" style="font-size: 0.76rem; font-weight: 700; color: #1e3a8a;">Manual FOIR (%):</label>
+                            <label for="salCustomFoirInput" style="font-size: 0.76rem; font-weight: 700; color: #1e3a8a;">Net Salary Fit Option Manual FOIR (%):</label>
                             <div style="width: 100px; position: relative;">
                                 <input type="number" id="salCustomFoirInput" class="calc-input" value="70" min="60" max="70" step="1" style="font-size: 0.85rem; padding: 4px 8px; text-align: center; border-color: #93c5fd; font-weight: 700;">
                             </div>
@@ -479,10 +479,11 @@
                 <div class="input-group">
                     <div class="input-header">
                         <label for="eligCibilSelect">CIBIL / Credit Score</label>
-                        <span class="input-badge" id="eligCibilBadge">750+ (Prime)</span>
+                        <span class="input-badge" id="eligCibilBadge">750 - 900 (Manual ROI)</span>
                     </div>
                     <select id="eligCibilSelect" class="calc-select" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--color-navy); background: #ffffff;">
-                        <option value="750+" selected>750 &amp; Above (Excellent / Lowest ROI)</option>
+                        <option value="750-900" selected>750 - 900 (Manual Rate of Interest)</option>
+                        <option value="800+">800 - 900 (Super Prime / Lowest ROI)</option>
                         <option value="700-749">700 - 749 (Good / Prime Banking Approval)</option>
                         <option value="650-699">650 - 699 (Fair / Standard NBFC Slabs)</option>
                         <option value="Below 650">Below 650 (Advisory / Co-Applicant Needed)</option>
@@ -526,6 +527,19 @@
                         <span class="rupee-sign">₹</span><span id="eligMaxLoan">0</span>
                     </div>
                     <span class="result-word-amount" id="eligMaxLoanWords">Calculating...</span>
+                </div>
+
+                <!-- Manual Loan Amount Required for Custom Charges Calculation -->
+                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <label for="eligReqLoanInput" style="font-size: 0.82rem; font-weight: 700; color: var(--color-navy); margin-bottom: 0;">Loan Amount Required (Manual)</label>
+                        <span class="input-badge" id="eligReqLoanBadge">₹0</span>
+                    </div>
+                    <div class="input-with-symbol">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" id="eligReqLoanInput" class="calc-input" placeholder="Enter needed loan (e.g. 5,00,000)" inputmode="numeric" style="font-weight: 700;">
+                    </div>
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Documentation &amp; bank processing calculate as per this manual loan amount.</span>
                 </div>
 
                 <div class="result-metrics-grid">
