@@ -302,6 +302,7 @@
                     <select id="lapProgramSelect" class="calc-input" style="font-weight: 700; color: var(--color-navy);">
                         <option value="income" selected>Net Monthly Income / ITR Profit Method</option>
                         <option value="turnover">Gross Turnover Program (Banking Norm: Mfg, Services, Traders, CA, CS, Doctors)</option>
+                        <option value="lrd">Lease Rental Discounting (Rental Program LRD 65%-85%)</option>
                     </select>
                 </div>
 
@@ -330,6 +331,7 @@
                                 <option value="ca" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Chartered Accountant (CA 3x Gross Receipts)</option>
                                 <option value="cs" data-min="1.5" data-max="1.5" data-def="1.5" data-is-multiplier="true">Company Secretary (CS 1.5x Gross Receipts)</option>
                                 <option value="doctor" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Doctor (MBBS / Specialist 3x Gross Receipts)</option>
+                                <option value="lrd" data-min="65" data-max="85" data-def="75" data-foir="0.75">Rental Program LRD (65% - 85% FOIR on Gross Rent)</option>
                                 <option value="custom" data-min="1" data-max="20" data-def="5">Custom Multiplier (1% - 20%)</option>
                         </select>
                     </div>
@@ -385,6 +387,53 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px; background: #ecfdf5; border: 1px solid #a7f3d0;">
                             <span style="color: #065f46; font-weight: 700;">Derived Net Monthly Income:</span>
                             <strong id="lapMonthlyIncomeBadge" style="color: #047857; font-size: 1.05rem; font-weight: 800;">₹0 / mo</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rental Program LRD Specific Controls for LAP -->
+                <div id="lapLrdGroup" style="display: none; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.82rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
+                            <span>🏢</span> Rental Program LRD (Lease Rental Discounting)
+                        </span>
+                        <span style="font-size: 0.7rem; background: #dcfce7; color: #15803d; font-weight: 700; padding: 2px 6px; border-radius: 4px;">65% - 85% FOIR</span>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-header">
+                            <label for="lapLrdRentInput" style="color: #166534; font-weight: 700;">Gross Monthly Rental Receipt (₹)</label>
+                            <span class="input-badge" id="lapLrdRentBadge">₹0</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">₹</span>
+                            <input type="text" id="lapLrdRentInput" class="calc-input" value="" placeholder="e.g. 5,00,00,000" inputmode="numeric" style="border-color: #86efac; font-weight: 700;">
+                        </div>
+                        <span style="font-size: 0.72rem; color: #166534; margin-top: 3px; display: block;">Monthly rental receivable under registered lease agreement.</span>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-header">
+                            <label for="lapLrdFoirInput" style="color: #166534; font-weight: 700;">Rental FOIR % (Bank Discounting Factor)</label>
+                            <span class="input-badge" id="lapLrdFoirBadge" style="background: #166534; color: #ffffff;">75%</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">%</span>
+                            <input type="number" id="lapLrdFoirInput" class="calc-input" value="75" min="65" max="85" step="1" style="border-color: #86efac; font-weight: 700; color: #166534;">
+                        </div>
+                        <input type="range" id="lapLrdFoirSlider" class="calc-slider" min="65" max="85" step="1" value="75" style="margin-top: 6px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #166534; font-weight: 700; margin-top: 2px;">
+                            <span>65% (Min)</span>
+                            <span>Default: 75%</span>
+                            <span>85% (Max)</span>
+                        </div>
+                    </div>
+
+                    <!-- Derived Net Monthly Rental Capacity -->
+                    <div style="background: #ffffff; border: 1px solid #86efac; border-radius: 6px; padding: 10px; margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                            <span style="color: #166534; font-weight: 600;">Derived Net Rental Cash Flow:</span>
+                            <strong id="lapLrdNetRentBadge" style="color: #15803d; font-size: 1.05rem; font-weight: 800;">₹0 / mo</strong>
                         </div>
                     </div>
                 </div>

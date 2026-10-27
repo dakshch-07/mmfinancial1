@@ -467,6 +467,130 @@ const CONFIG = {
     bindSync(document.getElementById('salRentInput'), document.getElementById('salRentSlider'), 0, 500000, 1000, recalc);
     bindSync(document.getElementById('salEmiInput'), document.getElementById('salEmiSlider'), 0, 500000, 500, recalc);
 
+    // 3 to 6 Months Salary Average Controller
+    const salAvgToggleBtn = document.getElementById('salAvgToggleBtn');
+    const salAvgContainer = document.getElementById('salAvgContainer');
+    const salAvgToggleIcon = document.getElementById('salAvgToggleIcon');
+    const btnAvg3Mo = document.getElementById('btnAvg3Mo');
+    const btnAvg6Mo = document.getElementById('btnAvg6Mo');
+    const salMo4to6Row = document.getElementById('salMo4to6Row');
+    const salAvgDisplayVal = document.getElementById('salAvgDisplayVal');
+    const btnApplyAvgSalary = document.getElementById('btnApplyAvgSalary');
+    let salAvgMonthsCount = 3;
+
+    if (salAvgToggleBtn && salAvgContainer) {
+      salAvgToggleBtn.addEventListener('click', () => {
+        const isOpen = salAvgContainer.style.display !== 'none';
+        salAvgContainer.style.display = isOpen ? 'none' : 'block';
+        if (salAvgToggleIcon) salAvgToggleIcon.textContent = isOpen ? '+ Open' : '− Close';
+      });
+    }
+
+    function computeSalaryAverage() {
+      const m1 = parseNumber((document.getElementById('salMo1') || {}).value);
+      const m2 = parseNumber((document.getElementById('salMo2') || {}).value);
+      const m3 = parseNumber((document.getElementById('salMo3') || {}).value);
+      let total = m1 + m2 + m3;
+      let count = salAvgMonthsCount;
+      if (salAvgMonthsCount === 6) {
+        const m4 = parseNumber((document.getElementById('salMo4') || {}).value);
+        const m5 = parseNumber((document.getElementById('salMo5') || {}).value);
+        const m6 = parseNumber((document.getElementById('salMo6') || {}).value);
+        total += m4 + m5 + m6;
+      }
+      const avg = count > 0 ? Math.round(total / count) : 0;
+      if (salAvgDisplayVal) salAvgDisplayVal.textContent = '₹' + fmtINR(avg);
+      return avg;
+    }
+
+    if (btnAvg3Mo && btnAvg6Mo) {
+      btnAvg3Mo.addEventListener('click', () => {
+        salAvgMonthsCount = 3;
+        btnAvg3Mo.style.background = '#eff6ff';
+        btnAvg3Mo.style.color = '#1d4ed8';
+        btnAvg3Mo.style.borderColor = '#3b82f6';
+        btnAvg6Mo.style.background = '#ffffff';
+        btnAvg6Mo.style.color = '#64748b';
+        btnAvg6Mo.style.borderColor = '#cbd5e1';
+        if (salMo4to6Row) salMo4to6Row.style.display = 'none';
+        computeSalaryAverage();
+      });
+
+      btnAvg6Mo.addEventListener('click', () => {
+        salAvgMonthsCount = 6;
+        btnAvg6Mo.style.background = '#eff6ff';
+        btnAvg6Mo.style.color = '#1d4ed8';
+        btnAvg6Mo.style.borderColor = '#3b82f6';
+        btnAvg3Mo.style.background = '#ffffff';
+        btnAvg3Mo.style.color = '#64748b';
+        btnAvg3Mo.style.borderColor = '#cbd5e1';
+        if (salMo4to6Row) salMo4to6Row.style.display = 'grid';
+        computeSalaryAverage();
+      });
+    }
+
+    ['salMo1', 'salMo2', 'salMo3', 'salMo4', 'salMo5', 'salMo6'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', computeSalaryAverage);
+        el.addEventListener('blur', () => {
+          const v = parseNumber(el.value);
+          if (v > 0) el.value = '₹' + fmtINR(v);
+        });
+      }
+    });
+
+    if (btnApplyAvgSalary) {
+      btnApplyAvgSalary.addEventListener('click', () => {
+        const avg = computeSalaryAverage();
+        if (avg > 0) {
+          const salIn = document.getElementById('salSalaryInput');
+          const salSl = document.getElementById('salSalarySlider');
+          if (salIn) salIn.value = '₹' + fmtINR(avg);
+          if (salSl) {
+            salSl.value = avg;
+            updateSliderFill(salSl);
+          }
+          const salB = document.getElementById('salSalaryBadge');
+          if (salB) salB.textContent = badgeWordINR(avg);
+          recalc();
+        }
+      });
+    }
+
+    // Live red badge update & recalculation on Manual Loan Amount Required
+    const eligReqAmtIn = document.getElementById('eligReqLoanInput');
+    const eligReqBadge = document.getElementById('eligReqLoanBadge');
+    if (eligReqAmtIn) {
+      eligReqAmtIn.addEventListener('input', () => {
+        const val = parseNumber(eligReqAmtIn.value);
+        if (eligReqBadge) eligReqBadge.textContent = badgeWordINR(val);
+        recalc();
+      });
+      eligReqAmtIn.addEventListener('blur', () => {
+        const val = parseNumber(eligReqAmtIn.value);
+        if (val > 0) eligReqAmtIn.value = '₹' + fmtINR(val);
+        if (eligReqBadge) eligReqBadge.textContent = badgeWordINR(val);
+      });
+    }
+
+    // Rental Program LRD Controls
+    const lrdProgramFields = document.getElementById('lrdProgramFields');
+    const lrdRentIn = document.getElementById('lrdRentInput');
+    const lrdFoirIn = document.getElementById('lrdFoirInput');
+    const lrdFoirSl = document.getElementById('lrdFoirSlider');
+
+    if (lrdRentIn) {
+      lrdRentIn.addEventListener('input', recalc);
+      lrdRentIn.addEventListener('blur', () => {
+        const val = parseNumber(lrdRentIn.value);
+        if (val > 0) lrdRentIn.value = '₹' + fmtINR(val);
+      });
+    }
+    if (lrdFoirIn && lrdFoirSl) {
+      bindSync(lrdFoirIn, lrdFoirSl, 65, 85, 1, recalc, true);
+    }
+
     const salCompCatGroup = document.getElementById('salCompCatGroup');
     const salCustomFoirIn = document.getElementById('salCustomFoirInput');
     const salCustomFoirSl = document.getElementById('salCustomFoirSlider');
@@ -613,9 +737,12 @@ const CONFIG = {
 
     if (bizProgSel) {
       bizProgSel.addEventListener('change', () => {
-        const isTurnover = bizProgSel.value === 'turnover';
+        const val = bizProgSel.value;
+        const isTurnover = val === 'turnover';
+        const isLrd = val === 'lrd';
         if (turnoverFields) turnoverFields.style.display = isTurnover ? 'block' : 'none';
-        if (itrFields) itrFields.style.display = isTurnover ? 'none' : 'block';
+        if (lrdProgramFields) lrdProgramFields.style.display = isLrd ? 'block' : 'none';
+        if (itrFields) itrFields.style.display = (!isTurnover && !isLrd) ? 'block' : 'none';
         recalc();
       });
     }
@@ -683,14 +810,14 @@ const CONFIG = {
         // salary 1L+ -> 70%
         // salary < 30k -> 45%
         let autoFoirPct = 65;
-        if (salary >= 100000) {
+        if (salary > 150000) {
           autoFoirPct = 70;
         } else if (salary >= 50000) {
-          autoFoirPct = 65;
-        } else if (salary >= 30000) {
-          autoFoirPct = 50;
+          autoFoirPct = 65; // default
+        } else if (salary >= 40000) {
+          autoFoirPct = 60;
         } else if (salary > 0) {
-          autoFoirPct = 45;
+          autoFoirPct = 60;
         }
 
         // If user hasn't manually overridden, auto-select based on salary
@@ -721,7 +848,23 @@ const CONFIG = {
         const isTurnoverProg = (bizProgSel && bizProgSel.value === 'turnover');
         let totalMonthlyBusinessIncome = 0;
 
-        if (isTurnoverProg) {
+        const isLrdProg = (bizProgSel && bizProgSel.value === 'lrd');
+        const isLrdIndustry = (bizProgSel && bizProgSel.value === 'turnover' && bizIndustrySel && bizIndustrySel.value === 'lrd');
+
+        if (isLrdProg || isLrdIndustry) {
+          // Rental Program LRD (Lease Rental Discounting)
+          // RENT * 65-85% = VALUE AND LESS OBLIGATION / PER LAKHS EMI = LOAN AMOUNT
+          const rentVal = parseNumber((document.getElementById('lrdRentInput') || {}).value) || parseNumber((document.getElementById('bizRentInput') || {}).value) || parseNumber((document.getElementById('bizTurnoverInput') || {}).value);
+          const lrdFoir = parseFloat((document.getElementById('lrdFoirInput') || {}).value) || 75;
+          const discountedRent = Math.round(rentVal * (lrdFoir / 100));
+
+          totalMonthlyBusinessIncome = discountedRent;
+          appliedFoir = 1.0;
+
+          const lrdRentB = document.getElementById('lrdRentBadge'); if (lrdRentB) lrdRentB.textContent = badgeWordINR(rentVal);
+          const lrdFoirB = document.getElementById('lrdFoirBadge'); if (lrdFoirB) lrdFoirB.textContent = lrdFoir + '% FOIR';
+          const lrdNetB = document.getElementById('lrdNetRentBadge'); if (lrdNetB) lrdNetB.textContent = '₹' + fmtINR(discountedRent) + ' / mo';
+        } else if (isTurnoverProg) {
           const turnover1 = parseNumber((document.getElementById('bizTurnoverInput') || {}).value);
           const turnover2 = parseNumber((document.getElementById('bizTurnoverYear2Input') || {}).value);
           const avgTurnover = (turnover1 > 0 && turnover2 > 0) ? Math.round((turnover1 + turnover2) / 2) : (turnover1 || turnover2 || 0);
@@ -851,6 +994,37 @@ const CONFIG = {
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
         const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
         if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('(₹' + fmtINR(chargeBaseAmount) + ')') : '';
+
+        // Dynamic Bank Charges: PF (1%+GST for LRD, 0.25%+GST standard), Life Loan Insurance 2%, Property Insurance 7%
+        const isLrdActive = (bizProgSel && (bizProgSel.value === 'lrd' || (bizProgSel.value === 'turnover' && bizIndustrySel && bizIndustrySel.value === 'lrd')));
+        const defaultPfRate = isLrdActive ? (0.01 * 1.18) : (0.0025 * 1.18);
+
+        const eligPfIn = widget.querySelector('#customPfInput');
+        const eligInsIn = widget.querySelector('#customInsuranceInput');
+        const eligTotBox = widget.querySelector('#customChargesTotal');
+        const eligTotVal = widget.querySelector('#customChargesTotalVal');
+
+        let pfVal = parseNumber((eligPfIn && eligPfIn.value) || 0);
+        if (pfVal === 0 && chargeBaseAmount > 0) {
+          pfVal = Math.round(chargeBaseAmount * defaultPfRate);
+          if (eligPfIn && !eligPfIn.dataset.userEdited) {
+            eligPfIn.placeholder = isLrdActive ? ('₹' + fmtINR(pfVal) + ' (1%+GST LRD)') : ('₹' + fmtINR(pfVal) + ' (0.25%+GST)');
+          }
+        }
+
+        let insVal = parseNumber((eligInsIn && eligInsIn.value) || 0);
+        if (insVal === 0 && chargeBaseAmount > 0) {
+          insVal = Math.round(chargeBaseAmount * 0.02);
+          if (eligInsIn && !eligInsIn.dataset.userEdited) {
+            eligInsIn.placeholder = '₹' + fmtINR(insVal) + ' (2% Life / Property)';
+          }
+        }
+
+        const totalBankCharges = pfVal + insVal;
+        if (eligTotBox && eligTotVal) {
+          eligTotBox.style.display = totalBankCharges > 0 ? 'block' : 'none';
+          eligTotVal.textContent = '₹' + fmtINR(totalBankCharges);
+        }
       }
 
       updateWhatsAppCta(
@@ -1528,11 +1702,45 @@ const CONFIG = {
       });
     }
 
+    const lapLrdGroup = document.getElementById('lapLrdGroup');
+    const lapLrdRentIn = document.getElementById('lapLrdRentInput');
+    const lapLrdFoirIn = document.getElementById('lapLrdFoirInput');
+    const lapLrdFoirSl = document.getElementById('lapLrdFoirSlider');
+
+    if (lapLrdRentIn) {
+      lapLrdRentIn.addEventListener('input', recalc);
+      lapLrdRentIn.addEventListener('blur', () => {
+        const val = parseNumber(lapLrdRentIn.value);
+        if (val > 0) lapLrdRentIn.value = '₹' + fmtINR(val);
+      });
+    }
+    if (lapLrdFoirIn && lapLrdFoirSl) {
+      bindSync(lapLrdFoirIn, lapLrdFoirSl, 65, 85, 1, recalc, true);
+    }
+
+    const lapReqAmtInSetup = document.getElementById('lapReqLoanInput');
+    const lapReqBadge = document.getElementById('lapReqLoanBadge');
+    if (lapReqAmtInSetup) {
+      lapReqAmtInSetup.addEventListener('input', () => {
+        const val = parseNumber(lapReqAmtInSetup.value);
+        if (lapReqBadge) lapReqBadge.textContent = badgeWordINR(val);
+        recalc();
+      });
+      lapReqAmtInSetup.addEventListener('blur', () => {
+        const val = parseNumber(lapReqAmtInSetup.value);
+        if (val > 0) lapReqAmtInSetup.value = '₹' + fmtINR(val);
+        if (lapReqBadge) lapReqBadge.textContent = badgeWordINR(val);
+      });
+    }
+
     if (progSel) {
       progSel.addEventListener('change', () => {
-        const isTurnover = progSel.value === 'turnover';
+        const val = progSel.value;
+        const isTurnover = val === 'turnover';
+        const isLrd = val === 'lrd';
         if (turnoverGroup) turnoverGroup.style.display = isTurnover ? 'block' : 'none';
-        if (incGroup) incGroup.style.display = isTurnover ? 'none' : 'block';
+        if (lapLrdGroup) lapLrdGroup.style.display = isLrd ? 'block' : 'none';
+        if (incGroup) incGroup.style.display = (!isTurnover && !isLrd) ? 'block' : 'none';
         recalc();
       });
     }
@@ -1548,10 +1756,23 @@ const CONFIG = {
       const agreeLtvVal = parseFloat((agreeLtvIn || {}).value) || 90;
 
       const isTurnover = (progSel && progSel.value === 'turnover');
+      const isLrd = (progSel && progSel.value === 'lrd') || (isTurnover && lapIndustrySel && lapIndustrySel.value === 'lrd');
 
       let netInc = 0;
       let appliedFoirLap = 0.60;
-      if (isTurnover) {
+      if (isLrd) {
+        // Rental Program LRD for LAP: RENT * 65-85% = VALUE AND LESS OBLIGATION / PER LAKHS EMI = LOAN AMOUNT
+        const rentVal = parseNumber((document.getElementById('lapLrdRentInput') || {}).value) || parseNumber((turnoverIn || {}).value);
+        const lrdFoir = parseFloat((document.getElementById('lapLrdFoirInput') || {}).value) || 75;
+        const discountedRent = Math.round(rentVal * (lrdFoir / 100));
+
+        netInc = discountedRent;
+        appliedFoirLap = 1.0;
+
+        const bRent = document.getElementById('lapLrdRentBadge'); if (bRent) bRent.textContent = badgeWordINR(rentVal);
+        const bFoir = document.getElementById('lapLrdFoirBadge'); if (bFoir) bFoir.textContent = lrdFoir + '% FOIR';
+        const bNet = document.getElementById('lapLrdNetRentBadge'); if (bNet) bNet.textContent = '₹' + fmtINR(discountedRent) + ' / mo';
+      } else if (isTurnover) {
         const turnover1 = parseNumber((turnoverIn || {}).value);
         const turnover2 = parseNumber((lapTurnoverYear2In || {}).value);
         const avgTurnover = (turnover1 > 0 && turnover2 > 0) ? Math.round((turnover1 + turnover2) / 2) : (turnover1 || turnover2 || 0);
@@ -1646,6 +1867,37 @@ const CONFIG = {
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
         const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
         if (baseDisplayEl) baseDisplayEl.textContent = lapChargeBaseAmount > 0 ? ('(₹' + fmtINR(lapChargeBaseAmount) + ')') : '';
+
+        // Dynamic Bank Charges for LAP: PF 1%+GST for LRD, 0.25%+GST standard, Life Insurance 2%, Property Insurance 7%
+        const isLrdActiveLap = (progSel && (progSel.value === 'lrd' || (progSel.value === 'turnover' && lapIndustrySel && lapIndustrySel.value === 'lrd')));
+        const defaultPfRateLap = isLrdActiveLap ? (0.01 * 1.18) : (0.0025 * 1.18);
+
+        const lapPfIn = widget.querySelector('#lapPfInput');
+        const lapInsIn = widget.querySelector('#lapInsuranceInput');
+        const lapTotBox = widget.querySelector('#lapCustomChargesTotal');
+        const lapTotVal = widget.querySelector('#lapCustomChargesTotalVal');
+
+        let pfVal = parseNumber((lapPfIn && lapPfIn.value) || 0);
+        if (pfVal === 0 && lapChargeBaseAmount > 0) {
+          pfVal = Math.round(lapChargeBaseAmount * defaultPfRateLap);
+          if (lapPfIn && !lapPfIn.dataset.userEdited) {
+            lapPfIn.placeholder = isLrdActiveLap ? ('₹' + fmtINR(pfVal) + ' (1%+GST LRD)') : ('₹' + fmtINR(pfVal) + ' (0.25%+GST)');
+          }
+        }
+
+        let insVal = parseNumber((lapInsIn && lapInsIn.value) || 0);
+        if (insVal === 0 && lapChargeBaseAmount > 0) {
+          insVal = Math.round(lapChargeBaseAmount * 0.02);
+          if (lapInsIn && !lapInsIn.dataset.userEdited) {
+            lapInsIn.placeholder = '₹' + fmtINR(insVal) + ' (2% Life / Property)';
+          }
+        }
+
+        const totalBankCharges = pfVal + insVal;
+        if (lapTotBox && lapTotVal) {
+          lapTotBox.style.display = totalBankCharges > 0 ? 'block' : 'none';
+          lapTotVal.textContent = '₹' + fmtINR(totalBankCharges);
+        }
       }
 
       updateWhatsAppCta(
