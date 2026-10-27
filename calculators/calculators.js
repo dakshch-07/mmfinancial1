@@ -3497,6 +3497,100 @@ const CONFIG = {
   }
 
   /* ── Main Router on DOMContentLoaded ────────────────────────────────────── */
+
+  /* ── Universal Calculator Reset Engine ─────────────────────────────────── */
+  function setupUniversalResetButton(widget) {
+    if (!widget) return;
+    const inputsCard = widget.querySelector('.inputs-card') || widget.querySelector('.lamf-schemes-card');
+    if (!inputsCard) return;
+
+    // Check if reset button already exists
+    let resetBtn = widget.querySelector('.calc-reset-btn');
+    if (!resetBtn) {
+      // Create Header Bar with Reset Button
+      const headerBar = document.createElement('div');
+      headerBar.className = 'calc-card-header-bar';
+      headerBar.innerHTML = `
+        <span class="calc-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--color-navy);"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Loan &amp; Investment Details
+        </span>
+        <button type="button" class="calc-reset-btn" title="Reset all inputs to defaults">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset / Clear
+        </button>
+      `;
+      inputsCard.insertBefore(headerBar, inputsCard.firstChild);
+      resetBtn = headerBar.querySelector('.calc-reset-btn');
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // 1. Clear or reset text inputs & textareas
+        const inputs = widget.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"])');
+        inputs.forEach(input => {
+          if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = input.defaultChecked || false;
+          } else if (input.type === 'range') {
+            // Restore default value or min
+            const def = input.getAttribute('value') || input.min || '0';
+            input.value = def;
+            updateSliderFill(input);
+          } else if (input.id === 'salCustomFoirInput' || input.id === 'lrdFoirInput' || input.id === 'lapLrdFoirInput') {
+            input.value = input.id === 'salCustomFoirInput' ? '65' : '75';
+          } else if (input.id === 'eligRateInput' || input.id === 'lapRateInput') {
+            input.value = input.getAttribute('value') || '8.75';
+          } else if (input.id === 'eligTenureInput' || input.id === 'lapTenureInput') {
+            input.value = input.getAttribute('value') || '20';
+          } else {
+            // For salary, rent, profits, manual loan req, turnovers: reset to empty / placeholder default
+            const initialDefault = input.getAttribute('value');
+            input.value = (initialDefault !== null && initialDefault !== '') ? initialDefault : '';
+            delete input.dataset.userEdited;
+          }
+        });
+
+        // 2. Reset dropdown selects
+        const selects = widget.querySelectorAll('select');
+        selects.forEach(sel => {
+          sel.selectedIndex = 0;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        // 3. Reset badges
+        const badges = widget.querySelectorAll('.input-badge');
+        badges.forEach(b => {
+          if (b.id === 'salCompFoirBadge') b.textContent = '65% FOIR';
+          else if (b.id === 'lrdFoirBadge' || b.id === 'lapLrdFoirBadge') b.textContent = '75% FOIR';
+          else if (b.id.includes('RateBadge')) {
+            const rIn = widget.querySelector('#eligRateInput') || widget.querySelector('#emiRateInput') || widget.querySelector('#lapRateInput');
+            if (rIn) b.textContent = parseFloat(rIn.value || 8.75).toFixed(2) + '%';
+          } else if (b.id.includes('TenureBadge')) {
+            const tIn = widget.querySelector('#eligTenureInput') || widget.querySelector('#emiTenureInput') || widget.querySelector('#lapTenureInput');
+            if (tIn) b.textContent = (tIn.value || 20) + ' Years';
+          } else {
+            b.textContent = '₹0';
+          }
+        });
+
+        // 4. Trigger input/change on primary input to force full recalculation
+        const triggerIn = widget.querySelector('.calc-input') || widget.querySelector('input');
+        if (triggerIn) {
+          triggerIn.dispatchEvent(new Event('input', { bubbles: true }));
+          triggerIn.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Special handling for LAMF
+        if (widget.dataset.widgetType === 'lamf') {
+          const clearAllBtn = widget.querySelector('#btnClearAllSchemes');
+          if (clearAllBtn) clearAllBtn.click();
+        }
+      });
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initFormulaAccordions();
     initFAQAccordions();
@@ -3505,6 +3599,7 @@ const CONFIG = {
 
     const widget = document.getElementById('calcWidget');
     if (widget) {
+      setupUniversalResetButton(widget);
       const type = widget.dataset.widgetType;
       if (type === 'eligibility') initEligibilityWidget(widget);
       else if (type === 'loan-emi') initLoanEmiWidget(widget);
