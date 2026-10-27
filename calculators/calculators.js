@@ -804,38 +804,22 @@ const CONFIG = {
         const rent = parseNumber((document.getElementById('salRentInput') || {}).value);
         existingEmi = parseNumber((document.getElementById('salEmiInput') || {}).value);
 
-        // Auto Selection of FOIR based on Salary:
-        // salary 30k-45k -> 50%
-        // salary 50k-1L -> 65%
-        // salary 1L+ -> 70%
-        // salary < 30k -> 45%
-        let autoFoirPct = 65;
-        if (salary > 150000) {
-          autoFoirPct = 70;
-        } else if (salary >= 50000) {
-          autoFoirPct = 65; // default
-        } else if (salary >= 40000) {
-          autoFoirPct = 60;
-        } else if (salary > 0) {
-          autoFoirPct = 60;
-        }
-
-        // If user hasn't manually overridden, auto-select based on salary
-        if (!salFoirUserManual && salCustomFoirIn && salary > 0) {
-          salCustomFoirIn.value = autoFoirPct;
-          if (salCustomFoirSl) {
-            salCustomFoirSl.value = autoFoirPct;
-            updateSliderFill(salCustomFoirSl);
-          }
-          if (salCompFoirBadge) salCompFoirBadge.textContent = autoFoirPct + '% FOIR';
-        }
-
-        const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
+        // Salaried FOIR is fixed at 65% for ANY salary amount by default.
+        // It ONLY changes if the user manually edits / moves the FOIR slider.
         let salFoir = 0.65;
-        if (customVal && !isNaN(customVal) && customVal >= 30 && customVal <= 85) {
+        const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
+        if (salFoirUserManual && customVal && !isNaN(customVal) && customVal >= 30 && customVal <= 85) {
           salFoir = customVal / 100;
         } else {
-          salFoir = autoFoirPct / 100;
+          salFoir = 0.65;
+          if (salCustomFoirIn && salCustomFoirIn.value != 65) {
+            salCustomFoirIn.value = 65;
+            if (salCustomFoirSl) {
+              salCustomFoirSl.value = 65;
+              updateSliderFill(salCustomFoirSl);
+            }
+            if (salCompFoirBadge) salCompFoirBadge.textContent = '65% FOIR';
+          }
         }
 
         appliedFoir = salFoir;
