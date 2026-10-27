@@ -468,22 +468,16 @@ const CONFIG = {
     bindSync(document.getElementById('salEmiInput'), document.getElementById('salEmiSlider'), 0, 500000, 500, recalc);
 
     const salCompCatGroup = document.getElementById('salCompCatGroup');
-    const salCompCategory = document.getElementById('salCompanyCategory');
     const salCustomFoirIn = document.getElementById('salCustomFoirInput');
+    const salCustomFoirSl = document.getElementById('salCustomFoirSlider');
     const salCompFoirBadge = document.getElementById('salCompFoirBadge');
-
-    if (salCompCategory) {
-      salCompCategory.addEventListener('change', () => {
-        const opt = salCompCategory.options[salCompCategory.selectedIndex];
-        const f = opt ? opt.dataset.foir : '70';
-        if (salCustomFoirIn) salCustomFoirIn.value = f;
-        if (salCompFoirBadge) salCompFoirBadge.textContent = f + '% FOIR';
-        recalc();
-      });
-    }
+    let salFoirUserManual = false;
 
     if (salCustomFoirIn) {
+      if (salCustomFoirSl) bindSync(salCustomFoirIn, salCustomFoirSl, 50, 70, 1, recalc, true);
+
       salCustomFoirIn.addEventListener('input', () => {
+        salFoirUserManual = true;
         let v = parseFloat(salCustomFoirIn.value);
         if (!isNaN(v) && salCompFoirBadge) {
           if (v > 70) v = 70;
@@ -493,11 +487,21 @@ const CONFIG = {
       });
       salCustomFoirIn.addEventListener('blur', () => {
         let v = parseFloat(salCustomFoirIn.value);
-        if (isNaN(v) || v < 45) v = 45;
+        if (isNaN(v) || v < 50) v = 50;
         if (v > 70) v = 70;
         salCustomFoirIn.value = v;
+        if (salCustomFoirSl) {
+          salCustomFoirSl.value = v;
+          updateSliderFill(salCustomFoirSl);
+        }
         if (salCompFoirBadge) salCompFoirBadge.textContent = v + '% FOIR';
         recalc();
+      });
+    }
+
+    if (salCustomFoirSl) {
+      salCustomFoirSl.addEventListener('input', () => {
+        salFoirUserManual = true;
       });
     }
 
@@ -673,26 +677,38 @@ const CONFIG = {
         const rent = parseNumber((document.getElementById('salRentInput') || {}).value);
         existingEmi = parseNumber((document.getElementById('salEmiInput') || {}).value);
 
-        // Toggle company category selector when salary > 1 Lakh
-        if (salCompCatGroup) {
-          salCompCatGroup.style.display = (salary > 100000) ? 'block' : 'none';
+        // Auto Selection of FOIR based on Salary:
+        // salary 30k-45k -> 50%
+        // salary 50k-1L -> 65%
+        // salary 1L+ -> 70%
+        // salary < 30k -> 45%
+        let autoFoirPct = 65;
+        if (salary >= 100000) {
+          autoFoirPct = 70;
+        } else if (salary >= 50000) {
+          autoFoirPct = 65;
+        } else if (salary >= 30000) {
+          autoFoirPct = 50;
+        } else if (salary > 0) {
+          autoFoirPct = 45;
         }
 
-        // Net Salary FOIR (Manual Fit Option & Company Category Benchmark)
+        // If user hasn't manually overridden, auto-select based on salary
+        if (!salFoirUserManual && salCustomFoirIn && salary > 0) {
+          salCustomFoirIn.value = autoFoirPct;
+          if (salCustomFoirSl) {
+            salCustomFoirSl.value = autoFoirPct;
+            updateSliderFill(salCustomFoirSl);
+          }
+          if (salCompFoirBadge) salCompFoirBadge.textContent = autoFoirPct + '% FOIR';
+        }
+
         const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
-        let salFoir = 0.60;
+        let salFoir = 0.65;
         if (customVal && !isNaN(customVal) && customVal >= 30 && customVal <= 85) {
-          // User defined manual net salary FOIR fit option
           salFoir = customVal / 100;
-        } else if (salary > 100000) {
-          const opt = salCompCategory ? salCompCategory.options[salCompCategory.selectedIndex] : null;
-          salFoir = opt ? (parseFloat(opt.dataset.foir) / 100) : 0.70;
-        } else if (salary <= 45000 && salary >= 30000) {
-          salFoir = 0.50;
-        } else if (salary < 30000 && salary > 0) {
-          salFoir = 0.45;
-        } else if (salary <= 100000 && salary > 45000) {
-          salFoir = 0.65;
+        } else {
+          salFoir = autoFoirPct / 100;
         }
 
         appliedFoir = salFoir;

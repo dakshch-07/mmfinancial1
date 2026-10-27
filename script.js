@@ -1776,9 +1776,9 @@ function initLoanForm() {
     }
 
     const salariedCompanyCatRow = document.getElementById('salariedCompanyCatRow');
-    const loanCompanyCategory = document.getElementById('loanCompanyCategory');
     const loanSalariedCustomFoir = document.getElementById('loanSalariedCustomFoir');
     const loanSalariedFoirBadge = document.getElementById('loanSalariedFoirBadge');
+    let loanSalariedFoirManual = false;
 
     function updateSalariedCompanyCategoryView() {
         const isTurnover = bizProgramSelect && bizProgramSelect.value === 'turnover';
@@ -1786,25 +1786,29 @@ function initLoanForm() {
         const isSalaried = empVal.includes('salaried');
         const numIncome = parseFloat(String(income ? income.value : '').replace(/[^0-9.]/g, '')) || 0;
 
-        // Show company category & manual Net Salary FOIR fit option for Salaried users
+        // Show manual Net Salary FOIR fit option for Salaried users
         if (isSalaried && !isTurnover) {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'grid';
+
+            // Auto-select 50% - 70% FOIR on salary typing if user hasn't typed manually
+            if (!loanSalariedFoirManual && numIncome > 0) {
+                let autoF = 65;
+                if (numIncome >= 100000) autoF = 70;
+                else if (numIncome >= 50000) autoF = 65;
+                else if (numIncome >= 30000) autoF = 50;
+                else autoF = 45;
+
+                if (loanSalariedCustomFoir) loanSalariedCustomFoir.value = autoF;
+                if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${autoF}% FOIR`;
+            }
         } else {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'none';
         }
     }
 
-    if (loanCompanyCategory) {
-        loanCompanyCategory.addEventListener('change', () => {
-            const opt = loanCompanyCategory.options[loanCompanyCategory.selectedIndex];
-            const foirVal = opt ? opt.dataset.foir : '70';
-            if (loanSalariedCustomFoir) loanSalariedCustomFoir.value = foirVal;
-            if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${foirVal}% FOIR`;
-        });
-    }
-
     if (loanSalariedCustomFoir) {
         loanSalariedCustomFoir.addEventListener('input', () => {
+            loanSalariedFoirManual = true;
             let v = parseFloat(loanSalariedCustomFoir.value);
             if (!isNaN(v) && loanSalariedFoirBadge) {
                 if (v > 70) v = 70;

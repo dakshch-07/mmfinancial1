@@ -377,28 +377,23 @@
                                 </div>
                             </div>
 
-                            <!-- Salaried Company Category Selection for Salary Above 1 Lakh (60% - 70% FOIR) -->
+                            <!-- Salaried Net Salary FOIR Fit Option (Auto-calculated on Salary, with Manual 50% - 70% Option) -->
                             <div class="form-row" id="salariedCompanyCatRow" style="display: grid; margin-bottom: 16px;">
-                                <div class="form-field">
-                                    <label for="loanCompanyCategory" style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a;">Company Category &amp; Benchmark</label>
-                                    <select id="loanCompanyCategory" name="loanCompanyCategory" class="form-select" style="border-color: #93c5fd;">
-                                        <option value="super_a" data-foir="70" selected>Super A: Top MNC / Fortune 500 / Central PSU (70% FOIR)</option>
-                                        <option value="cat_a" data-foir="68">Category A: Top Listed Indian Corporates (68% FOIR)</option>
-                                        <option value="cat_b" data-foir="65">Category B: Mid-Size Corporate / Reputed Pvt Ltd (65% FOIR)</option>
-                                        <option value="cat_c" data-foir="60">Category C / Others: Standard Pvt Ltd / LLP / Firms (60% FOIR)</option>
-                                    </select>
-                                    <span class="field-hint">FOIR is determined between 60% and 70% based on lending bank's employer categorization.</span>
-                                </div>
-                                <div class="form-field">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <label for="loanSalariedCustomFoir" style="font-size: 0.82rem; font-weight: 700; color: #1e3a8a;">Net Salary Fit Option Manual FOIR (%)</label>
-                                        <span id="loanSalariedFoirBadge" style="font-size: 0.72rem; font-weight: 700; color: #1e3a8a; background: #dbeafe; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">70% FOIR</span>
+                                <div class="form-field" style="grid-column: 1 / -1; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 14px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                        <label for="loanSalariedCustomFoir" style="font-size: 0.85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0;">Net Salary FOIR Fit Option (50% - 70%)</label>
+                                        <span id="loanSalariedFoirBadge" style="font-size: 0.76rem; font-weight: 700; color: #ffffff; background: #1e3a8a; padding: 3px 10px; border-radius: 4px;">65% FOIR</span>
                                     </div>
                                     <div style="position: relative; display: flex; align-items: center;">
                                         <span style="position: absolute; right: 12px; font-weight: 700; color: #1e3a8a; pointer-events: none;">%</span>
-                                        <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="70" min="45" max="70" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
+                                        <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="65" min="50" max="70" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
                                     </div>
-                                    <span class="field-hint">Manual Net Salary Fit: Enter custom FOIR (45% - 75%) or select company category.</span>
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 4px;">
+                                        <span>50% (Auto: ₹30k-45k)</span>
+                                        <span>65% (Auto: ₹50k-1L)</span>
+                                        <span>70% (Auto: ₹1L+)</span>
+                                    </div>
+                                    <span class="field-hint" style="color: #1e3a8a; font-weight: 600; margin-top: 4px;">Auto-calculated based on salary slab: ₹30k–₹45k (50%), ₹50k–₹1L (65%), ₹1L+ (70%). You can also manually adjust between 50% - 70%.</span>
                                 </div>
                             </div>
 

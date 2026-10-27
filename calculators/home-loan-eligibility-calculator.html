@@ -253,24 +253,23 @@
                         <div class="slider-limits"><span>₹10,000</span><span>₹10,00,000</span></div>
                     </div>
 
-                    <!-- Company Category Selection for Salary Above 1 Lakh (60% - 70% FOIR) -->
+                    <!-- Net Salary FOIR Fit Option (Auto-calculated on Salary, with Manual 50% - 70% Option) -->
                     <div class="input-group" id="salCompCatGroup" style="display: block; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px;">
                         <div class="input-header">
-                            <label for="salCompanyCategory" style="color: #1e3a8a; font-weight: 700;">Company Category &amp; Benchmark</label>
-                            <span class="input-badge" id="salCompFoirBadge" style="background: #1e3a8a; color: #ffffff;">70% FOIR</span>
+                            <label for="salCustomFoirInput" style="color: #1e3a8a; font-weight: 700;">Net Salary FOIR Fit Option (50% - 70%)</label>
+                            <span class="input-badge" id="salCompFoirBadge" style="background: #1e3a8a; color: #ffffff;">65% FOIR</span>
                         </div>
-                        <select id="salCompanyCategory" class="calc-input" style="border-color: #93c5fd; font-weight: 700; color: #1e3a8a; margin-top: 4px;">
-                            <option value="super_a" data-foir="70" selected>Super A: Top MNC / Fortune 500 / Central PSU (70% FOIR)</option>
-                            <option value="cat_a" data-foir="68">Category A: Top Listed Indian Corporates (68% FOIR)</option>
-                            <option value="cat_b" data-foir="65">Category B: Mid Corporate / Reputed Pvt Ltd (65% FOIR)</option>
-                            <option value="cat_c" data-foir="60">Category C / Others: Standard Pvt Ltd / LLP (60% FOIR)</option>
-                        </select>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                            <label for="salCustomFoirInput" style="font-size: 0.76rem; font-weight: 700; color: #1e3a8a;">Net Salary Fit Option Manual FOIR (%):</label>
-                            <div style="width: 100px; position: relative;">
-                                <input type="number" id="salCustomFoirInput" class="calc-input" value="70" min="60" max="70" step="1" style="font-size: 0.85rem; padding: 4px 8px; text-align: center; border-color: #93c5fd; font-weight: 700;">
-                            </div>
+                        <div class="input-with-symbol" style="margin-top: 6px;">
+                            <span class="currency-prefix">%</span>
+                            <input type="number" id="salCustomFoirInput" class="calc-input" value="65" min="50" max="70" step="1" style="border-color: #93c5fd; font-weight: 700; color: #1e3a8a;" aria-label="Applied Salaried FOIR">
                         </div>
+                        <input type="range" id="salCustomFoirSlider" class="calc-slider" min="50" max="70" step="1" value="65" style="margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 3px;">
+                            <span>50% (Auto: ₹30k-45k)</span>
+                            <span>65% (Auto: ₹50k-1L)</span>
+                            <span>70% (Auto: ₹1L+)</span>
+                        </div>
+                        <span id="salFoirAutoHint" style="font-size: 0.72rem; color: #1e3a8a; margin-top: 4px; display: block; font-weight: 600;">Auto-selected based on salary: ₹30k–₹45k (50%), ₹50k–₹1L (65%), ₹1L+ (70%). You can also manually adjust between 50% - 70%.</span>
                     </div>
 
                     
