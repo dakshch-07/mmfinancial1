@@ -666,7 +666,7 @@ const CONFIG = {
       // FOIR requirements:
       // Personal Loan = 65% (0.65)
       // Home Loan & LAP = 60% (0.60)
-      const appliedFoir = isPersonal ? CONFIG.defaults.foir.personalLoanFoir : CONFIG.defaults.foir.homeLoanFoir;
+      let appliedFoir = isPersonal ? CONFIG.defaults.foir.personalLoanFoir : CONFIG.defaults.foir.homeLoanFoir;
 
       let eligibleIncome = 0;
       let existingEmi = 0;
@@ -830,7 +830,14 @@ const CONFIG = {
       animateNumber(document.getElementById('eligEmiCapacity'), eligibleEmi);
       animateNumber(document.getElementById('eligEstimatedEmi'), estimatedEmi);
       const foirEl = document.getElementById('eligFoirApplied');
-      if (foirEl) foirEl.textContent = Math.round(appliedFoir * 100);
+      if (foirEl) {
+        const roundedFoir = Math.round(appliedFoir * 100);
+        foirEl.textContent = roundedFoir;
+        const foirTitleEl = foirEl.closest('.metric-box') ? foirEl.closest('.metric-box').querySelector('.metric-title') : null;
+        if (foirTitleEl) {
+          foirTitleEl.textContent = profile === 'salaried' ? 'Applicable FOIR (50-70%)' : 'Applicable FOIR';
+        }
+      }
       animateNumber(document.getElementById('eligTotalPayable'), totalPayable);
 
       // Render Indicative Statutory Charges on Eligibility Card (Calculated on Required Loan Amount if entered, else Max Eligibility)
