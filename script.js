@@ -1937,16 +1937,16 @@ function initLoanForm() {
     function badgeWordINR(val) {
         if (!isFinite(val) || val <= 0) return '₹0';
         if (val >= 1e7) {
-            const cr = val / 1e7;
-            return '₹' + cr.toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            const cr = (val / 1e7).toFixed(2).replace(/\.?0+$/, '');
+            return '₹' + cr + ' Cr (' + cr + ' Crore)';
         }
         if (val >= 1e5) {
-            const lk = val / 1e5;
-            return '₹' + lk.toFixed(2).replace(/\.?0+$/, '') + ' Lakh';
+            const lk = (val / 1e5).toFixed(2).replace(/\.?0+$/, '');
+            return '₹' + lk + ' Lakh';
         }
         if (val >= 1e3) {
-            const th = val / 1e3;
-            return '₹' + th.toFixed(1).replace(/\.?0+$/, '') + ' K';
+            const th = (val / 1e3).toFixed(1).replace(/\.?0+$/, '');
+            return '₹' + th + ' Thousand';
         }
         return '₹' + Math.round(val).toLocaleString('en-IN');
     }
