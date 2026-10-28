@@ -2397,8 +2397,20 @@ function initLoanForm() {
                                 <span>₹3,500 - ₹10,000 (As per bank &amp; loan documentation)</span>
                             </div>
                             <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Processing Fee &amp; Insurance:</strong>
-                                <span>As per lending bank / NBFC policy</span>
+                                <strong style="color: #166534; display: block;">Minimum Login Fees (Non-Refundable):</strong>
+                                <span>₹1,000 to ₹5,000 + GST</span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Processing Fee (PF):</strong>
+                                <span>0.25% to 1.50% + GST (Govt offer ₹2,500 - ₹12,000)</span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Legal &amp; Valuation Charges:</strong>
+                                <span>As per bank policy (Govt: ₹12k &bull; 1-5Cr: ₹18.5k &bull; 5Cr+: ₹24k)</span>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                <strong style="color: #166534; display: block;">Loan Insurance (Life &amp; Property):</strong>
+                                <span>Life 0.5% - 5% / Property ₹5,000 - ₹50,000 (As per bank norm)</span>
                             </div>
                         </div>
                     </div>
