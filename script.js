@@ -2241,93 +2241,98 @@ function initLoanForm() {
         if (btnCheckText) btnCheckText.textContent = 'Assessing Eligibility Across 25+ Lenders...';
         if (btnCheck) btnCheck.disabled = true;
 
-        const payload = {
-            loanEmpType: empType.value,
-            loanType: loanType.value,
-            loanAmount: numAmount,
-            loanIncome: effectiveIncome,
-            businessProgram: isTurnover ? 'turnover' : 'itr',
-            turnoverAmount: isTurnover ? parseFloat(String(loanTurnoverAmount.value).replace(/[^0-9.]/g, '')) || 0 : 0,
-            turnoverMultiplier: isTurnover ? parseFloat(loanTurnoverMultiplier.value) || 0.05 : 0,
-            loanExistingEmi: parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0,
-            loanTenure: tenure ? tenure.value : '20 Years',
-            loanCibil: cibilSelect ? cibilSelect.value : '750+',
-            loanRoi: parseFloat(loanRoiInput ? loanRoiInput.value : 8.5),
-            bonusIncome: parseFloat(String(loanBonus ? loanBonus.value : '').replace(/[^0-9.]/g, '')) || 0,
-            rentalIncome: parseFloat(String(loanRentIncome ? loanRentIncome.value : '').replace(/[^0-9.]/g, '')) || 0,
-            depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
-            directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
-            companyCategory: loanCompanyCategory ? loanCompanyCategory.value : 'super_a',
-            customFoir: (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
-            formStartTime: userStartTime
-        };
-
-        let resultData = null;
         try {
-            // Attempt serverless API call
-            const response = await fetch('/api/check-eligibility', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (response.ok) {
-                const json = await response.json();
-                if (json && json.data) {
-                    resultData = json.data;
-                }
-            }
-        } catch (apiErr) {
-            console.warn('API call failed, running local eligibility calculation fallback:', apiErr);
-        }
-
-        // Fallback to local computation if API response not available
-        if (!resultData) {
-            const localCalc = computeLocalEligibility({
-                empType: payload.loanEmpType,
-                loanType: payload.loanType,
-                loanAmount: payload.loanAmount,
-                loanIncome: payload.loanIncome,
-                loanExistingEmi: payload.loanExistingEmi,
-                loanTenure: payload.loanTenure,
-                cibilScore: payload.loanCibil,
-                loanRoi: payload.loanRoi,
-                bonusIncome: payload.bonusIncome,
-                rentalIncome: payload.rentalIncome,
-                depreciation: payload.depreciation,
-                directorSalary: payload.directorSalary
-            });
-            resultData = {
-                isEligible: localCalc.isEligible,
-                isSalaried: localCalc.isSalaried,
-                grossMonthlyIncome: localCalc.grossMonthlyIncome,
-                formattedGrossIncome: `₹${formatIndianNumber(localCalc.grossMonthlyIncome)}`,
-                foirUsed: localCalc.foirPercentText,
-                foirLabel: localCalc.foirLabel,
-                eligibleEmiCapacity: localCalc.eligibleEmiCapacity,
-                formattedEmiCapacity: `₹${formatIndianNumber(localCalc.eligibleEmiCapacity)} / mo`,
-                maxEligibleLoan: localCalc.maxEligibleLoan,
-                formattedMaxLoan: `₹${formatIndianNumber(localCalc.maxEligibleLoan)}`,
-                reqAmount: localCalc.reqAmount,
-                formattedReqAmount: `₹${formatIndianNumber(localCalc.reqAmount)}`,
-                estimatedReqEmi: localCalc.estimatedReqEmi,
-                formattedEstimatedEmi: `₹${formatIndianNumber(localCalc.estimatedReqEmi)} / mo`,
-                tenureMonths: localCalc.tenureMonths,
-                roi: localCalc.roi,
-                tips: localCalc.tips,
-                token: btoa(JSON.stringify({ payload: { ...payload, timestamp: Date.now() }, signature: 'client_local_fallback' })),
-                timestamp: Date.now()
+            const payload = {
+                loanEmpType: empType ? empType.value : '',
+                loanType: loanType ? loanType.value : '',
+                loanAmount: numAmount,
+                loanIncome: effectiveIncome,
+                businessProgram: isTurnover ? 'turnover' : 'itr',
+                turnoverAmount: (isTurnover && loanTurnoverAmount) ? parseFloat(String(loanTurnoverAmount.value).replace(/[^0-9.]/g, '')) || 0 : 0,
+                turnoverMultiplier: (isTurnover && loanTurnoverMultiplier) ? parseFloat(loanTurnoverMultiplier.value) || 0.05 : 0,
+                loanExistingEmi: parseFloat(String(emi ? emi.value : '').replace(/[^0-9.]/g, '')) || 0,
+                loanTenure: tenure ? tenure.value : '20 Years',
+                loanCibil: cibilSelect ? cibilSelect.value : '750+',
+                loanRoi: parseFloat(loanRoiInput ? loanRoiInput.value : 8.5),
+                bonusIncome: parseFloat(String(loanBonus ? loanBonus.value : '').replace(/[^0-9.]/g, '')) || 0,
+                rentalIncome: parseFloat(String(loanRentIncome ? loanRentIncome.value : '').replace(/[^0-9.]/g, '')) || 0,
+                depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
+                directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
+                companyCategory: 'super_a',
+                customFoir: (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
+                formStartTime: userStartTime
             };
-        }
 
-        // Reset button state
-        if (btnCheckText) btnCheckText.textContent = 'Check My Loan Eligibility';
-        if (btnCheck) btnCheck.disabled = false;
+            let resultData = null;
+            try {
+                // Attempt serverless API call
+                const response = await fetch('/api/check-eligibility', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    const json = await response.json();
+                    if (json && json.data) {
+                        resultData = json.data;
+                    }
+                }
+            } catch (apiErr) {
+                console.warn('API call failed, running local eligibility calculation fallback:', apiErr);
+            }
 
-        // Render Step 2 Results
-        if (resultData.isEligible) {
-            renderEligibleSuccess(resultData, payload);
-        } else {
-            renderIneligibleAdvisory(resultData, payload);
+            // Fallback to local computation if API response not available
+            if (!resultData) {
+                const localCalc = computeLocalEligibility({
+                    empType: payload.loanEmpType,
+                    loanType: payload.loanType,
+                    loanAmount: payload.loanAmount,
+                    loanIncome: payload.loanIncome,
+                    loanExistingEmi: payload.loanExistingEmi,
+                    loanTenure: payload.loanTenure,
+                    cibilScore: payload.loanCibil,
+                    loanRoi: payload.loanRoi,
+                    bonusIncome: payload.bonusIncome,
+                    rentalIncome: payload.rentalIncome,
+                    depreciation: payload.depreciation,
+                    directorSalary: payload.directorSalary
+                });
+                resultData = {
+                    isEligible: localCalc.isEligible,
+                    isSalaried: localCalc.isSalaried,
+                    grossMonthlyIncome: localCalc.grossMonthlyIncome,
+                    formattedGrossIncome: `₹${formatIndianNumber(localCalc.grossMonthlyIncome)}`,
+                    foirUsed: localCalc.foirPercentText,
+                    foirLabel: localCalc.foirLabel,
+                    eligibleEmiCapacity: localCalc.eligibleEmiCapacity,
+                    formattedEmiCapacity: `₹${formatIndianNumber(localCalc.eligibleEmiCapacity)} / mo`,
+                    maxEligibleLoan: localCalc.maxEligibleLoan,
+                    formattedMaxLoan: `₹${formatIndianNumber(localCalc.maxEligibleLoan)}`,
+                    reqAmount: localCalc.reqAmount,
+                    formattedReqAmount: `₹${formatIndianNumber(localCalc.reqAmount)}`,
+                    estimatedReqEmi: localCalc.estimatedReqEmi,
+                    formattedEstimatedEmi: `₹${formatIndianNumber(localCalc.estimatedReqEmi)} / mo`,
+                    tenureMonths: localCalc.tenureMonths,
+                    roi: localCalc.roi,
+                    tips: localCalc.tips,
+                    token: btoa(JSON.stringify({ payload: { ...payload, timestamp: Date.now() }, signature: 'client_local_fallback' })),
+                    timestamp: Date.now()
+                };
+            }
+
+            // Render Step 2 Results
+            if (resultData.isEligible) {
+                renderEligibleSuccess(resultData, payload);
+            } else {
+                renderIneligibleAdvisory(resultData, payload);
+            }
+        } catch (calcErr) {
+            console.error('Error during eligibility assessment:', calcErr);
+            alert('Something went wrong calculating eligibility. Please check your inputs or try again.');
+        } finally {
+            // Always reset button state
+            if (btnCheckText) btnCheckText.textContent = 'Check My Loan Eligibility';
+            if (btnCheck) btnCheck.disabled = false;
         }
     });
 
