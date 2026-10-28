@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropline Overdraft Loan Calculator | DOD Limit & Monthly Drop Schedule | MM Financial Services</title>
+    <meta name="description" content="Calculate your Dropline Overdraft (DOD) loan limit, monthly limit reduction (drop), daily interest on utilized funds, and government bank charges with MM Financial Services.">
+    <link rel="canonical" href="https://mmtfinancialservicesconsultant.vercel.app/calculators/dropline-overdraft-loan-calculator">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css?v=2.5">
+    <link rel="stylesheet" href="/calculators/calculators.css?v=2.6">
+    
+    <!-- Structured Data: BreadcrumbList & FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://mmtfinancialservicesconsultant.vercel.app/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Calculators",
+              "item": "https://mmtfinancialservicesconsultant.vercel.app/calculators"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Dropline Overdraft Loan Calculator",
+              "item": "https://mmtfinancialservicesconsultant.vercel.app/calculators/dropline-overdraft-loan-calculator"
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is a Dropline Overdraft (DOD) Loan facility?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A Dropline Overdraft (DOD) is a specialized credit facility where your sanctioned borrowing limit systematically reduces ('drops') at regular intervals (monthly or annually) over the chosen tenure. You only pay interest on the amount utilized, saving substantial cost compared to a traditional term loan."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does interest calculation work in a Dropline Overdraft?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Interest in a Dropline Overdraft is calculated on a daily product basis only on the drawn/utilized funds, not on the entire sanctioned limit. If your sanctioned limit is ₹1 Crore and you only use ₹30 Lakh, interest is charged only on ₹30 Lakh."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the Government Bank legal, valuation & processing fees for DOD?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "For properties under ₹1 Crore market value, Govt Bank charges are ₹6,500 Legal + ₹5,500 Valuation (₹12,000 total). For ₹1 Cr to ₹5 Cr, 2 Legal reports (₹13,000) + Valuation (₹5,500) = ₹18,500. For ₹5 Cr and above, Legal ₹13,000 + Valuation ₹11,000 = ₹24,000. Govt Bank Processing Fee ranges from ₹2,500 + GST to ₹12,000 + GST."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+</head>
+<body class="calc-page-body">
+    <!-- 1. TOP HEADER / BRAND BAR -->
+    <header class="site-header" id="siteHeader">
+        <div class="header-inner container">
+            <a href="/" class="brand-link" aria-label="MM Financial Services Home">
+                <div class="monogram-seal">
+                    <span class="seal-inner">MM</span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">MM FINANCIAL SERVICES</span>
+                    <span class="brand-sub">CONSULTANT</span>
+                </div>
+            </a>
+
+            <nav class="main-nav" id="mainNav" aria-label="Primary Navigation">
+                <ul class="nav-links">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/#about" class="nav-link">About</a></li>
+                    <li><a href="/loans" class="nav-link">Loans</a></li>
+                    <li><a href="/mutual-funds" class="nav-link">Mutual Funds</a></li>
+                    <li><a href="/insurance" class="nav-link">Insurance</a></li>
+                    <li><a href="/calculators" class="nav-link active">Calculators</a></li>
+                    <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="/#why-us" class="nav-link">Why Us</a></li>
+                    <li><a href="/#faq" class="nav-link">FAQ</a></li>
+                    <li><a href="/#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="tel:+919594736833" class="nav-phone" title="Call Mukesh Tiwari directly">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <span class="phone-digits">95947 36833</span>
+                </a>
+                <a href="/#contact" class="btn btn-brick-sm">Get Free Consultation</a>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. TRUST TICKER BAR (Infinite Marquee) -->
+    <div class="top-ticker-bar" role="region" aria-label="Official announcements and trust notices">
+        <div class="ticker-inner">
+            <div class="ticker-content">
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Your Goals. Our Guidance. A Better Financial Future.</strong></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>MM Financial Services Consultant</strong> &mdash; 19 Free Financial Calculators</span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> Direct Advisor Access: Call <strong>9594736833</strong> &bull; <em>mmfsc09@gmail.com</em></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Loans &bull; Mutual Funds &bull; Insurance</strong> &mdash; Mukesh Tiwari</span>
+            </div>
+            <div class="ticker-content" aria-hidden="true">
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Your Goals. Our Guidance. A Better Financial Future.</strong></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>MM Financial Services Consultant</strong> &mdash; 19 Free Financial Calculators</span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> Direct Advisor Access: Call <strong>9594736833</strong> &bull; <em>mmfsc09@gmail.com</em></span>
+                <span class="ticker-item"><span class="ticker-bullet">&#9670;</span> <strong>Loans &bull; Mutual Funds &bull; Insurance</strong> &mdash; Mukesh Tiwari</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="monogram-seal mini"><span class="seal-inner">MM</span></div>
+            <div class="drawer-brand-text">
+                <span class="drawer-brand-name">MM FINANCIAL SERVICES</span>
+                <span class="drawer-brand-sub">CONSULTANT</span>
+            </div>
+            <button class="drawer-close" id="drawerClose" aria-label="Close menu">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <ul class="drawer-nav">
+                <li><a href="/" class="drawer-link">Home</a></li>
+                <li><a href="/#about" class="drawer-link">About Mukesh Tiwari</a></li>
+                <li><a href="/loans" class="drawer-link">Loans</a></li>
+                <li><a href="/mutual-funds" class="drawer-link">Mutual Funds</a></li>
+                <li><a href="/insurance" class="drawer-link">Insurance</a></li>
+                <li><a href="/calculators" class="drawer-link active">Calculators Hub</a></li>
+                <li><a href="/#how-it-works" class="drawer-link">How It Works</a></li>
+                <li><a href="/#why-us" class="drawer-link">Why Choose Us</a></li>
+                <li><a href="/#faq" class="drawer-link">FAQ</a></li>
+                <li><a href="/#contact" class="drawer-link">Contact Mukesh Tiwari</a></li>
+            </ul>
+        </div>
+        <div class="drawer-footer">
+            <p class="drawer-advisor">Advisor: <strong>Mukesh Tiwari</strong></p>
+            <a href="tel:+919594736833" class="btn btn-navy-full" style="padding:10px; font-size:0.85rem;">Call 95947 36833</a>
+        </div>
+    </div>
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+    <main class="calc-main-content">
+        <!-- TOP NAV BAR WITH BACK TO HOME BUTTON -->
+        <div class="calc-top-nav-bar">
+            <div class="calc-container">
+                <div class="calc-top-nav-inner">
+                    <a href="/" class="calc-back-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        <span>Back to Home</span>
+                    </a>
+                    <nav class="calc-breadcrumb" aria-label="Breadcrumb">
+                        <a href="/">Home</a>
+                        <span class="bc-sep">&rsaquo;</span>
+                        <a href="/calculators">Calculators</a>
+                        <span class="bc-sep">&rsaquo;</span>
+                        <span class="bc-curr">Dropline Overdraft Loan Calculator</span>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- HERO / HEADER -->
+        <section class="calc-page-hero">
+            <div class="calc-container">
+                <div class="calc-hero-content">
+                    <span class="calc-hero-badge">Smart Working Capital &amp; Business Credit</span>
+                    <h1 class="calc-hero-title">Dropline Overdraft (DOD) Loan Calculator</h1>
+                    <p class="calc-hero-subtitle">Optimize working capital with interest charged strictly on daily utilized funds while your credit limit systematically drops month-by-month over tenure.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- WIDGET CONTAINER -->
+        <section class="calc-widget-section">
+            <div class="calc-container">
+                <div class="calc-widget" id="calcWidget" data-widget-type="dropline-od" data-calc-id="dropline-overdraft-loan-calculator">
+                    <div class="calc-widget-grid">
+                        <div class="calc-card inputs-card">
+                            <!-- DOD Limit Required with Words Badge -->
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="dodLimitInput">Sanctioned Overdraft Limit (₹)</label>
+                                    <span class="input-badge" id="dodLimitBadge">₹50,00,000 (Fifty Lakh)</span>
+                                </div>
+                                <div class="input-with-symbol">
+                                    <span class="currency-prefix">₹</span>
+                                    <input type="text" id="dodLimitInput" class="calc-input" value="50,00,000" placeholder="e.g. 50,00,000" inputmode="numeric">
+                                </div>
+                                <input type="range" id="dodLimitSlider" class="calc-slider" min="500000" max="100000000" step="100000" value="5000000">
+                                <div class="slider-limits"><span>₹5 Lakh</span><span>₹10 Crore</span></div>
+                            </div>
+
+                            <!-- Interest Rate -->
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="dodRateInput">Interest Rate (% p.a.)</label>
+                                    <span class="input-badge" id="dodRateBadge">9.25%</span>
+                                </div>
+                                <div class="input-with-symbol">
+                                    <span class="currency-prefix">%</span>
+                                    <input type="text" id="dodRateInput" class="calc-input" value="9.25" inputmode="decimal">
+                                </div>
+                                <input type="range" id="dodRateSlider" class="calc-slider" min="7.0" max="18.0" step="0.05" value="9.25">
+                                <div class="slider-limits"><span>7.0%</span><span>18.0%</span></div>
+                            </div>
+
+                            <!-- Loan Tenure -->
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="dodTenureInput">Facility Tenure (Years / Months)</label>
+                                    <span class="input-badge" id="dodTenureBadge">5 Years (60 Months)</span>
+                                </div>
+                                <div class="input-with-symbol">
+                                    <span class="currency-prefix">Yr</span>
+                                    <input type="text" id="dodTenureInput" class="calc-input" value="5" inputmode="numeric">
+                                </div>
+                                <input type="range" id="dodTenureSlider" class="calc-slider" min="1" max="15" step="1" value="5">
+                                <div class="slider-limits"><span>1 Year (12 Mo)</span><span>15 Years (180 Mo)</span></div>
+                            </div>
+
+                            <!-- Utilization Rate % (Interactive Assumption) -->
+                            <div class="input-group" style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                                <div class="input-header">
+                                    <label for="dodUtilInput" style="font-size: 0.78rem; font-weight: 700; color: #1e3a8a;">Average Limit Utilization (%)</label>
+                                    <span class="input-badge" id="dodUtilBadge" style="background: #1e3a8a; color: #ffffff;">80% Utilized</span>
+                                </div>
+                                <div class="input-with-symbol">
+                                    <span class="currency-prefix">%</span>
+                                    <input type="text" id="dodUtilInput" class="calc-input" value="80" inputmode="numeric" style="font-weight: 700; color: var(--color-navy);">
+                                </div>
+                                <input type="range" id="dodUtilSlider" class="calc-slider" min="10" max="100" step="5" value="80">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 3px;">
+                                    <span>10% (Low Drawing)</span>
+                                    <span>80% (Typical Biz Cycle)</span>
+                                    <span>100% (Full Sanction)</span>
+                                </div>
+                                <span style="font-size: 0.72rem; color: #1e3a8a; margin-top: 4px; display: block; font-weight: 600;">Interest is calculated only on utilized funds, saving substantial interest versus term loans.</span>
+                            </div>
+
+                            <!-- Existing Monthly Obligations / EMIs -->
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="dodEmiInput">Existing Monthly Business/Personal EMIs</label>
+                                    <span class="input-badge" id="dodEmiBadge">₹0</span>
+                                </div>
+                                <div class="input-with-symbol">
+                                    <span class="currency-prefix">₹</span>
+                                    <input type="text" id="dodEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric">
+                                </div>
+                                <input type="range" id="dodEmiSlider" class="calc-slider" min="0" max="1000000" step="5000" value="0">
+                                <div class="slider-limits"><span>₹0</span><span>₹10,00,000</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Results Card -->
+                        <div class="calc-card results-card">
+                            <div class="result-highlight-badge">DOD Facility Summary</div>
+                            
+                            <div class="result-primary-metric">
+                                <span class="primary-label">Monthly Limit Reduction (Drop)</span>
+                                <div class="primary-value" id="dodMonthlyDropDisplay">₹83,333</div>
+                                <span class="primary-sub" id="dodMonthlyDropWords">Eighty-Three Thousand Three Hundred Thirty-Three</span>
+                            </div>
+
+                            <div class="metric-grid">
+                                <div class="metric-box">
+                                    <span class="metric-title">1st Month Interest (at 80% Draw)</span>
+                                    <span class="metric-val">₹<span id="dodFirstMonthInterest">30,833</span></span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="metric-title">Daily Interest Outflow</span>
+                                    <span class="metric-val">₹<span id="dodDailyInterest">1,028</span></span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="metric-title">Total Limit Dropped</span>
+                                    <span class="metric-val">₹<span id="dodTotalDropVal">50,00,000</span></span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="metric-title">Est. Total Interest Payable</span>
+                                    <span class="metric-val">₹<span id="dodTotalInterestVal">9,44,792</span></span>
+                                </div>
+                            </div>
+
+                            <!-- Statutory Govt & Bank Charges Breakdown -->
+                            <div class="statutory-charges-box" style="margin-top: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--color-navy); text-transform: uppercase; letter-spacing: 0.5px;">
+                                        ⚖️ DOD Stamp Duty &amp; Govt Charges
+                                    </span>
+                                    <span style="font-size: 0.7rem; color: #15803d; font-weight: 700; background: #dcfce7; padding: 2px 6px; border-radius: 4px;">Fixed Slabs</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem;">
+                                    <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                        <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Loan Stamp Duty (Govt. 0.3%):</span>
+                                        <strong class="charge-stamp-duty" style="color: var(--color-navy); font-size: 0.85rem;">₹15,000</strong> <span class="charges-loan-base-display" style="font-size: 0.7rem; color: #64748b; font-weight: 600;"></span>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                        <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notice of Intimation (Govt.):</span>
+                                        <strong style="color: var(--color-navy); font-size: 0.82rem;">₹15,000 (up to 30L)</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                        <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notice Vendor Filing:</span>
+                                        <strong style="color: var(--color-navy); font-size: 0.82rem;">₹1,800 - ₹3,000</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                                        <span style="color: #64748b; font-size: 0.68rem; display: block; font-weight: 600;">Notary &amp; Franking (with Documents):</span>
+                                        <strong style="color: var(--color-navy); font-size: 0.82rem;">₹3,500 - ₹10,000</strong>
+                                    </div>
+
+                                    <!-- Government Bank Legal, Valuation & PF Offer Card -->
+                                    <div style="grid-column: 1 / -1; background: #f0fdf4; border: 1.5px solid #86efac; padding: 8px 10px; border-radius: 6px; margin-top: 4px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; flex-wrap: wrap; gap: 4px;">
+                                            <span style="color: #166534; font-size: 0.72rem; font-weight: 700;">🏛️ Government Bank Legal &amp; Valuation Fees:</span>
+                                            <strong class="govt-legal-valuation-val" style="color: #15803d; font-size: 0.88rem;">₹12,000</strong>
+                                        </div>
+                                        <span class="govt-legal-valuation-slab" style="font-size: 0.68rem; color: #15803d; font-weight: 600; display: block;">(₹6,500 + ₹5,500 Legal &amp; Valuation)</span>
+                                        <span style="font-size: 0.66rem; color: #475569; display: block; margin-top: 3px; line-height: 1.4;">
+                                            <strong>Govt Bank Offer PF:</strong> ₹2,500 + GST to ₹12,000 + GST &bull; <em>MV Slabs: Under 1 Cr: ₹6.5k+₹5.5k | 1-5 Cr: 2 Legal ₹13k+₹5.5k | Above 5 Cr: ₹13k+₹11k</em>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Bank Processing Fee & Insurance (Manual Input) -->
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">
+                                        Optional Bank Charges &amp; Insurance (Manual / Custom Entry 0.25+gst ):
+                                    </span>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div style="background: #f1f5f9; padding: 6px 8px; border-radius: 6px;">
+                                            <label for="dodPfInput" style="font-size: 0.68rem; font-weight: 600; color: #475569; display: block; margin-bottom: 2px;">Processing Fee (PF ₹) .</label>
+                                            <input type="text" id="dodPfInput" class="calc-input" placeholder="e.g. ₹ 0.25 to 1.50%+GST" style="padding: 4px 8px; font-size: 0.82rem; height: auto;" inputmode="numeric">
+                                        </div>
+                                        <div style="background: #f1f5f9; padding: 6px 8px; border-radius: 6px;">
+                                            <label for="dodInsuranceInput" style="font-size: 0.68rem; font-weight: 600; color: #475569; display: block; margin-bottom: 2px;">Life 0.5% -5% / Property Insurance (₹)5000-50000</label>
+                                            <input type="text" id="dodInsuranceInput" class="calc-input" placeholder="e.g. ₹30,000" style="padding: 4px 8px; font-size: 0.82rem; height: auto;" inputmode="numeric">
+                                        </div>
+                                    </div>
+                                    <div id="dodCustomChargesTotal" style="margin-top: 6px; font-size: 0.72rem; color: #15803d; font-weight: 700; display: none;">
+                                        Total Bank PF &amp; Insurance: <span id="dodCustomChargesTotalVal">₹0</span>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 6px; font-size: 0.7rem; color: #64748b;">
+                                    * Processing Fee (PF) &amp; Loan Insurance are as per lending bank/NBFC guidelines.
+                                </div>
+                            </div>
+
+                            <div class="result-cta-group">
+                                <a href="https://wa.me/919594736833" id="dodWhatsAppBtn" target="_blank" rel="noopener noreferrer" class="btn btn-wa-full">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                                    <span>Share DOD on WhatsApp</span>
+                                </a>
+                                <a href="/#contact" class="btn btn-navy-full">Apply for DOD Sanction &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dropline Schedule Box -->
+                <div class="schedule-box" style="margin-top: 32px;">
+                    <div class="schedule-header">
+                        <div>
+                            <h3 class="schedule-title">Month-by-Month Dropline Overdraft Schedule</h3>
+                            <p class="schedule-subtitle">Watch your sanctioned credit limit step down periodically while interest stays restricted to drawing power.</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <button type="button" class="btn-outline-sm" id="btnDownloadDodCsv">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Download DOD Schedule (CSV)</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Opening Limit</th>
+                                    <th>Monthly Drop</th>
+                                    <th>Closing Limit</th>
+                                    <th>Estimated Monthly Interest</th>
+                                    <th>Principal Reduction</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dodScheduleTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="calc-disclaimer-box" role="note" aria-label="Disclaimer" style="margin-top: 24px;">
+                    <div class="calc-disclaimer-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Regulatory Notice &amp; Statutory Disclaimer</span>
+                    </div>
+                    <p>This calculator provides an indicative estimate only. Dropline Overdraft (DOD) limits, interest rates, daily interest debit cycle, and limit reduction frequency are subject to lending bank/NBFC credit sanctions and operational policies. MM Financial Services Consultant acts as an authorized advisory partner.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- OTHER CALCULATORS STRIP -->
+        <section class="other-calcs-section" id="othercalculators">
+            <div class="calc-container">
+                <div class="other-calcs-header">
+                    <div>
+                        <h3 class="other-calcs-title">Explore Other Financial Calculators</h3>
+                        <p class="other-calcs-desc">Instant, bank-accurate financial tools to plan every aspect of your loans and wealth compounding.</p>
+                    </div>
+                    <a href="/calculators" class="btn btn-outline-navy">View All 19 Calculators &rarr;</a>
+                </div>
+
+                <div class="other-calcs-grid">
+                    <a href="/calculators/home-loan-eligibility-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Home Loan Eligibility Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/loan-against-property-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Loan Against Property (LAP) Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/home-loan-emi-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Loans</span>
+                            <h4 class="other-calc-title">Home Loan EMI Calculator</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+
+                    <a href="/calculators/loan-against-mutual-funds-calculator" class="other-calc-card">
+                        <div class="other-calc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><polyline points="8 16 12 12 16 14 20 10"/></svg></div>
+                        <div class="other-calc-info">
+                            <span class="other-calc-cat">Investments &bull; Loans</span>
+                            <h4 class="other-calc-title">Loan Against Mutual Funds (LAMF)</h4>
+                        </div>
+                        <span class="other-calc-arrow">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand-col">
+                    <div class="footer-logo">
+                        <div class="monogram-seal mini"><span class="seal-inner">MM</span></div>
+                        <div class="footer-brand-text">
+                            <span class="footer-brand-name">MM FINANCIAL SERVICES</span>
+                            <span class="footer-brand-sub">CONSULTANT</span>
+                        </div>
+                    </div>
+                    <p class="footer-tagline">&ldquo;Your Goals. Our Guidance. A Better Financial Future.&rdquo;</p>
+                    <p class="footer-bio">Comprehensive financial solutions across Loans, Mutual Funds &amp; Insurance.</p>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4 class="footer-col-title">Navigation</h4>
+                    <ul class="footer-links-list">
+                        <li><a href="/" class="footer-link">Home</a></li>
+                        <li><a href="/#about" class="footer-link">About Mukesh Tiwari</a></li>
+                        <li><a href="/loans" class="footer-link">Loans Portfolio</a></li>
+                        <li><a href="/mutual-funds" class="footer-link">Mutual Funds Portfolio</a></li>
+                        <li><a href="/insurance" class="footer-link">Insurance Solutions</a></li>
+                        <li><a href="/calculators" class="footer-link">All 19 Financial Calculators</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4 class="footer-col-title">Top Calculators</h4>
+                    <ul class="footer-links-list">
+                        <li><a href="/calculators/dropline-overdraft-loan-calculator" class="footer-link">Dropline Overdraft Calculator</a></li>
+                        <li><a href="/calculators/loan-against-property-calculator" class="footer-link">Loan Against Property (LAP)</a></li>
+                        <li><a href="/calculators/loan-against-mutual-funds-calculator" class="footer-link">Loan Against Mutual Funds</a></li>
+                        <li><a href="/calculators/home-loan-eligibility-calculator" class="footer-link">Home Loan Eligibility</a></li>
+                        <li><a href="/calculators/sip-calculator" class="footer-link">Mutual Fund SIP Calculator</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact-col">
+                    <h4 class="footer-col-title">Contact Consultant</h4>
+                    <p class="footer-contact-item"><strong>Mukesh Tiwari</strong></p>
+                    <p class="footer-contact-item">&#128222; <a href="tel:+919594736833">9594736833</a></p>
+                    <p class="footer-contact-item">&#9993; <a href="mailto:mmfsc09@gmail.com">mmfsc09@gmail.com</a></p>
+                    <p class="footer-contact-item">&#128205; Mumbai &bull; MMR, Maharashtra</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom-bar">
+                <p>&copy; 2026 MM Financial Services Consultant. All Rights Reserved. Lending &amp; Investment products subject to market &amp; underwriting risks.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/919594736833?text=Hi%20Mukesh%20ji,%20I%20have%20an%20enquiry%20regarding%20Dropline%20Overdraft%20(DOD)%20Loan." class="floating-whatsapp" target="_blank" rel="noopener" aria-label="Talk on WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="wa-icon"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.17.581 4.204 1.597 5.962l-1.697 6.202 6.368-1.67c1.701.928 3.655 1.464 5.732 1.464 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/></svg>
+        <span>Talk on WhatsApp</span>
+    </a>
+
+    <script src="/calculators/calculators.js?v=2.6"></script>
+</body>
+</html>

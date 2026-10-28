@@ -41,7 +41,15 @@ const CONFIG = {
       businessFoir: 0.60
     },
     charges: {
-      stampDutyRate: 0.003,            // 0.3% of loan amount (Fixed Govt Charges)
+      stampDutyRate: 0.003,
+      govtBankLegalUnder1Cr: 6500,
+      govtBankValuationUnder1Cr: 5500,
+      govtBankLegal1CrTo5Cr: 13000,
+      govtBankValuation1CrTo5Cr: 5500,
+      govtBankLegalAbove5Cr: 13000,
+      govtBankValuationAbove5Cr: 11000,
+      govtBankPfOfferMin: 2500,
+      govtBankPfOfferMax: 12000,            // 0.3% of loan amount (Fixed Govt Charges)
       noticeOfIntimationGovt: 15000,   // Loan amount up to 30 Lacs: 15,000 Govt
       noticeVendorMin: 1800,           // Vendor fee 1,800 - 3,000 as per bank
       noticeVendorMax: 3000,
@@ -62,7 +70,37 @@ const CONFIG = {
     return Math.round(val).toLocaleString('en-IN');
   }
 
-  function parseNumber(val) {
+    /* ── Government Bank Legal, Valuation & PF Calculation Helper ── */
+  function calcGovtBankFees(marketValue) {
+    const mv = Number(marketValue) || 0;
+    if (mv < 10000000) {
+      return {
+        legal: 6500,
+        valuation: 5500,
+        total: 12000,
+        slab: "Under ₹1 Cr",
+        breakdown: "₹6,500 + ₹5,500 (Legal + Valuation)"
+      };
+    } else if (mv < 50000000) {
+      return {
+        legal: 13000,
+        valuation: 5500,
+        total: 18500,
+        slab: "₹1 Cr to ₹5 Cr",
+        breakdown: "₹13,000 (2 Legal ₹6,500+₹6,500) + ₹5,500 (Valuation)"
+      };
+    } else {
+      return {
+        legal: 13000,
+        valuation: 11000,
+        total: 24000,
+        slab: "₹5 Cr & Above",
+        breakdown: "₹13,000 (Legal) + ₹11,000 (Valuation)"
+      };
+    }
+  }
+
+function parseNumber(val) {
     if (typeof val === 'number') return isFinite(val) ? val : 0;
     const clean = String(val || '').replace(/[^0-9.]/g, '');
     const num = parseFloat(clean);
@@ -442,6 +480,211 @@ const CONFIG = {
   }
 
   /* ── 1. ELIGIBILITY WIDGET CONTROLLER ──────────────────────────────────── */
+  
+  /* ── 15. Dropline Overdraft (DOD) Loan Calculator ───────────────────────── */
+  function initDroplineOdWidget(widget) {
+    const limitIn = widget.querySelector('#dodLimitInput');
+    const limitSl = widget.querySelector('#dodLimitSlider');
+    const limitBadge = widget.querySelector('#dodLimitBadge');
+
+    const rateIn = widget.querySelector('#dodRateInput');
+    const rateSl = widget.querySelector('#dodRateSlider');
+    const rateBadge = widget.querySelector('#dodRateBadge');
+
+    const tenureIn = widget.querySelector('#dodTenureInput');
+    const tenureSl = widget.querySelector('#dodTenureSlider');
+    const tenureBadge = widget.querySelector('#dodTenureBadge');
+
+    const utilIn = widget.querySelector('#dodUtilInput');
+    const utilSl = widget.querySelector('#dodUtilSlider');
+    const utilBadge = widget.querySelector('#dodUtilBadge');
+
+    const emiIn = widget.querySelector('#dodEmiInput');
+    const emiSl = widget.querySelector('#dodEmiSlider');
+    const emiBadge = widget.querySelector('#dodEmiBadge');
+
+    const monthlyDropDisplay = widget.querySelector('#dodMonthlyDropDisplay');
+    const monthlyDropWords = widget.querySelector('#dodMonthlyDropWords');
+    const firstMonthInterest = widget.querySelector('#dodFirstMonthInterest');
+    const dailyInterest = widget.querySelector('#dodDailyInterest');
+    const totalDropVal = widget.querySelector('#dodTotalDropVal');
+    const totalInterestVal = widget.querySelector('#dodTotalInterestVal');
+    const scheduleTbody = document.getElementById('dodScheduleTableBody');
+    const btnDownloadDodCsv = document.getElementById('btnDownloadDodCsv');
+    const chargesContainer = widget.querySelector('.statutory-charges-box');
+    const waBtn = widget.querySelector('#dodWhatsAppBtn');
+
+    let currentDodSchedule = [];
+
+    syncInputSlider(limitIn, limitSl, limitBadge, 'currency');
+    syncInputSlider(rateIn, rateSl, rateBadge, 'percent');
+    syncInputSlider(tenureIn, tenureSl, tenureBadge, 'custom', function (v) {
+      const yrs = parseInt(v, 10) || 1;
+      return yrs + ' Years (' + (yrs * 12) + ' Months)';
+    });
+    syncInputSlider(utilIn, utilSl, utilBadge, 'custom', function (v) {
+      return (parseInt(v, 10) || 80) + '% Utilized';
+    });
+    syncInputSlider(emiIn, emiSl, emiBadge, 'currency');
+
+    function calculateDod() {
+      const limit = parseNumber(limitIn ? limitIn.value : 5000000);
+      const rate = parseFloat(rateIn ? rateIn.value : 9.25) || 9.25;
+      const tenureYears = parseInt(tenureIn ? tenureIn.value : 5, 10) || 5;
+      const tenureMonths = Math.max(1, tenureYears * 12);
+      const utilPct = Math.min(100, Math.max(5, parseFloat(utilIn ? utilIn.value : 80) || 80));
+
+      const monthlyDrop = limit / tenureMonths;
+      
+      currentDodSchedule = [];
+      let currentLimit = limit;
+      let totalInterest = 0;
+      const monthlyRate = (rate / 100) / 12;
+
+      for (let m = 1; m <= tenureMonths; m++) {
+        const openingLimit = currentLimit;
+        const closingLimit = Math.max(0, openingLimit - monthlyDrop);
+        const utilizedAmount = (openingLimit * (utilPct / 100));
+        const monthInterest = utilizedAmount * monthlyRate;
+        totalInterest += monthInterest;
+
+        currentDodSchedule.push({
+          month: m,
+          openingLimit: openingLimit,
+          monthlyDrop: monthlyDrop,
+          closingLimit: closingLimit,
+          interest: monthInterest,
+          principalDrop: monthlyDrop
+        });
+
+        currentLimit = closingLimit;
+      }
+
+      const firstMonthUtilized = limit * (utilPct / 100);
+      const firstMonthInt = firstMonthUtilized * monthlyRate;
+      const dailyInt = (firstMonthUtilized * (rate / 100)) / 365;
+
+      if (monthlyDropDisplay) monthlyDropDisplay.textContent = '₹' + fmtINR(monthlyDrop);
+      if (monthlyDropWords) monthlyDropWords.textContent = formatCurrencyWords(monthlyDrop);
+      if (firstMonthInterest) firstMonthInterest.textContent = fmtINR(firstMonthInt);
+      if (dailyInterest) dailyInterest.textContent = fmtINR(dailyInt);
+      if (totalDropVal) totalDropVal.textContent = fmtINR(limit);
+      if (totalInterestVal) totalInterestVal.textContent = fmtINR(totalInterest);
+
+      if (scheduleTbody) {
+        scheduleTbody.innerHTML = '';
+        currentDodSchedule.forEach(function (row) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td>Month ' + row.month + '</td>' +
+            '<td>₹' + fmtINR(row.openingLimit) + '</td>' +
+            '<td style="color: #dc2626; font-weight: 600;">-₹' + fmtINR(row.monthlyDrop) + '</td>' +
+            '<td style="font-weight: 700; color: var(--color-navy);">₹' + fmtINR(row.closingLimit) + '</td>' +
+            '<td style="color: #b45309;">₹' + fmtINR(row.interest) + '</td>' +
+            '<td style="color: #15803d; font-weight: 600;">₹' + fmtINR(row.principalDrop) + '</td>';
+          scheduleTbody.appendChild(tr);
+        });
+      }
+
+      if (chargesContainer) {
+        const stampDuty = Math.round(limit * CONFIG.defaults.charges.stampDutyRate);
+        const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
+        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+        const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
+        if (baseDisplayEl) baseDisplayEl.textContent = limit > 0 ? ('(₹' + fmtINR(limit) + ')') : '';
+
+        const govtFees = calcGovtBankFees(limit);
+        const govtLegalValEl = chargesContainer.querySelector('.govt-legal-valuation-val');
+        const govtSlabEl = chargesContainer.querySelector('.govt-legal-valuation-slab');
+        if (govtLegalValEl) govtLegalValEl.textContent = '₹' + fmtINR(govtFees.total);
+        if (govtSlabEl) govtSlabEl.textContent = '(' + govtFees.breakdown + ')';
+
+        const dodPfIn = widget.querySelector('#dodPfInput');
+        const dodInsIn = widget.querySelector('#dodInsuranceInput');
+        const dodTotBox = widget.querySelector('#dodCustomChargesTotal');
+        const dodTotVal = widget.querySelector('#dodCustomChargesTotalVal');
+
+        let pfVal = parseNumber((dodPfIn && dodPfIn.value) || 0);
+        if (pfVal === 0 && limit > 0) {
+          pfVal = Math.round(limit * (0.0025 * 1.18));
+          if (dodPfIn && !dodPfIn.dataset.userEdited) {
+            dodPfIn.placeholder = '₹' + fmtINR(pfVal) + ' (0.25%+GST)';
+          }
+        }
+
+        let insVal = parseNumber((dodInsIn && dodInsIn.value) || 0);
+        if (insVal === 0 && limit > 0) {
+          insVal = Math.round(limit * 0.02);
+          if (dodInsIn && !dodInsIn.dataset.userEdited) {
+            dodInsIn.placeholder = '₹' + fmtINR(insVal) + ' (2% Life / Property)';
+          }
+        }
+
+        const totalCharges = pfVal + insVal;
+        if (dodTotBox && dodTotVal) {
+          dodTotBox.style.display = totalCharges > 0 ? 'block' : 'none';
+          dodTotVal.textContent = '₹' + fmtINR(totalCharges);
+        }
+      }
+
+      if (waBtn) {
+        const lines = [
+          'Hi Mukesh ji, I checked the Dropline Overdraft (DOD) Calculator on your portal:',
+          '• Sanctioned Limit: ₹' + fmtINR(limit),
+          '• Tenure: ' + tenureYears + ' Years (' + tenureMonths + ' Months)',
+          '• Interest Rate: ' + rate + '% p.a.',
+          '• Monthly Limit Drop: ₹' + fmtINR(monthlyDrop) + '/month',
+          '• Est. First Month Interest: ₹' + fmtINR(firstMonthInt),
+          'Please advise on best bank sanction and Govt Bank offer rates.'
+        ];
+        waBtn.href = 'https://wa.me/' + CONFIG.whatsappNumber + '?text=' + encodeURIComponent(lines.join('\n'));
+      }
+    }
+
+    [limitIn, limitSl, rateIn, rateSl, tenureIn, tenureSl, utilIn, utilSl, emiIn, emiSl].forEach(function (el) {
+      if (!el) return;
+      el.addEventListener('input', calculateDod);
+      el.addEventListener('change', calculateDod);
+    });
+
+    const dodPfIn = widget.querySelector('#dodPfInput');
+    const dodInsIn = widget.querySelector('#dodInsuranceInput');
+    [dodPfIn, dodInsIn].forEach(function (input) {
+      if (!input) return;
+      input.addEventListener('input', function () {
+        input.dataset.userEdited = 'true';
+        calculateDod();
+      });
+    });
+
+    if (btnDownloadDodCsv) {
+      btnDownloadDodCsv.addEventListener('click', function () {
+        if (!currentDodSchedule || !currentDodSchedule.length) return;
+        let csv = 'Month,Opening Limit (INR),Monthly Drop (INR),Closing Limit (INR),Estimated Monthly Interest (INR),Principal Reduction (INR)\n';
+        currentDodSchedule.forEach(function (r) {
+          csv += [
+            r.month,
+            Math.round(r.openingLimit),
+            Math.round(r.monthlyDrop),
+            Math.round(r.closingLimit),
+            Math.round(r.interest),
+            Math.round(r.principalDrop)
+          ].join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'Dropline_Overdraft_Schedule.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+
+    calculateDod();
+  }
+
   function initEligibilityWidget(widget) {
     let profile = 'salaried';
     const tabSalaried = document.getElementById('tabSalaried');
@@ -976,8 +1219,18 @@ const CONFIG = {
         const stampDuty = Math.round(chargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
         const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+        const emiGovtFees = calcGovtBankFees(P);
+        const emiGovtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
+        const emiGovtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
+        if (emiGovtLegalValEl) emiGovtLegalValEl.textContent = "₹" + fmtINR(emiGovtFees.total);
+        if (emiGovtSlabEl) emiGovtSlabEl.textContent = "(" + emiGovtFees.breakdown + ")";
         const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
         if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('(₹' + fmtINR(chargeBaseAmount) + ')') : '';
+        const govtFees = calcGovtBankFees(chargeBaseAmount);
+        const govtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
+        const govtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
+        if (govtLegalValEl) govtLegalValEl.textContent = "₹" + fmtINR(govtFees.total);
+        if (govtSlabEl) govtSlabEl.textContent = "(" + govtFees.breakdown + ")";
 
         // Dynamic Bank Charges: PF (1%+GST for LRD, 0.25%+GST standard), Life Loan Insurance 2%, Property Insurance 7%
         const isLrdActive = (bizProgSel && (bizProgSel.value === 'lrd' || (bizProgSel.value === 'turnover' && bizIndustrySel && bizIndustrySel.value === 'lrd')));
@@ -1851,6 +2104,12 @@ const CONFIG = {
         if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
         const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
         if (baseDisplayEl) baseDisplayEl.textContent = lapChargeBaseAmount > 0 ? ('(₹' + fmtINR(lapChargeBaseAmount) + ')') : '';
+        const lapMvVal = Math.max(parseNumber((propIn && propIn.value) || 0), lapChargeBaseAmount);
+        const lapGovtFees = calcGovtBankFees(lapMvVal);
+        const lapGovtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
+        const lapGovtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
+        if (lapGovtLegalValEl) lapGovtLegalValEl.textContent = "₹" + fmtINR(lapGovtFees.total);
+        if (lapGovtSlabEl) lapGovtSlabEl.textContent = "(" + lapGovtFees.breakdown + ")";
 
         // Dynamic Bank Charges for LAP: PF 1%+GST for LRD, 0.25%+GST standard, Life Insurance 2%, Property Insurance 7%
         const isLrdActiveLap = (progSel && (progSel.value === 'lrd' || (progSel.value === 'turnover' && lapIndustrySel && lapIndustrySel.value === 'lrd')));
@@ -2320,7 +2579,7 @@ const CONFIG = {
         const desc = (card.querySelector('.hub-card-desc') || {}).textContent || '';
         const text = (title + ' ' + desc).toLowerCase();
 
-        const matchCat = (activeCategory === 'all' || cat.toLowerCase() === activeCategory.toLowerCase());
+        const matchCat = (activeCategory === 'all' || cat.toLowerCase().split(/\\s+/).includes(activeCategory.toLowerCase()));
         const matchSearch = (!searchQuery || text.includes(searchQuery.toLowerCase()));
 
         card.style.display = (matchCat && matchSearch) ? 'flex' : 'none';
@@ -3601,7 +3860,8 @@ const CONFIG = {
     if (widget) {
       setupUniversalResetButton(widget);
       const type = widget.dataset.widgetType;
-      if (type === 'eligibility') initEligibilityWidget(widget);
+      if (type === 'dropline-od') initDroplineOdWidget(widget);
+      else if (type === 'eligibility') initEligibilityWidget(widget);
       else if (type === 'loan-emi') initLoanEmiWidget(widget);
       else if (type === 'comparison') initComparisonWidget(widget);
       else if (type === 'education-loan') initEducationLoanWidget(widget);
