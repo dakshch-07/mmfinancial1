@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FINANCIAL CALCULATORS HUB & SUITE — calculators.js
  * MM Financial Services Consultant (Mukesh Tiwari)
  * 100% Client-side Vanilla JS engines for all calculators.
@@ -1216,53 +1216,28 @@ function parseNumber(val) {
       const manualReqLoan = reqAmtIn ? parseNumber(reqAmtIn.value) : 0;
       const chargeBaseAmount = manualReqLoan > 0 ? manualReqLoan : maxLoan;
       if (chargesContainer) {
-        const stampDuty = Math.round(chargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
-        const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
-        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
-        const emiGovtFees = calcGovtBankFees(P);
-        const emiGovtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
-        const emiGovtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
-        if (emiGovtLegalValEl) emiGovtLegalValEl.textContent = "₹" + fmtINR(emiGovtFees.total);
-        if (emiGovtSlabEl) emiGovtSlabEl.textContent = "(" + emiGovtFees.breakdown + ")";
         const baseDisplayEl = chargesContainer.querySelector('.charges-loan-base-display');
-        if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('(₹' + fmtINR(chargeBaseAmount) + ')') : '';
-        const govtFees = calcGovtBankFees(chargeBaseAmount);
-        const govtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
-        const govtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
-        if (govtLegalValEl) govtLegalValEl.textContent = "₹" + fmtINR(govtFees.total);
-        if (govtSlabEl) govtSlabEl.textContent = "(" + govtFees.breakdown + ")";
+        if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('on ₹' + fmtINR(chargeBaseAmount)) : '';
 
-        // Dynamic Bank Charges: PF (1%+GST for LRD, 0.25%+GST standard), Life Loan Insurance 2%, Property Insurance 7%
-        const isLrdActive = (bizProgSel && (bizProgSel.value === 'lrd' || (bizProgSel.value === 'turnover' && bizIndustrySel && bizIndustrySel.value === 'lrd')));
-        const defaultPfRate = isLrdActive ? (0.01 * 1.18) : (0.0025 * 1.18);
-
-        const eligPfIn = widget.querySelector('#customPfInput');
-        const eligInsIn = widget.querySelector('#customInsuranceInput');
-        const eligTotBox = widget.querySelector('#customChargesTotal');
-        const eligTotVal = widget.querySelector('#customChargesTotalVal');
-
-        let pfVal = parseNumber((eligPfIn && eligPfIn.value) || 0);
-        if (pfVal === 0 && chargeBaseAmount > 0) {
-          pfVal = Math.round(chargeBaseAmount * defaultPfRate);
-          if (eligPfIn && !eligPfIn.dataset.userEdited) {
-            eligPfIn.placeholder = isLrdActive ? ('₹' + fmtINR(pfVal) + ' (1%+GST LRD)') : ('₹' + fmtINR(pfVal) + ' (0.25%+GST)');
-          }
-        }
-
-        let insVal = parseNumber((eligInsIn && eligInsIn.value) || 0);
-        if (insVal === 0 && chargeBaseAmount > 0) {
-          insVal = Math.round(chargeBaseAmount * 0.02);
-          if (eligInsIn && !eligInsIn.dataset.userEdited) {
-            eligInsIn.placeholder = '₹' + fmtINR(insVal) + ' (2% Life / Property)';
-          }
-        }
-
-        const totalBankCharges = pfVal + insVal;
-        if (eligTotBox && eligTotVal) {
-          eligTotBox.style.display = totalBankCharges > 0 ? 'block' : 'none';
-          eligTotVal.textContent = '₹' + fmtINR(totalBankCharges);
-        }
-      }
+        if (isPersonal) {
+          // Personal Loan: PF 2.5% – 3% + 18% GST
+          const pfMin = Math.round(chargeBaseAmount * 0.025 * 1.18);
+          const pfMax = Math.round(chargeBaseAmount * 0.03 * 1.18);
+          const pfMinEl = chargesContainer.querySelector('.pl-pf-min-val');
+          const pfMaxEl = chargesContainer.querySelector('.pl-pf-max-val');
+          if (pfMinEl) pfMinEl.textContent = chargeBaseAmount > 0 ? ('₹' + fmtINR(pfMin)) : '—';
+          if (pfMaxEl) pfMaxEl.textContent = chargeBaseAmount > 0 ? ('₹' + fmtINR(pfMax)) : '—';
+        } else {
+          const stampDuty = Math.round(chargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
+          const stampEl = chargesContainer.querySelector('.charge-stamp-duty');
+          if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+          const govtFees = calcGovtBankFees(chargeBaseAmount);
+          const govtLegalValEl = chargesContainer.querySelector(".govt-legal-valuation-val");
+          const govtSlabEl = chargesContainer.querySelector(".govt-legal-valuation-slab");
+          if (govtLegalValEl) govtLegalValEl.textContent = "₹" + fmtINR(govtFees.total);
+          if (govtSlabEl) govtSlabEl.textContent = "(" + govtFees.breakdown + ")";
+        } // end else (home loan charges)
+      } // end if (chargesContainer)
 
       updateWhatsAppCta(
         document.getElementById('eligWhatsAppBtn'),
