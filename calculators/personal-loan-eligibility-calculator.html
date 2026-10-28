@@ -213,7 +213,7 @@
                 <div class="calc-hero-content">
                     <span class="calc-hero-badge">Quick Unsecured Estimate</span>
                     <h1 class="calc-hero-title">Personal Loan Eligibility Calculator</h1>
-                    <p class="calc-hero-subtitle">Find out how much personal loan you can qualify for with leading banks and NBFCs. Based on your net salary, employer category, and existing obligations, get an instant estimate of your borrowing capacity.</p>
+                    <p class="calc-hero-subtitle">Find out how much personal loan you can qualify for with leading banks and NBFCs. Based on your net monthly salary and existing obligations, get an instant estimate of your unsecured borrowing capacity at 65% FOIR.</p>
                 </div>
             </div>
         </section>
@@ -224,16 +224,7 @@
                 
     <div class="calc-widget" id="calcWidget" data-widget-type="eligibility" data-calc-id="personal-loan-eligibility-calculator">
         <!-- Level 1 Profile Tabs -->
-        <div class="calc-tabs-bar" role="tablist">
-            <button type="button" class="calc-tab-btn active" id="tabSalaried" role="tab" aria-selected="true" data-profile="salaried">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Salaried Professional</span>
-            </button>
-            <button type="button" class="calc-tab-btn" id="tabBusiness" role="tab" aria-selected="false" data-profile="business">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                <span>Business / Self-Employed (ITR)</span>
-            </button>
-        </div>
+        
 
         <div class="calc-widget-grid">
             <!-- Left: Inputs Card -->
@@ -338,191 +329,6 @@
                 </div>
 
                 <!-- Business Inputs (2-Year ITR Banking Assessment / Turnover Program) -->
-                <div id="businessFields" class="profile-fields" style="display:none;">
-                    <!-- Assessment Method Selector -->
-                    <div class="input-group">
-                        <label for="bizProgramSelect" style="font-size:0.78rem; font-weight:700;">Business Assessment Underwriting Program</label>
-                        <select id="bizProgramSelect" class="calc-input" style="font-weight: 700; color: var(--color-navy);">
-                            <option value="itr" selected>Net Profit Method (2-Year ITR PAT + Depreciation)</option>
-                            <option value="turnover">Gross Turnover Program (Banking Norm: Mfg, Services, Traders, CA, CS, Doctors)</option>
-                        </select>
-                    </div>
-
-                    <!-- Turnover Program Specific Controls -->
-                    <div id="turnoverProgramFields" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
-                        <!-- Industry / Profession Category Selector -->
-                        <div class="input-group">
-                            <label for="bizIndustrySelect" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Industry / Profession Category (Bank Benchmark)</label>
-                            <select id="bizIndustrySelect" class="calc-input" style="font-weight: 700; color: var(--color-navy); border-color: #fcd34d;">
-                                <option value="mfg" data-min="10" data-max="15" data-def="15" data-foir="0.85">Manufacturing (10% - 15% Margin | 85% FOIR)</option>
-                                <option value="services" data-min="10" data-max="15" data-def="15" data-foir="0.85">Services (10% - 15% Margin | 85% FOIR)</option>
-                                <option value="trader" data-min="5" data-max="10" data-def="7.5" data-foir="0.85" selected>Trading / Wholesale / Retail (5% - 10% Margin)</option>
-                                <option value="ca" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Chartered Accountant (CA 3x Gross Receipts)</option>
-                                <option value="cs" data-min="1.5" data-max="1.5" data-def="1.5" data-is-multiplier="true">Company Secretary (CS 1.5x Gross Receipts)</option>
-                                <option value="doctor" data-min="2" data-max="3" data-def="3" data-is-multiplier="true">Doctor (MBBS / Specialist 3x Gross Receipts)</option>
-                                <option value="custom" data-min="1" data-max="20" data-def="5">Custom Multiplier (1% - 20%)</option>
-                            </select>
-                        </div>
-
-                        <!-- Manual Percentage Margin Field with bracket limits -->
-                        <div class="input-group">
-                            <div class="input-header">
-                                <label for="bizTurnoverPctInput" id="bizTurnoverPctLabel" style="font-size: 0.78rem; font-weight: 700; color: #78350f;">Manual Net Cash Margin % (Editable)</label>
-                                <span class="input-badge" id="bizTurnoverPctBadge">7.5%</span>
-                            </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix" id="bizTurnoverPrefix">%</span>
-                                <input type="text" id="bizTurnoverPctInput" class="calc-input" value="7.5" inputmode="decimal" aria-label="Turnover Percentage" style="border-color: #fcd34d; font-weight: 700;">
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #78350f; font-weight: 700; margin-top: 3px;">
-                                <span id="bizTurnoverMinLimit">5.0% (Min)</span>
-                                <span id="bizTurnoverMaxLimit">10.0% (Max)</span>
-                            </div>
-                            <span id="bizTurnoverNote" style="font-size: 0.72rem; color: #78350f; margin-top: 3px; display: block;">Trading benchmark accepted by leading banks: 5% to 10% of gross turnover.</span>
-                        </div>
-
-                        <!-- Current & Previous Year Turnover Inputs -->
-                        <div class="input-group">
-                            <div class="input-header">
-                                <label for="bizTurnoverInput" id="bizTurnoverLabel">Current Financial Year Gross Turnover / Receipts (₹)</label>
-                                <span class="input-badge" id="bizTurnoverBadge">₹0</span>
-                            </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix">₹</span>
-                                <input type="text" id="bizTurnoverInput" class="calc-input" value="" placeholder="e.g. 2,00,00,000" inputmode="numeric" aria-label="Current Year Turnover">
-                            </div>
-                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Latest / Current FY revenue as per GST returns / Audited P&amp;L.</span>
-                        </div>
-
-                        <div class="input-group">
-                            <div class="input-header">
-                                <label for="bizTurnoverYear2Input" id="bizTurnoverYear2Label">Previous Financial Year Gross Turnover / Receipts (₹)</label>
-                                <span class="input-badge" id="bizTurnoverYear2Badge">₹0</span>
-                            </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix">₹</span>
-                                <input type="text" id="bizTurnoverYear2Input" class="calc-input" value="" placeholder="e.g. 1,80,00,000" inputmode="numeric" aria-label="Previous Year Turnover">
-                            </div>
-                            <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block;">Previous FY revenue as per GST returns / Audited P&amp;L.</span>
-                        </div>
-
-                        <!-- 2-Year Average & Derived Monthly Cash Flow Card -->
-                        <div style="background: #ffffff; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 6px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px;">
-                                <span style="color: #78350f; font-weight: 600;" id="bizAvgTurnoverLabel">2-Year Average Turnover:</span>
-                                <strong id="bizAvgTurnoverBadge" style="color: var(--color-navy); font-size: 1.05rem; font-weight: 800;">₹0</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px; background: #ecfdf5; border: 1px solid #a7f3d0;">
-                                <span style="color: #065f46; font-weight: 700;">Derived Net Monthly Income:</span>
-                                <strong id="bizMonthlyIncomeBadge" style="color: #047857; font-size: 1.05rem; font-weight: 800;">₹0 / mo</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Standard 2-Year ITR Fields -->
-                    <div id="itrProgramFields">
-                        <div class="input-group">
-                            <div class="input-header">
-                                <label for="bizProfitInput">Latest Year Net Profit (ITR Year 1 PAT)</label>
-                                <span class="input-badge" id="bizProfitBadge">₹0</span>
-                            </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix">₹</span>
-                                <input type="text" id="bizProfitInput" class="calc-input" value="" placeholder="e.g. 12,00,000" inputmode="numeric" aria-label="Latest Year Net Profit">
-                            </div>
-                            <input type="range" id="bizProfitSlider" class="calc-slider" min="100000" max="20000000" step="25000" value="1200000">
-                            <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
-                        </div>
-
-                        <div class="input-group">
-                            <div class="input-header">
-                                <label for="bizProfit2Input">Previous Year Net Profit (ITR Year 2 PAT)</label>
-                                <span class="input-badge" id="bizProfit2Badge">₹0</span>
-                            </div>
-                            <div class="input-with-symbol">
-                                <span class="currency-prefix">₹</span>
-                                <input type="text" id="bizProfit2Input" class="calc-input" value="" placeholder="e.g. 10,00,000" inputmode="numeric" aria-label="Previous Year Net Profit">
-                            </div>
-                            <input type="range" id="bizProfit2Slider" class="calc-slider" min="100000" max="20000000" step="25000" value="1000000">
-                            <div class="slider-limits"><span>₹1 Lakh</span><span>₹2 Crore</span></div>
-                        </div>
-                    </div>
-
-                    <!-- 2-Year ITR Bank Assessment Strip -->
-                    <div class="biz-calc-summary-card">
-                        <div class="biz-summary-header">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mini-icon"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                            <span>2-Year ITR Assessment (24 Months / 12 Months)</span>
-                        </div>
-                        <div class="biz-summary-grid">
-                            <div class="biz-stat-item">
-                                <span class="biz-stat-label">2-Yr Avg Annual Profit</span>
-                                <span class="biz-stat-val" id="bizAvgAnnualProfit">₹0</span>
-                            </div>
-                            <div class="biz-stat-item">
-                                <span class="biz-stat-label">Monthly Profit (24M)</span>
-                                <span class="biz-stat-val" id="bizMonthlyProfit">₹0</span>
-                            </div>
-                            <div class="biz-stat-item highlight">
-                                <span class="biz-stat-label">Total Monthly Cash Flow</span>
-                                <span class="biz-stat-val" id="bizTotalMonthlyIncome">₹0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizDepreciationInput">Annual Depreciation (Non-Cash Add-back)</label>
-                            <span class="input-badge" id="bizDepreciationBadge">₹0</span>
-                        </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizDepreciationInput" class="calc-input" value="" placeholder="e.g. 1,50,000" inputmode="numeric" aria-label="Annual Depreciation">
-                        </div>
-                        <input type="range" id="bizDepreciationSlider" class="calc-slider" min="0" max="5000000" step="10000" value="150000">
-                        <div class="slider-limits"><span>₹0</span><span>₹50 Lakh (100% added back)</span></div>
-                    </div>
-
-                    <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizSalaryInput">Annual Partner / Director Remuneration</label>
-                            <span class="input-badge" id="bizSalaryBadge">₹0</span>
-                        </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizSalaryInput" class="calc-input" value="" placeholder="e.g. 3,00,000" inputmode="numeric" aria-label="Partner Director Salary">
-                        </div>
-                        <input type="range" id="bizSalarySlider" class="calc-slider" min="0" max="5000000" step="10000" value="300000">
-                        <div class="slider-limits"><span>₹0</span><span>₹50 Lakh (drawn from firm)</span></div>
-                    </div>
-
-                    <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizRentInput">Monthly Rental Income</label>
-                            <span class="input-badge" id="bizRentBadge">₹0</span>
-                        </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizRentInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Monthly Rental Income">
-                        </div>
-                        <input type="range" id="bizRentSlider" class="calc-slider" min="0" max="500000" step="1000" value="0">
-                        <div class="slider-limits"><span>₹0</span><span>₹5,00,000</span></div>
-                    </div>
-
-                    <div class="input-group">
-                        <div class="input-header">
-                            <label for="bizEmiInput">Existing Monthly Business/Personal EMIs</label>
-                            <span class="input-badge" id="bizEmiBadge">₹0</span>
-                        </div>
-                        <div class="input-with-symbol">
-                            <span class="currency-prefix">₹</span>
-                            <input type="text" id="bizEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Existing Business EMIs">
-                        </div>
-                        <input type="range" id="bizEmiSlider" class="calc-slider" min="0" max="1000000" step="1000" value="0">
-                        <div class="slider-limits"><span>₹0</span><span>₹10,00,000</span></div>
-                    </div>
-                </div>
-
                 <!-- CIBIL Score Selection -->
                 <div class="input-group">
                     <div class="input-header">
