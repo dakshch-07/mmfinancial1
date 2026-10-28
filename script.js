@@ -2543,17 +2543,9 @@ function initLoanForm() {
                                 <strong style="color: #166534; display: block;">Minimum Login Fees (Non-Refundable):</strong>
                                 <span>₹1,000 to ₹5,000 + GST</span>
                             </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Processing Fee (PF):</strong>
-                                <span>0.25% to 1.50% + GST (Govt offer ₹2,500 - ₹12,000)</span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Legal &amp; Valuation Charges:</strong>
-                                <span>As per bank policy (Govt: ₹12k &bull; 1-5Cr: ₹18.5k &bull; 5Cr+: ₹24k)</span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Loan Insurance (Life &amp; Property):</strong>
-                                <span>Life 0.5% - 5% / Property ₹5,000 - ₹50,000 (As per bank norm)</span>
+                            <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border: 1px solid #dcfce7; grid-column: 1 / -1;">
+                                <strong style="color: #166534; display: block; font-size: 0.8rem; margin-bottom: 2px;">Processing Fees, Legal &amp; Valuation Charges and Insurance:</strong>
+                                <span style="color: #15803d; font-weight: 700;">As per bank norms applicable</span>
                             </div>
                         </div>
                     </div>
