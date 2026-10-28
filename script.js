@@ -2481,6 +2481,7 @@ function initLoanForm() {
 
     // STEP 2A: RENDER ELIGIBLE RESULT & DYNAMICALLY MOUNT LEAD FORM (ANTI-BYPASS)
     function renderEligibleSuccess(data, originalPayload) {
+        const isPersonalLoan = (originalPayload.loanType || "").toLowerCase().includes("personal");
         if (badgeStep1) {
             badgeStep1.classList.remove('active');
             badgeStep1.classList.add('completed');
@@ -2522,31 +2523,46 @@ function initLoanForm() {
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                             <span style="font-size: 0.8rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                                Indicative Govt. &amp; Bank Charges (As per Requested ₹${formatIndianNumber(originalPayload.loanAmount)})
+                                Indicative ${isPersonalLoan ? "Personal Loan Charges (Unsecured)" : "Govt. & Bank Charges"} (As per Requested ₹${formatIndianNumber(originalPayload.loanAmount)})
                             </span>
-                            <span style="font-size: 0.72rem; color: #15803d; font-weight: 600; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">Govt. &amp; Bank Slabs</span>
+                            <span style="font-size: 0.72rem; color: #15803d; font-weight: 600; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">${isPersonalLoan ? "Unsecured Slabs" : "Govt. & Bank Slabs"}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 0.76rem; color: #374151;">
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Stamp Duty (Govt. Fixed):</strong>
-                                <span>0.3% of Loan = <strong>₹${formatIndianNumber(Math.round(originalPayload.loanAmount * 0.003))}</strong></span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Notice of Intimation (Govt.):</strong>
-                                <span>₹15,000 (up to 30L) + Vendor (₹1,800 - ₹3,000)</span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Notary &amp; Franking with Document Charges:</strong>
-                                <span>₹3,500 - ₹10,000 (As per bank &amp; loan documentation)</span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
-                                <strong style="color: #166534; display: block;">Minimum Login Fees (Non-Refundable):</strong>
-                                <span>₹1,000 to ₹5,000 + GST</span>
-                            </div>
-                            <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border: 1px solid #dcfce7; grid-column: 1 / -1;">
-                                <strong style="color: #166534; display: block; font-size: 0.8rem; margin-bottom: 2px;">Processing Fees, Legal &amp; Valuation Charges and Insurance:</strong>
-                                <span style="color: #15803d; font-weight: 700;">As per bank norms applicable</span>
-                            </div>
+                            ${isPersonalLoan ? `
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Processing Fee (PF):</strong>
+                                    <span><strong>2.5% to 3% + GST</strong></span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Notary &amp; Franking Charges:</strong>
+                                    <span>As per bank norms applicable</span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7; grid-column: 1 / -1;">
+                                    <strong style="color: #166534; display: block;">Foreclosure / Prepayment Charges:</strong>
+                                    <span><strong>2% - 7%</strong> as per bank norms</span>
+                                </div>
+                            ` : `
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Stamp Duty (Govt. Fixed):</strong>
+                                    <span>0.3% of Loan = <strong>₹${formatIndianNumber(Math.round(originalPayload.loanAmount * 0.003))}</strong></span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Notice of Intimation (Govt.):</strong>
+                                    <span>₹15,000 (up to 30L) + Vendor (₹1,800 - ₹3,000)</span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Notary &amp; Franking with Document Charges:</strong>
+                                    <span>₹3,500 - ₹10,000 (As per bank &amp; loan documentation)</span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                                    <strong style="color: #166534; display: block;">Minimum Login Fees (Non-Refundable):</strong>
+                                    <span>₹1,000 to ₹5,000 + GST</span>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border: 1px solid #dcfce7; grid-column: 1 / -1;">
+                                    <strong style="color: #166534; display: block; font-size: 0.8rem; margin-bottom: 2px;">Processing Fees, Legal &amp; Valuation Charges and Insurance:</strong>
+                                    <span style="color: #15803d; font-weight: 700;">As per bank norms applicable</span>
+                                </div>
+                            `}
                         </div>
                     </div>
 
