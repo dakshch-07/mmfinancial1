@@ -15,6 +15,10 @@
       "dest": "/calculators/$1.html"
     },
     {
+      "src": "^/admin(\\.html)?/?$",
+      "dest": "/admin.html"
+    },
+    {
       "src": "^/loans(\\.html)?/?$",
       "dest": "/loans.html"
     },

@@ -212,6 +212,25 @@
                             <input type="text" name="extra_loan_fax" id="loanHoneypot" style="display:none !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
                             <input type="hidden" name="formStartTime" id="loanFormStartTime" value="">
 
+                            <!-- Applicant Contact Details (Enquiry & Instant Pre-Qualification) -->
+                            <div class="form-row" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                                <div class="form-field">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                        <label for="step1ApplicantName" style="margin-bottom: 0;">Applicant Full Name <span class="req">*</span></label>
+                                    </div>
+                                    <input type="text" id="step1ApplicantName" name="step1ApplicantName" placeholder="e.g. Rajesh Sharma" required class="form-input">
+                                    <span class="field-error" id="step1ApplicantNameError">Please enter your full name (min 2 chars)</span>
+                                </div>
+                                <div class="form-field">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                        <label for="step1ApplicantPhone" style="margin-bottom: 0;">Mobile / WhatsApp Number <span class="req">*</span></label>
+                                        <span class="input-badge" style="background: #e0f2fe; color: #0369a1; font-size: 0.7rem; font-weight: 700;">+91</span>
+                                    </div>
+                                    <input type="tel" id="step1ApplicantPhone" name="step1ApplicantPhone" placeholder="e.g. 98200 12345" required class="form-input" maxlength="10" inputmode="numeric">
+                                    <span class="field-error" id="step1ApplicantPhoneError">Please enter a valid 10-digit mobile number</span>
+                                </div>
+                            </div>
+
                             <!-- Employment Type & Loan Category -->
                             <div class="form-row">
                                 <div class="form-field">

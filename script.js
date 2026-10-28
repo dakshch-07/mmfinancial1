@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MMT Financial Services Consultant
  * Advisor: Mukesh Tiwari
  * Script: GSAP Animations, Live Financial Calculators (EMI & SIP), Filtering, Form Validation
@@ -715,6 +715,45 @@ async function sendLeadToEmail(data, subject, replyToEmail) {
     }
 }
 
+/**
+ * Universal helper to record enquiries and leads into Admin Panel Storage
+ * (Sends to /api/admin-records and mirrors into localStorage for instant admin display)
+ */
+async function recordAdminSubmission(type, data) {
+    try {
+        // 1. Mirror into localStorage for instantaneous client-side admin panel sync
+        try {
+            const storageKey = type === 'lead' ? 'mmt_admin_leads' : 'mmt_admin_enquiries';
+            const localList = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const record = Object.assign({
+                id: (type === 'lead' ? 'LEAD-' : 'ENQ-') + Date.now() + '-' + Math.floor(Math.random() * 1000),
+                type: type,
+                status: 'New',
+                timestamp: new Date().toISOString(),
+                istTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'
+            }, data);
+            localList.unshift(record);
+            if (localList.length > 500) localList.pop();
+            localStorage.setItem(storageKey, JSON.stringify(localList));
+        } catch (storageErr) {
+            console.warn('LocalStorage admin sync warning:', storageErr);
+        }
+
+        // 2. Transmit to serverless backend API
+        const endpoint = type === 'lead' 
+            ? '/api/admin-records?action=save-lead' 
+            : '/api/admin-records?action=save-enquiry';
+        
+        await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ type: type }, data))
+        }).catch(e => console.warn('Admin record API sync warning:', e));
+    } catch (err) {
+        console.warn('recordAdminSubmission failed gracefully:', err);
+    }
+}
+
 function initContactForm() {
     const form = document.getElementById('consultationForm');
     const fullName = document.getElementById('fullName');
@@ -778,6 +817,18 @@ function initContactForm() {
             `*Notes:* ${encodeURIComponent(enteredMsg)}`;
 
         const whatsappUrl = `https://wa.me/919594736833?text=${whatsappText}`;
+
+        // Record into Admin Panel (Enquiries Module)
+        recordAdminSubmission('enquiry', {
+            category: 'General Consultation',
+            customerName: enteredName,
+            phone: cleanPhone,
+            amount: enteredAmount,
+            details: {
+                serviceRequested: selectedService,
+                notes: enteredMsg
+            }
+        });
 
         // Dispatch lead notification email via FormSubmit.co
         sendLeadToEmail({
@@ -1647,6 +1698,8 @@ function initLoanForm() {
     const btnCheckText = document.getElementById('btnCheckEligibilityText');
     const badgeStep1 = document.getElementById('badgeStep1');
     const badgeStep2 = document.getElementById('badgeStep2');
+    const step1ApplicantName = document.getElementById('step1ApplicantName');
+    const step1ApplicantPhone = document.getElementById('step1ApplicantPhone');
 
     // Accordion elements
     const toggleAddIncomeBtn = document.getElementById('toggleAddIncomeBtn');
@@ -2341,6 +2394,10 @@ function initLoanForm() {
         step1Form.querySelectorAll('.form-field').forEach(f => f.classList.remove('has-error'));
 
         let isValid = true;
+        if (step1ApplicantName && !validateField(step1ApplicantName, step1ApplicantName.value.trim().length >= 2)) isValid = false;
+        const cleanStep1Phone = step1ApplicantPhone ? step1ApplicantPhone.value.replace(/[^0-9]/g, '') : '';
+        if (step1ApplicantPhone && !validateField(step1ApplicantPhone, /^[6-9]\d{9}$/.test(cleanStep1Phone))) isValid = false;
+
         if (!validateField(empType, empType && empType.value.trim() !== '')) isValid = false;
         if (!validateField(loanType, loanType && loanType.value.trim() !== '')) isValid = false;
 
@@ -2463,6 +2520,25 @@ function initLoanForm() {
                 };
             }
 
+            // Record customer enquiry immediately in Admin Panel (Enquiries Module)
+            const applicantName = step1ApplicantName ? step1ApplicantName.value.trim() : '';
+            const applicantPhone = step1ApplicantPhone ? step1ApplicantPhone.value.replace(/[^0-9]/g, '') : '';
+            recordAdminSubmission('enquiry', {
+                category: 'Loan Eligibility Check',
+                customerName: applicantName || 'Website Visitor',
+                phone: applicantPhone,
+                amount: `₹${formatIndianNumber(payload.loanAmount)}`,
+                details: {
+                    loanType: payload.loanType,
+                    profile: payload.loanEmpType,
+                    eligible: resultData.isEligible ? 'Eligible' : 'Needs Advisory',
+                    maxEligibleLoan: resultData.formattedMaxLoan || 'N/A',
+                    monthlyIncome: `₹${formatIndianNumber(payload.loanIncome)}`,
+                    tenure: payload.loanTenure,
+                    cibil: payload.loanCibil
+                }
+            });
+
             // Render Step 2 Results
             if (resultData.isEligible) {
                 renderEligibleSuccess(resultData, payload);
@@ -2482,6 +2558,8 @@ function initLoanForm() {
     // STEP 2A: RENDER ELIGIBLE RESULT & DYNAMICALLY MOUNT LEAD FORM (ANTI-BYPASS)
     function renderEligibleSuccess(data, originalPayload) {
         const isPersonalLoan = (originalPayload.loanType || "").toLowerCase().includes("personal");
+        const prefillName = step1ApplicantName ? step1ApplicantName.value.trim() : '';
+        const prefillPhone = step1ApplicantPhone ? step1ApplicantPhone.value.replace(/[^0-9]/g, '') : '';
         if (badgeStep1) {
             badgeStep1.classList.remove('active');
             badgeStep1.classList.add('completed');
@@ -2620,12 +2698,12 @@ function initLoanForm() {
                     <div class="form-row">
                         <div class="form-field">
                             <label for="leadFullName">Applicant Full Name <span class="req">*</span></label>
-                            <input type="text" id="leadFullName" name="loanFullName" placeholder="e.g. Rajesh Sharma" required class="form-input">
+                            <input type="text" id="leadFullName" name="loanFullName" placeholder="e.g. Rajesh Sharma" value="${prefillName}" required class="form-input">
                             <span class="field-error" id="leadFullNameError">Please enter your full name (at least 2 characters)</span>
                         </div>
                         <div class="form-field">
                             <label for="leadPhone">Mobile / WhatsApp Number <span class="req">*</span></label>
-                            <input type="tel" id="leadPhone" name="loanPhone" placeholder="e.g. 98200 12345" required class="form-input" maxlength="10">
+                            <input type="tel" id="leadPhone" name="loanPhone" placeholder="e.g. 98200 12345" value="${prefillPhone}" required class="form-input" maxlength="10">
                             <span class="field-error" id="leadPhoneError">Please enter a valid 10-digit Indian mobile number</span>
                         </div>
                     </div>
@@ -2859,6 +2937,27 @@ function initLoanForm() {
                 console.warn('API submission failed or offline, proceeding with WhatsApp sync fallback:', err);
             }
 
+            // Record into Admin Panel (Verified Leads Module)
+            recordAdminSubmission('lead', {
+                category: 'Verified Loan Application',
+                customerName: leadFullName.value.trim(),
+                phone: cleanPhone,
+                email: leadEmail.value.trim(),
+                city: leadCity && leadCity.value.trim() ? leadCity.value.trim() : 'Mumbai MMR',
+                loanType: originalPayload.loanType,
+                empType: originalPayload.loanEmpType,
+                requestedAmount: `₹${formatIndianNumber(originalPayload.loanAmount)}`,
+                maxEligibleLoan: eligibilityData.formattedMaxLoan,
+                estimatedEmi: eligibilityData.formattedEstimatedEmi,
+                roi: `${eligibilityData.roi || originalPayload.loanRoi || 8.5}% p.a.`,
+                cibilScore: originalPayload.loanCibil || '750+',
+                foirUsed: eligibilityData.foirUsed,
+                monthlyIncome: `₹${formatIndianNumber(originalPayload.loanIncome)}`,
+                existingEmi: `₹${formatIndianNumber(originalPayload.loanExistingEmi)}`,
+                preferredTenure: originalPayload.loanTenure,
+                notes: leadMessage && leadMessage.value.trim() ? leadMessage.value.trim() : ''
+            });
+
             // Dispatch verified loan lead notification email via FormSubmit.co to mmfsc09@gmail.com
             sendLeadToEmail({
                 "Applicant Name": leadFullName.value.trim(),
@@ -2996,6 +3095,22 @@ function initMfForm() {
 
         const waText = buildWhatsAppText(false);
         const waUrl = `https://wa.me/919594736833?text=${encodeURIComponent(waText)}`;
+
+        // Record into Admin Panel (Enquiries Module)
+        recordAdminSubmission('enquiry', {
+            category: 'Mutual Funds & SIP',
+            customerName: fullName.value.trim(),
+            phone: cleanPhone,
+            email: email && email.value.trim() ? email.value.trim() : '',
+            city: city && city.value.trim() ? city.value.trim() : '',
+            amount: amount.value.trim(),
+            details: {
+                investmentMode: mode.value,
+                timeHorizon: horizon.value,
+                riskProfile: risk.value,
+                goals: message && message.value.trim() ? message.value.trim() : ''
+            }
+        });
 
         // Dispatch lead notification email via FormSubmit.co to mmfsc09@gmail.com
         sendLeadToEmail({
@@ -3168,6 +3283,23 @@ function initInsuranceForm() {
 
         const waText = buildWhatsAppText(false);
         const waUrl = `https://wa.me/919594736833?text=${encodeURIComponent(waText)}`;
+
+        // Record into Admin Panel (Enquiries Module)
+        recordAdminSubmission('enquiry', {
+            category: 'Insurance Consultation',
+            customerName: fullName.value.trim(),
+            phone: cleanPhone,
+            email: email && email.value.trim() ? email.value.trim() : '',
+            city: city && city.value.trim() ? city.value.trim() : '',
+            amount: insCover.value,
+            details: {
+                insuranceType: insType.value,
+                desiredCover: insCover.value,
+                ageGroup: insAge.value,
+                tobaccoStatus: insTobacco.value,
+                healthNotes: message && message.value.trim() ? message.value.trim() : ''
+            }
+        });
 
         // Dispatch lead notification email via FormSubmit.co to mmfsc09@gmail.com
         sendLeadToEmail({
