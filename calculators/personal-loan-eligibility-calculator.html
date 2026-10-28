@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -361,15 +361,19 @@
 
                 <div class="input-group">
                     <div class="input-header">
-                        <label for="eligTenureInput">Loan Tenure (Years)</label>
-                        <span class="input-badge" id="eligTenureBadge">5 Years</span>
+                        <label for="eligTenureInput" id="eligTenureLabel">Loan Tenure</label>
+                        <div class="tenure-unit-toggle" role="group" aria-label="Tenure Unit Option">
+                            <button type="button" class="tenure-unit-btn active" data-unit="years" title="Tenure in Years"><span class="unit-full">Years</span><span class="unit-short">Yr</span></button>
+                            <button type="button" class="tenure-unit-btn" data-unit="months" title="Tenure in Months"><span class="unit-full">Months</span><span class="unit-short">Mo</span></button>
+                        </div>
+                        <span class="input-badge" id="eligTenureBadge">5 Years (60 Mo)</span>
                     </div>
                     <div class="input-with-symbol">
-                        <span class="currency-prefix">Yr</span>
+                        <span class="currency-prefix" id="eligTenurePrefix">Yr</span>
                         <input type="text" id="eligTenureInput" class="calc-input" value="5" inputmode="numeric" aria-label="Loan Tenure">
                     </div>
                     <input type="range" id="eligTenureSlider" class="calc-slider" min="1" max="7" step="1" value="5">
-                    <div class="slider-limits"><span>1 Year</span><span>7 Years</span></div>
+                    <div class="slider-limits" id="eligTenureLimits"><span>1 Year</span><span>7 Years</span></div>
                 </div>
             </div>
 

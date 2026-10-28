@@ -1029,9 +1029,69 @@ function parseNumber(val) {
     bindSync(document.getElementById('eligRateInput'), document.getElementById('eligRateSlider'), 6.0, 24.0, 0.05, recalc, true);
     bindSync(document.getElementById('eligTenureInput'), document.getElementById('eligTenureSlider'), 1, maxTenure, 1, recalc);
 
+    // Personal Loan Tenure Unit Switcher (Years 1-7 or Months 12-84)
+    let currentEligTenureUnit = 'years';
+    const eligTenureIn = document.getElementById('eligTenureInput');
+    const eligTenureSl = document.getElementById('eligTenureSlider');
+    const eligTenureLabel = document.getElementById('eligTenureLabel');
+    const eligTenurePrefix = document.getElementById('eligTenurePrefix');
+    const eligTenureLimits = document.querySelectorAll('#eligTenureLimits span');
+    const eligUnitBtns = widget.querySelectorAll('.tenure-unit-toggle .tenure-unit-btn');
+
+    if (eligUnitBtns && eligUnitBtns.length > 0) {
+      eligUnitBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetUnit = btn.dataset.unit;
+          if (targetUnit === currentEligTenureUnit) return;
+          currentEligTenureUnit = targetUnit;
+          eligUnitBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+          if (currentEligTenureUnit === 'months') {
+            const currentYrs = parseFloat(eligTenureIn ? eligTenureIn.value : 5) || 5;
+            const moVal = Math.max(12, Math.min(84, Math.round(currentYrs * 12)));
+            if (eligTenureSl) {
+              eligTenureSl.min = 12;
+              eligTenureSl.max = 84;
+              eligTenureSl.step = 1;
+              eligTenureSl.value = moVal;
+              updateSliderFill(eligTenureSl);
+            }
+            if (eligTenureIn) eligTenureIn.value = moVal;
+            if (eligTenureLabel) eligTenureLabel.textContent = 'Loan Tenure (Months)';
+            if (eligTenurePrefix) eligTenurePrefix.textContent = 'Mo';
+            if (eligTenureLimits && eligTenureLimits.length >= 2) {
+              eligTenureLimits[0].textContent = '12 Months';
+              eligTenureLimits[1].textContent = '84 Months';
+            }
+          } else {
+            const currentMos = parseFloat(eligTenureIn ? eligTenureIn.value : 60) || 60;
+            const yrVal = Math.max(1, Math.min(7, Math.round(currentMos / 12) || 1));
+            if (eligTenureSl) {
+              eligTenureSl.min = 1;
+              eligTenureSl.max = 7;
+              eligTenureSl.step = 1;
+              eligTenureSl.value = yrVal;
+              updateSliderFill(eligTenureSl);
+            }
+            if (eligTenureIn) eligTenureIn.value = yrVal;
+            if (eligTenureLabel) eligTenureLabel.textContent = 'Loan Tenure (Years)';
+            if (eligTenurePrefix) eligTenurePrefix.textContent = 'Yr';
+            if (eligTenureLimits && eligTenureLimits.length >= 2) {
+              eligTenureLimits[0].textContent = '1 Year';
+              eligTenureLimits[1].textContent = '7 Years';
+            }
+          }
+          recalc();
+        });
+      });
+    }
+
     function recalc() {
       const rate = parseFloat((document.getElementById('eligRateInput') || {}).value) || defaultRate;
-      const tenure = parseInt((document.getElementById('eligTenureInput') || {}).value, 10) || (isPersonal ? 5 : 20);
+      const rawTenure = parseFloat((document.getElementById('eligTenureInput') || {}).value) || (isPersonal ? (currentEligTenureUnit === 'months' ? 60 : 5) : 20);
+      const tenureMonths = currentEligTenureUnit === 'months' ? rawTenure : (rawTenure * 12);
+      const tenure = tenureMonths / 12;
 
       // FOIR requirements:
       // Personal Loan = 65% (0.65)
@@ -1190,7 +1250,16 @@ function parseNumber(val) {
       const bizEmiB = document.getElementById('bizEmiBadge'); if (bizEmiB) bizEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('bizEmiInput') || {}).value));
 
       const rateB = document.getElementById('eligRateBadge'); if (rateB) rateB.textContent = rate.toFixed(2) + '%';
-      const tenB = document.getElementById('eligTenureBadge'); if (tenB) tenB.textContent = tenure + ' Years';
+      const tenB = document.getElementById('eligTenureBadge');
+      if (tenB) {
+        if (currentEligTenureUnit === 'months') {
+          const yrs = (tenureMonths / 12).toFixed(1).replace(/\.0$/, '');
+          tenB.textContent = Math.round(tenureMonths) + " Months (" + yrs + " Yrs)";
+        } else {
+          const mos = Math.round(tenureMonths);
+          tenB.textContent = rawTenure + (rawTenure === 1 ? " Year (" : " Years (") + mos + " Mo)";
+        }
+      }
 
       // Update Result UI
       animateNumber(document.getElementById('eligMaxLoan'), maxLoan);
