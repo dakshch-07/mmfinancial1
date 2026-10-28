@@ -1,6 +1,6 @@
 ﻿/**
  * FINANCIAL CALCULATORS HUB & SUITE — calculators.js
- * MM Financial Services Consultant (Mukesh Tiwari)
+ * MMT Financial Services Consultant (Mukesh Tiwari)
  * 100% Client-side Vanilla JS engines for all calculators.
  */
 
@@ -475,7 +475,7 @@ function parseNumber(val) {
   /* ── Universal WhatsApp Link Builder ────────────────────────────────────── */
   function updateWhatsAppCta(btnEl, calcName, detailsStr) {
     if (!btnEl) return;
-    const msg = `Hello Mukesh ji, I used the ${calcName} on your MM Financial Services website.\nDetails: ${detailsStr}\nPlease guide me further with consultation.`;
+    const msg = `Hello Mukesh ji, I used the ${calcName} on your MMT Financial Services website.\nDetails: ${detailsStr}\nPlease guide me further with consultation.`;
     btnEl.href = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
   }
 

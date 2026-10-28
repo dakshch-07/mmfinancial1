@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    FINANCIAL CALCULATORS HUB & SUITE — calculators.css
    MM Financial Services Consultant (Mukesh Tiwari — NJ Wealth Authorized Partner)
    Design System: Editorial Indian Financial Advisory
@@ -2158,4 +2158,31 @@ select.calc-input {
 
 .calc-reset-btn:active {
     transform: scale(0.96);
+}
+
+/* MMT Brand Logo & Image Styling */
+.monogram-seal {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background: #0d2140 !important;
+    border: 1.5px solid var(--color-gold) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 8px rgba(13, 33, 64, 0.22) !important;
+}
+
+.monogram-seal img.brand-logo-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.monogram-seal.mini {
+    width: 34px !important;
+    height: 34px !important;
 }

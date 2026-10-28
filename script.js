@@ -1,5 +1,5 @@
-/**
- * MM FINANCIAL SERVICES CONSULTANT
+﻿/**
+ * MMT Financial Services Consultant
  * Advisor: Mukesh Tiwari
  * Script: GSAP Animations, Live Financial Calculators (EMI & SIP), Filtering, Form Validation
  */
@@ -689,7 +689,7 @@ function initFaqAccordion() {
 async function sendLeadToEmail(data, subject, replyToEmail) {
     try {
         const payload = Object.assign({
-            _subject: subject || 'New Lead — MM Financial Services',
+            _subject: subject || 'New Lead — MMT Financial Services',
             _template: 'table',
             _captcha: 'false'
         }, data);
@@ -770,7 +770,7 @@ function initContactForm() {
         const enteredMsg = messageText.value.trim() || 'No specific notes';
 
         // Build WhatsApp redirect link
-        const whatsappText = `*New Consultation Request — MM Financial Services*%0A` +
+        const whatsappText = `*New Consultation Request — MMT Financial Services*%0A` +
             `*Name:* ${encodeURIComponent(enteredName)}%0A` +
             `*Phone:* ${encodeURIComponent(enteredPhone)}%0A` +
             `*Service:* ${encodeURIComponent(selectedService)}%0A` +
@@ -1161,7 +1161,7 @@ function initTypewriterAnimation() {
 
     const phrases = [
         "Authorized Partner • NJ Wealth",
-        "MM Financial Services Consultant",
+        "MMT Financial Services Consultant",
         "Loans & Investment Specialist",
         "Direct Advisory • Mumbai & MMR"
     ];
@@ -2736,7 +2736,7 @@ function initLoanForm() {
             const roiVal = eligibilityData.roi || originalPayload.loanRoi || '8.5';
             const cibilVal = originalPayload.loanCibil || '750+';
 
-            return `*New Verified Loan Application — MM Financial Services*\n` +
+            return `*New Verified Loan Application — MMT Financial Services*\n` +
                    `----------------------------------------\n` +
                    `*Status:* 🟢 ELIGIBLE (System Verified)\n` +
                    `*Eligible Capacity:* Up to ${formattedMaxEligible}\n` +
@@ -2914,7 +2914,7 @@ function initMfForm() {
     function buildWhatsAppText(isDirect = false) {
         const title = isDirect 
             ? '*Mutual Funds Consultation — Direct WhatsApp Chat*' 
-            : '*New Mutual Fund & SIP Consultation — MM Financial Services*';
+            : '*New Mutual Fund & SIP Consultation — MMT Financial Services*';
 
         let text = `${title}\n` +
                    `*(NJ Wealth Authorized Partner)*\n` +
@@ -3087,7 +3087,7 @@ function initInsuranceForm() {
     function buildWhatsAppText(isDirect = false) {
         const title = isDirect 
             ? '*Insurance Comparison — Direct WhatsApp Consultation*' 
-            : '*New Insurance Consultation Request — MM Financial Services*';
+            : '*New Insurance Consultation Request — MMT Financial Services*';
 
         let text = `${title}\n` +
                    `----------------------------------------\n` +
@@ -3101,7 +3101,7 @@ function initInsuranceForm() {
                    `*City / Location:* ${city && city.value.trim() ? city.value.trim() : 'Not specified'}\n` +
                    `*Existing Policy / Notes:* ${message && message.value.trim() ? message.value.trim() : 'None'}\n` +
                    `----------------------------------------\n` +
-                   `Advisor: Mukesh Tiwari (MM Financial Services Consultant)`;
+                   `Advisor: Mukesh Tiwari (MMT Financial Services Consultant)`;
         return text;
     }
 
