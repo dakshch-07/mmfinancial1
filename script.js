@@ -1726,14 +1726,20 @@ function initLoanForm() {
 
         if (income) {
             income.required = !isTurnover;
+            const salAvgBox = document.getElementById('loanSalAvgBox');
+            const itrAvgBox = document.getElementById('loanItrAvgBox');
             if (isSalaried) {
                 if (incomeLabel) incomeLabel.innerHTML = 'Monthly Net Salary <span class="req">*</span>';
                 if (income) income.placeholder = 'e.g. ₹85,000 / month';
                 if (incomeHint) incomeHint.textContent = 'Net monthly take-home salary credited to bank account';
+                if (salAvgBox) salAvgBox.style.display = isTurnover ? 'none' : 'block';
+                if (itrAvgBox) itrAvgBox.style.display = 'none';
             } else {
                 if (incomeLabel) incomeLabel.innerHTML = 'Annual Net Profit as per ITR <span class="req">*</span>';
                 if (income) income.placeholder = 'e.g. ₹15,00,000 profit / year';
                 if (incomeHint) incomeHint.textContent = 'Net business income / profit as per latest ITR computation sheet';
+                if (salAvgBox) salAvgBox.style.display = 'none';
+                if (itrAvgBox) itrAvgBox.style.display = isTurnover ? 'none' : 'block';
             }
         }
 
@@ -2178,6 +2184,143 @@ function initLoanForm() {
             const val = parseFloat(loanRoiInput.value);
             if (!isNaN(val) && loanRoiBadge) {
                 loanRoiBadge.textContent = `${val.toFixed(2)}%`;
+            }
+        });
+    }
+
+    // --- Salary 3 to 6 Months Average Controller for Step 1 ---
+    const loanSalAvgToggleBtn = document.getElementById('loanSalAvgToggleBtn');
+    const loanSalAvgContainer = document.getElementById('loanSalAvgContainer');
+    const loanSalAvgToggleIcon = document.getElementById('loanSalAvgToggleIcon');
+    const loanBtnAvg3Mo = document.getElementById('loanBtnAvg3Mo');
+    const loanBtnAvg6Mo = document.getElementById('loanBtnAvg6Mo');
+    const loanSalMo4to6Row = document.getElementById('loanSalMo4to6Row');
+    const loanSalAvgDisplayVal = document.getElementById('loanSalAvgDisplayVal');
+    const loanBtnApplyAvgSalary = document.getElementById('loanBtnApplyAvgSalary');
+    let loanSalAvgMonthsCount = 3;
+
+    if (loanSalAvgToggleBtn && loanSalAvgContainer) {
+        loanSalAvgToggleBtn.addEventListener('click', () => {
+            const isOpen = loanSalAvgContainer.style.display !== 'none';
+            loanSalAvgContainer.style.display = isOpen ? 'none' : 'block';
+            if (loanSalAvgToggleIcon) loanSalAvgToggleIcon.textContent = isOpen ? '+ Open' : '− Close';
+        });
+    }
+
+    function parseCleanNum(val) {
+        return parseFloat(String(val || '').replace(/[^0-9.]/g, '')) || 0;
+    }
+
+    function computeLoansSalaryAverage() {
+        const m1 = parseCleanNum((document.getElementById('loanSalMo1') || {}).value);
+        const m2 = parseCleanNum((document.getElementById('loanSalMo2') || {}).value);
+        const m3 = parseCleanNum((document.getElementById('loanSalMo3') || {}).value);
+        let total = m1 + m2 + m3;
+        let count = loanSalAvgMonthsCount;
+        if (loanSalAvgMonthsCount === 6) {
+            const m4 = parseCleanNum((document.getElementById('loanSalMo4') || {}).value);
+            const m5 = parseCleanNum((document.getElementById('loanSalMo5') || {}).value);
+            const m6 = parseCleanNum((document.getElementById('loanSalMo6') || {}).value);
+            total += m4 + m5 + m6;
+        }
+        const avg = count > 0 ? Math.round(total / count) : 0;
+        if (loanSalAvgDisplayVal) loanSalAvgDisplayVal.textContent = '₹' + formatIndianNumber(avg);
+        return avg;
+    }
+
+    if (loanBtnAvg3Mo && loanBtnAvg6Mo) {
+        loanBtnAvg3Mo.addEventListener('click', () => {
+            loanSalAvgMonthsCount = 3;
+            loanBtnAvg3Mo.style.background = '#eff6ff';
+            loanBtnAvg3Mo.style.color = '#1d4ed8';
+            loanBtnAvg3Mo.style.borderColor = '#3b82f6';
+            loanBtnAvg6Mo.style.background = '#ffffff';
+            loanBtnAvg6Mo.style.color = '#64748b';
+            loanBtnAvg6Mo.style.borderColor = '#cbd5e1';
+            if (loanSalMo4to6Row) loanSalMo4to6Row.style.display = 'none';
+            computeLoansSalaryAverage();
+        });
+
+        loanBtnAvg6Mo.addEventListener('click', () => {
+            loanSalAvgMonthsCount = 6;
+            loanBtnAvg6Mo.style.background = '#eff6ff';
+            loanBtnAvg6Mo.style.color = '#1d4ed8';
+            loanBtnAvg6Mo.style.borderColor = '#3b82f6';
+            loanBtnAvg3Mo.style.background = '#ffffff';
+            loanBtnAvg3Mo.style.color = '#64748b';
+            loanBtnAvg3Mo.style.borderColor = '#cbd5e1';
+            if (loanSalMo4to6Row) loanSalMo4to6Row.style.display = 'grid';
+            computeLoansSalaryAverage();
+        });
+    }
+
+    ['loanSalMo1', 'loanSalMo2', 'loanSalMo3', 'loanSalMo4', 'loanSalMo5', 'loanSalMo6'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', computeLoansSalaryAverage);
+            el.addEventListener('blur', () => {
+                const v = parseCleanNum(el.value);
+                if (v > 0) el.value = '₹' + formatIndianNumber(v);
+            });
+        }
+    });
+
+    if (loanBtnApplyAvgSalary) {
+        loanBtnApplyAvgSalary.addEventListener('click', () => {
+            const avg = computeLoansSalaryAverage();
+            if (avg > 0 && income) {
+                income.value = '₹' + formatIndianNumber(avg);
+                const badge = document.getElementById('loanIncomeBadge');
+                if (badge) badge.textContent = badgeWordINR(avg);
+                updateSalariedCompanyCategoryView();
+            }
+        });
+    }
+
+    // --- Business 2-Year ITR Average (Current & Previous Year) Controller ---
+    const loanItrAvgToggleBtn = document.getElementById('loanItrAvgToggleBtn');
+    const loanItrAvgContainer = document.getElementById('loanItrAvgContainer');
+    const loanItrAvgToggleIcon = document.getElementById('loanItrAvgToggleIcon');
+    const loanItrYr1 = document.getElementById('loanItrYr1');
+    const loanItrYr2 = document.getElementById('loanItrYr2');
+    const loanItrAvgDisplayVal = document.getElementById('loanItrAvgDisplayVal');
+    const loanBtnApplyAvgItr = document.getElementById('loanBtnApplyAvgItr');
+
+    if (loanItrAvgToggleBtn && loanItrAvgContainer) {
+        loanItrAvgToggleBtn.addEventListener('click', () => {
+            const isOpen = loanItrAvgContainer.style.display !== 'none';
+            loanItrAvgContainer.style.display = isOpen ? 'none' : 'block';
+            if (loanItrAvgToggleIcon) loanItrAvgToggleIcon.textContent = isOpen ? '+ Open' : '− Close';
+        });
+    }
+
+    function computeLoansItrAverage() {
+        const yr1 = parseCleanNum(loanItrYr1 ? loanItrYr1.value : 0);
+        const yr2 = parseCleanNum(loanItrYr2 ? loanItrYr2.value : 0);
+        let avg = 0;
+        if (yr1 > 0 && yr2 > 0) avg = Math.round((yr1 + yr2) / 2);
+        else avg = yr1 || yr2;
+        if (loanItrAvgDisplayVal) loanItrAvgDisplayVal.textContent = '₹' + formatIndianNumber(avg);
+        return avg;
+    }
+
+    [loanItrYr1, loanItrYr2].forEach(el => {
+        if (el) {
+            el.addEventListener('input', computeLoansItrAverage);
+            el.addEventListener('blur', () => {
+                const v = parseCleanNum(el.value);
+                if (v > 0) el.value = '₹' + formatIndianNumber(v);
+            });
+        }
+    });
+
+    if (loanBtnApplyAvgItr) {
+        loanBtnApplyAvgItr.addEventListener('click', () => {
+            const avg = computeLoansItrAverage();
+            if (avg > 0 && income) {
+                income.value = '₹' + formatIndianNumber(avg);
+                const badge = document.getElementById('loanIncomeBadge');
+                if (badge) badge.textContent = badgeWordINR(avg);
             }
         });
     }

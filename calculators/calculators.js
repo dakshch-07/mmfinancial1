@@ -3640,6 +3640,50 @@ function parseNumber(val) {
       }
       renderSvgChart(totals);
 
+      // Render Indicative Statutory Charges on LAMF Card
+      const lamfChargesBox = widget.querySelector('.statutory-charges-box');
+      if (lamfChargesBox) {
+        const chargeBaseAmount = totalLimit;
+        const stampDuty = Math.round(chargeBaseAmount * CONFIG.defaults.charges.stampDutyRate);
+        const stampEl = lamfChargesBox.querySelector('.charge-stamp-duty');
+        if (stampEl) stampEl.textContent = '₹' + fmtINR(stampDuty);
+        const baseDisplayEl = lamfChargesBox.querySelector('.charges-loan-base-display');
+        if (baseDisplayEl) baseDisplayEl.textContent = chargeBaseAmount > 0 ? ('(₹' + fmtINR(chargeBaseAmount) + ')') : '';
+
+        const govtFees = calcGovtBankFees(chargeBaseAmount);
+        const govtLegalValEl = lamfChargesBox.querySelector('.govt-legal-valuation-val');
+        const govtSlabEl = lamfChargesBox.querySelector('.govt-legal-valuation-slab');
+        if (govtLegalValEl) govtLegalValEl.textContent = '₹' + fmtINR(govtFees.total);
+        if (govtSlabEl) govtSlabEl.textContent = '(' + govtFees.breakdown + ')';
+
+        const lamfPfIn = widget.querySelector('#lamfPfInput');
+        const lamfInsIn = widget.querySelector('#lamfInsuranceInput');
+        const lamfTotBox = widget.querySelector('#lamfCustomChargesTotal');
+        const lamfTotVal = widget.querySelector('#lamfCustomChargesTotalVal');
+
+        let pfVal = parseNumber((lamfPfIn && lamfPfIn.value) || 0);
+        if (pfVal === 0 && chargeBaseAmount > 0) {
+          pfVal = Math.round(chargeBaseAmount * (0.0025 * 1.18));
+          if (lamfPfIn && !lamfPfIn.dataset.userEdited) {
+            lamfPfIn.placeholder = '₹' + fmtINR(pfVal) + ' (0.25%+GST)';
+          }
+        }
+
+        let insVal = parseNumber((lamfInsIn && lamfInsIn.value) || 0);
+        if (insVal === 0 && chargeBaseAmount > 0) {
+          insVal = Math.round(chargeBaseAmount * 0.02);
+          if (lamfInsIn && !lamfInsIn.dataset.userEdited) {
+            lamfInsIn.placeholder = '₹' + fmtINR(insVal) + ' (2% Life / Property)';
+          }
+        }
+
+        const totalBankCharges = pfVal + insVal;
+        if (lamfTotBox && lamfTotVal) {
+          lamfTotBox.style.display = totalBankCharges > 0 ? 'block' : 'none';
+          lamfTotVal.textContent = '₹' + fmtINR(totalBankCharges);
+        }
+      }
+
       // Update Live WhatsApp CTA Link
       updateLamfWhatsApp(totals, annualRate, withdrawn);
     }
