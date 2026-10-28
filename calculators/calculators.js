@@ -991,7 +991,8 @@ function parseNumber(val) {
     }
 
     const isPersonal = widget.dataset.calcId === 'personal-loan-eligibility-calculator';
-    const defaultRate = isPersonal ? 11.0 : 8.75;
+    const minRate = isPersonal ? 12.0 : 6.0;
+    const defaultRate = isPersonal ? 12.0 : 8.75;
     const maxTenure = isPersonal ? 7 : 30;
 
     const cibilSel = document.getElementById('eligCibilSelect');
@@ -1026,7 +1027,7 @@ function parseNumber(val) {
       });
     }
 
-    bindSync(document.getElementById('eligRateInput'), document.getElementById('eligRateSlider'), 6.0, 24.0, 0.05, recalc, true);
+    bindSync(document.getElementById('eligRateInput'), document.getElementById('eligRateSlider'), minRate, 24.0, 0.05, recalc, true);
     bindSync(document.getElementById('eligTenureInput'), document.getElementById('eligTenureSlider'), 1, maxTenure, 1, recalc);
 
     // Personal Loan Tenure Unit Switcher (Years 1-7 or Months 12-84)
