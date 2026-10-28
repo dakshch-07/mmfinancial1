@@ -682,7 +682,7 @@
             </div>
         </section>
 
-        <!-- DEDICATED CALCULATORS SECTION (LINE MEIN CHOTE CONTAINERS) -->
+        <!-- DEDICATED CALCULATORS SECTION -->
         <section class="compact-calcs-section">
             <div class="container">
                 <div class="compact-calcs-header">
@@ -691,42 +691,21 @@
                     <p class="compact-calcs-sub">Select any calculator below for instant bank-accurate eligibility, monthly EMI and amortization:</p>
                 </div>
 
-                <!-- COMPACT GRID (3 Col on Desktop, 1 Col on Mobile) -->
+                <!-- COMPACT GRID (Dedicated Loan Calculators: Home, LAP, Personal, Business + View All Hub) -->
                 <div class="compact-calcs-grid">
-                    <a href="/calculators/home-loan-eligibility-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Home Loan Eligibility</div>
-                            <div class="compact-calc-tag">60% FOIR (Salaried &amp; 2-Yr ITR Business)</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
+                    <!-- 1. Home Loan -->
                     <a href="/calculators/home-loan-emi-calculator" class="compact-calc-card">
                         <div class="compact-calc-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         </div>
                         <div class="compact-calc-info">
-                            <div class="compact-calc-title">Home Loan EMI Calculator</div>
-                            <div class="compact-calc-tag">Monthly EMI + Amortization &amp; Prepayment</div>
+                            <div class="compact-calc-title">Home Loan Calculator</div>
+                            <div class="compact-calc-tag">Monthly EMI + Amortization &amp; Eligibility</div>
                         </div>
                         <span class="compact-calc-btn">Calculate &rarr;</span>
                     </a>
 
-                    
-                    <a href="/calculators/dropline-overdraft-loan-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><polyline points="7 17 12 22 17 17"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Dropline Overdraft (DOD)</div>
-                            <div class="compact-calc-tag">Monthly Limit Drop &amp; Interest on Drawn Power</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
+                    <!-- 2. Loan Against Property (LAP) -->
                     <a href="/calculators/loan-against-property-calculator" class="compact-calc-card">
                         <div class="compact-calc-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
@@ -738,101 +717,38 @@
                         <span class="compact-calc-btn">Calculate &rarr;</span>
                     </a>
 
-                    <a href="/calculators/home-loan-comparison-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Home Loan Comparison</div>
-                            <div class="compact-calc-tag">Compare 2 Bank Offers &amp; Total Outflow</div>
-                        </div>
-                        <span class="compact-calc-btn">Compare &rarr;</span>
-                    </a>
-
+                    <!-- 3. Personal Loan -->
                     <a href="/calculators/personal-loan-eligibility-calculator" class="compact-calc-card">
                         <div class="compact-calc-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
                         <div class="compact-calc-info">
-                            <div class="compact-calc-title">Personal Loan Eligibility</div>
-                            <div class="compact-calc-tag">65% FOIR Unsecured Borrowing Capacity</div>
+                            <div class="compact-calc-title">Personal Loan Calculator</div>
+                            <div class="compact-calc-tag">65% FOIR Unsecured Borrowing Capacity &amp; EMI</div>
                         </div>
                         <span class="compact-calc-btn">Calculate &rarr;</span>
                     </a>
 
-                    <a href="/calculators/personal-loan-emi-calculator" class="compact-calc-card">
+                    <!-- 4. Business Loan / Dropline Overdraft -->
+                    <a href="/calculators/dropline-overdraft-loan-calculator" class="compact-calc-card">
                         <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><polyline points="7 17 12 22 17 17"/></svg>
                         </div>
                         <div class="compact-calc-info">
-                            <div class="compact-calc-title">Personal Loan EMI Calculator</div>
-                            <div class="compact-calc-tag">Collateral-Free Instant Installment</div>
+                            <div class="compact-calc-title">Business Loan / Dropline Overdraft</div>
+                            <div class="compact-calc-tag">Working Capital, DOD Drop &amp; Interest on Drawn Funds</div>
                         </div>
                         <span class="compact-calc-btn">Calculate &rarr;</span>
                     </a>
 
-                    <a href="/calculators/car-loan-emi-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Car Loan EMI Calculator</div>
-                            <div class="compact-calc-tag">Vehicle Finance up to 8 Years Tenure</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
-                    <a href="/calculators/two-wheeler-loan-emi-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Two-Wheeler Loan EMI</div>
-                            <div class="compact-calc-tag">Bike &amp; Scooter Monthly Installment</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
-                    <a href="/calculators/education-loan-emi-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Education Loan EMI Calculator</div>
-                            <div class="compact-calc-tag">Higher Studies + Section 80E Tax Saving</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
-                    <a href="/calculators/gold-loan-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-1.8-1"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">Gold Loan Calculator</div>
-                            <div class="compact-calc-tag">75% RBI LTV on Gold Market Value</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
-                    <a href="/calculators/emi-calculator" class="compact-calc-card">
-                        <div class="compact-calc-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg>
-                        </div>
-                        <div class="compact-calc-info">
-                            <div class="compact-calc-title">All-in-One Loan EMI Calculator</div>
-                            <div class="compact-calc-tag">Multi-Purpose Repayment &amp; Total Interest</div>
-                        </div>
-                        <span class="compact-calc-btn">Calculate &rarr;</span>
-                    </a>
-
+                    <!-- 5. View All Hub -->
                     <a href="/calculators" class="compact-calc-card" style="background: linear-gradient(135deg, #f9fbfd 0%, #edf3fb 100%); border-color: var(--color-gold-border);">
                         <div class="compact-calc-icon" style="background: var(--color-navy); color: var(--color-gold);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </div>
                         <div class="compact-calc-info">
-                            <div class="compact-calc-title">View All 19 Calculators Hub</div>
-                            <div class="compact-calc-tag">Loans, Mutual Funds, Deposits &amp; Insurance</div>
+                            <div class="compact-calc-title">View All Calculators Hub</div>
+                            <div class="compact-calc-tag">Explore Full 19 Financial Planning Tools Suite</div>
                         </div>
                         <span class="compact-calc-btn" style="background: var(--color-gold); color: var(--color-navy);">Hub &rarr;</span>
                     </a>
