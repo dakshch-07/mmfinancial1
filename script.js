@@ -2664,6 +2664,138 @@ function initLoanForm() {
         }
     });
 
+    // GENERATE DYNAMIC REQUIRED DOCUMENTS LIST BASED ON CONSIDERED INCOME & PROFILE
+    function generateDocumentChecklistHtml(payload) {
+        const empVal = String(payload.loanEmpType || '').toLowerCase();
+        const isSalaried = empVal.includes('salaried');
+        const isDoctor = empVal.includes('doctor') || empVal.includes('professional');
+        const isBizEntity = empVal.includes('proprietor') || empVal.includes('partner') || empVal.includes('director');
+        const isTurnover = payload.businessProgram === 'turnover';
+        const hasRent = parseFloat(payload.rentalIncome || 0) > 0;
+        const hasBonus = parseFloat(payload.bonusIncome || 0) > 0;
+        const hasDepr = parseFloat(payload.depreciation || 0) > 0;
+        const hasRemun = parseFloat(payload.directorSalary || 0) > 0;
+
+        let docs = [];
+
+        // 1. Mandatory KYC Documents (Common to all)
+        docs.push({
+            category: 'KYC & Identity (Mandatory)',
+            items: [
+                'PAN Card copy (Self-attested)',
+                'Aadhaar Card (Linked with Mobile for e-sign)',
+                'Current Residence Proof (Electricity Bill / Rent Agreement / Passport)',
+                '2 Passport Size Colour Photographs'
+            ]
+        });
+
+        // 2. Income Verification Documents (Profile-specific)
+        if (isSalaried) {
+            const incomeDocs = [
+                'Latest 3 to 6 Months Salary Slips (Company stamped / signed)',
+                'Latest 6 Months Salary Bank Account Statements (PDF with net credits)',
+                'Latest 2 Years Form 16 (Part A & Part B) / ITR-V'
+            ];
+            if (hasBonus) {
+                incomeDocs.push('Bonus Proof / Annual Appraisal Letter (for 50% bonus capacity)');
+            }
+            if (hasRent) {
+                incomeDocs.push('Registered Rent Agreement (50% - 80% rent consideration) + 6 Months Bank Credit Statement');
+            }
+            docs.push({
+                category: 'Income Verification (Salaried Profile)',
+                items: incomeDocs
+            });
+        } else if (isTurnover) {
+            const turnoverDocs = [
+                'Latest 12 Months GST Returns (GSTR-3B & GSTR-1 filings)',
+                'Latest 12 Months Current Bank Account Statements (All operational banks)',
+                'Business PAN Card & Udyam / MSME Registration Certificate',
+                'GST Registration Certificate & Shop Act / Trade License'
+            ];
+            if (isDoctor) {
+                turnoverDocs.push('Medical Degree Certificate (MBBS / MD / MS) & State Council Registration');
+                turnoverDocs.push('Form 26AS (for Professional Gross Receipts credit verification)');
+            } else if (empVal.includes('ca') || empVal.includes('cs')) {
+                turnoverDocs.push('COP / ICAI / ICSI Membership Certificate & Form 26AS receipts');
+            }
+            if (hasRent) {
+                turnoverDocs.push('Registered Rent Agreement (50% - 80% rent consideration) + 6 Months Bank Statements');
+            }
+            docs.push({
+                category: 'Gross Turnover / Banking Underwriting Documents',
+                items: turnoverDocs
+            });
+        } else {
+            // Net Profit / 2-Year ITR Program
+            const itrDocs = [
+                'Last 2 to 3 Years Audited Balance Sheet & Profit & Loss (P&L) Accounts with CA Audit Report',
+                'Last 2 Years Complete ITR Computation & Acknowledgement Verification',
+                'Latest 12 Months Current Account Bank Statements',
+                'Business PAN, GST Certificate & Partnership Deed / MOA & AOA / COI'
+            ];
+            if (hasDepr) {
+                itrDocs.push('Depreciation Schedule as per Companies Act / IT Act (for 100% add-back to cash profit)');
+            }
+            if (hasRemun) {
+                itrDocs.push('Form 16 / Partner Salary Ledger Copy (for 100% add-back)');
+            }
+            if (hasRent) {
+                itrDocs.push('Registered Rent Agreement (50% - 80% consideration) + 6 Months Bank Statement proof');
+            }
+            docs.push({
+                category: isBizEntity ? 'Entity & 2-Year ITR Documents (Proprietor / Firm / Pvt Ltd)' : 'Business 2-Year ITR Documents',
+                items: itrDocs
+            });
+        }
+
+        // 3. Property / Security Documents (For Home Loan & LAP)
+        const loanTypeLower = String(payload.loanType || '').toLowerCase();
+        if (loanTypeLower.includes('home') || loanTypeLower.includes('lap') || loanTypeLower.includes('property') || loanTypeLower.includes('mortgage')) {
+            docs.push({
+                category: 'Property Documents (For Sanction & Disbursement)',
+                items: [
+                    'Registered Agreement for Sale / Registered Sale Deed with all chain documents',
+                    'Allotment Letter / NOC from Builder or Society',
+                    'Approved Building Sanction Plan, IOD & Completion / Occupancy Certificate (OC)',
+                    'Latest Property Tax Receipt & Society Share Certificate'
+                ]
+            });
+        }
+
+        // Render clean HTML
+        return `
+            <div style="margin-top: 14px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 8px;">
+                    <span style="font-size: 0.85rem; font-weight: 800; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                        <span>📋</span> Required List of Documents (As Per Your Income Submission)
+                    </span>
+                    <span style="font-size: 0.7rem; color: #1e3a8a; font-weight: 700; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">
+                        ${isSalaried ? 'Salaried KYC & Income' : (isTurnover ? 'Turnover Banking Norms' : 'Audited 2-Yr ITR Norms')}
+                    </span>
+                </div>
+                <p style="font-size: 0.74rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
+                    Bank underwriting will verify the exact income figures entered in your eligibility test. Keep the following checklist ready for rapid sanction:
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+                    ${docs.map(cat => `
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+                            <strong style="color: var(--color-navy); font-size: 0.78rem; display: block; margin-bottom: 6px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                                ${cat.category}
+                            </strong>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 0.73rem; color: #334155; line-height: 1.5;">
+                                ${cat.items.map(it => `<li style="margin-bottom: 4px;">${it}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 10px; padding: 6px 10px; background: #ecfdf5; border-radius: 6px; border: 1px solid #a7f3d0; font-size: 0.72rem; color: #065f46; font-weight: 600;">
+                    💡 <strong>Doorstep Pickup Available:</strong> Senior Advisor Mukesh Tiwari & team arrange doorstep document collection & direct bank coordination across 25+ lenders.
+                </div>
+            </div>
+        `;
+    }
+
     // STEP 2A: RENDER ELIGIBLE RESULT & DYNAMICALLY MOUNT LEAD FORM (ANTI-BYPASS)
     function renderEligibleSuccess(data, originalPayload) {
         const isPersonalLoan = (originalPayload.loanType || "").toLowerCase().includes("personal");
@@ -2756,6 +2888,9 @@ function initLoanForm() {
                     <div style="font-size: 0.8rem; color: #166534; font-weight: 600; margin-top: 10px;">
                         ✓ Complete Step 2 below to receive sanctioned quotes with zero hidden processing charges.
                     </div>
+
+                    <!-- Custom Document Checklist Based on Considered Income & Profile -->
+                    ${generateDocumentChecklistHtml(originalPayload)}
                 </div>
             `;
         }
