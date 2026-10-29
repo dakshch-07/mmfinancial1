@@ -1477,13 +1477,13 @@ const LOAN_ELIGIBILITY_CONFIG = {
     ],
     salariedAddBacks: {
         annualBonusPercent: 0.50,
-        rentalIncomePercent: 0.50
+        rentalIncomePercent: 0.65 // 50% - 80% (benchmark 65% with registered rent agreement)
     },
     businessAddBacks: {
         depreciationFactor: 1.00,
         directorRemunerationFactor: 1.00,
         termLoanInterestFactor: 1.00,
-        rentalIncomeFactor: 0.50
+        rentalIncomeFactor: 0.65 // 50% - 80% (benchmark 65% with registered rent agreement)
     },
     emiPerLakhLookup: {
         6: 17079, 12: 8722, 18: 5936, 24: 4546, 36: 3157, 48: 2465,
@@ -1708,6 +1708,7 @@ function initLoanForm() {
     const businessAddFields = document.getElementById('businessAddFields');
     const loanBonus = document.getElementById('loanBonus');
     const loanRentIncome = document.getElementById('loanRentIncome');
+    const loanBizRentIncome = document.getElementById('loanBizRentIncome');
     const loanDepreciation = document.getElementById('loanDepreciation');
     const loanDirectorSalary = document.getElementById('loanDirectorSalary');
 
@@ -2121,6 +2122,7 @@ function initLoanForm() {
         { el: emi, badgeId: 'loanExistingEmiBadge' },
         { el: loanBonus, badgeId: 'loanBonusBadge' },
         { el: loanRentIncome, badgeId: 'loanRentIncomeBadge' },
+        { el: loanBizRentIncome, badgeId: 'loanBizRentIncomeBadge' },
         { el: loanDepreciation, badgeId: 'loanDepreciationBadge' },
         { el: loanDirectorSalary, badgeId: 'loanDirectorSalaryBadge' },
         { el: loanTurnoverAmount, badgeId: 'loanTurnoverAmountBadge' },
@@ -2562,7 +2564,7 @@ function initLoanForm() {
                 loanCibil: cibilSelect ? cibilSelect.value : '750+',
                 loanRoi: parseFloat(loanRoiInput ? loanRoiInput.value : 8.5),
                 bonusIncome: parseFloat(String(loanBonus ? loanBonus.value : '').replace(/[^0-9.]/g, '')) || 0,
-                rentalIncome: parseFloat(String(loanRentIncome ? loanRentIncome.value : '').replace(/[^0-9.]/g, '')) || 0,
+                rentalIncome: parseFloat(String((isSalaried ? loanRentIncome : loanBizRentIncome) ? (isSalaried ? loanRentIncome : loanBizRentIncome).value : (loanRentIncome ? loanRentIncome.value : '')).replace(/[^0-9.]/g, '')) || 0,
                 depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
                 directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
                 companyCategory: 'super_a',

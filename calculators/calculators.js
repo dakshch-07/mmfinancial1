@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FINANCIAL CALCULATORS HUB & SUITE — calculators.js
  * MMT Financial Services Consultant (Mukesh Tiwari)
  * 100% Client-side Vanilla JS engines for all calculators.
@@ -1128,8 +1128,8 @@ function parseNumber(val) {
 
         appliedFoir = salFoir;
 
-        // Salaried: FOIR applied to net monthly salary + 50% bonus/12 + 50% rent
-        const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.5);
+        // Salaried: FOIR applied to net monthly salary + 50% bonus/12 + 65% rent (50% - 80% with registered rent agreement)
+        const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.65);
         eligibleIncome = monthlyEquivalent * appliedFoir;
       } else {
         // Business / Self-Employed Assessment: Net Profit (ITR) OR Turnover Program (2% - 7%)
@@ -1173,10 +1173,10 @@ function parseNumber(val) {
             totalMonthlyBusinessIncome = Math.round((annualDerivedIncome * appliedFoir) / 12);
           }
 
-          // Add-backs: Rent & Remuneration
+          // Add-backs: Rent & Remuneration (Rent at 50% - 80% benchmark 65%)
           const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
-          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.5);
+          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.65);
 
           const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = badgeWordINR(turnover1);
           const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = badgeWordINR(turnover2);
@@ -1197,10 +1197,10 @@ function parseNumber(val) {
           const avgAnnualProfit = total2YrProfit / 2;
           const monthlyProfit = total2YrProfit / 24;
 
-          // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent
+          // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent (50% - 80% benchmark 65%)
           const monthlyDepr = depr / 12;
           const monthlyRemun = remun / 12;
-          const monthlyRent = rent * 0.5;
+          const monthlyRent = rent * 0.65;
 
           // Total Monthly Cash Flow for Business Underwriting
           totalMonthlyBusinessIncome = monthlyProfit + monthlyDepr + monthlyRemun + monthlyRent;

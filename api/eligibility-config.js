@@ -62,14 +62,14 @@ const LOAN_ELIGIBILITY_CONFIG = {
     // 4. INCOME ADD-BACK & MULTIPLIER RULES
     salariedAddBacks: {
         annualBonusPercent: 0.50,     // 50% of annual bonus considered monthly (bonus / 12 * 50%)
-        rentalIncomePercent: 0.50     // 50% of verified rental income considered
+        rentalIncomePercent: 0.65     // 50% - 80% (benchmark 65% with registered rent agreement)
     },
 
     businessAddBacks: {
         depreciationFactor: 1.00,     // 100% of book depreciation added back
         directorRemunerationFactor: 1.00, // 100% of partner/director salary added back
         termLoanInterestFactor: 1.00, // 100% of business term loan interest added back
-        rentalIncomeFactor: 0.50      // 50% of rental income added back
+        rentalIncomeFactor: 0.65      // 50% - 80% (benchmark 65% with registered rent agreement)
     },
 
     // 5. EMI PER LAKH REFERENCE LOOKUP TABLE (At benchmark 8.5% ROI per ₹1,00,000)
