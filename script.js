@@ -2664,7 +2664,7 @@ function initLoanForm() {
         }
     });
 
-    // GENERATE DYNAMIC REQUIRED DOCUMENTS LIST BASED ON CONSIDERED INCOME & PROFILE
+    // GENERATE DYNAMIC REQUIRED DOCUMENTS LIST BASED ON CONSIDERED INCOME & PROFILE (AS PER MUKESH TIWARI UNDERWRITING STANDARDS)
     function generateDocumentChecklistHtml(payload) {
         const empVal = String(payload.loanEmpType || '').toLowerCase();
         const isSalaried = empVal.includes('salaried');
@@ -2675,122 +2675,156 @@ function initLoanForm() {
         const hasBonus = parseFloat(payload.bonusIncome || 0) > 0;
         const hasDepr = parseFloat(payload.depreciation || 0) > 0;
         const hasRemun = parseFloat(payload.directorSalary || 0) > 0;
+        const hasExistingEmi = parseFloat(payload.loanExistingEmi || 0) > 0;
+        const loanTypeLower = String(payload.loanType || '').toLowerCase();
+        const isPropertyLoan = loanTypeLower.includes('home') || loanTypeLower.includes('lap') || loanTypeLower.includes('property') || loanTypeLower.includes('mortgage');
 
-        let docs = [];
+        let sections = [];
 
-        // 1. Mandatory KYC Documents (Common to all)
-        docs.push({
-            category: 'KYC & Identity (Mandatory)',
+        // 1. Mandatory KYC Documents (Applicant & Co-Applicant - Fix Rule)
+        sections.push({
+            title: '1. KYC & Applicant Profile (Applicant & Co-Applicant Mandatory)',
+            badge: 'Mandatory',
+            badgeBg: '#fef3c7',
+            badgeColor: '#92400e',
             items: [
-                'PAN Card copy (Self-attested)',
-                'Aadhaar Card (Linked with Mobile for e-sign)',
-                'Current Residence Proof (Electricity Bill / Rent Agreement / Passport)',
-                '2 Passport Size Colour Photographs'
+                '<strong>PAN Card & Aadhaar Card</strong> (Updated with current residence address)',
+                '<strong>Current Residence Proof:</strong> If rented, <em>Registered Rent Agreement & Latest Light Bill (Electricity Bill)</em>',
+                '<strong>Passport Size Photographs</strong> (2 colour photos for applicant & co-applicant)',
+                '<strong>Personal Details Sheet:</strong> Mother\'s name, Mobile number, Email ID, Education, Total Dependents',
+                '<strong>Stability Proof:</strong> Residence stability (Total years in city & current address) + Work experience (Total & current)',
+                '<strong>2 Personal References:</strong> Full Name, Mobile Number & Complete Address'
             ]
         });
 
         // 2. Income Verification Documents (Profile-specific)
         if (isSalaried) {
-            const incomeDocs = [
-                'Latest 3 to 6 Months Salary Slips (Company stamped / signed)',
-                'Latest 6 Months Salary Bank Account Statements (PDF with net credits)',
-                'Latest 2 Years Form 16 (Part A & Part B) / ITR-V'
+            const salariedItems = [
+                '<strong>Official Job Proof:</strong> Official Email ID & Office Address Proof (Employee ID Card or appointment letter)',
+                '<strong>Salary Slips:</strong> Latest 3 to 6 Months Salary Slips (with company seal/signature & bonus breakdown)',
+                '<strong>Banking (Salary Account):</strong> 6 to 12 Months Salary Credited Bank Statement (Original Net-banking PDF download)',
+                '<strong>Secondary / Savings Bank Account:</strong> If salary is transferred or maintained in another bank, 6 to 12 months statement of that account',
+                '<strong>Tax Proof:</strong> Form 16 (Part A & Part B) for the last 2 to 3 years'
             ];
-            if (hasBonus) {
-                incomeDocs.push('Bonus Proof / Annual Appraisal Letter (for 50% bonus capacity)');
-            }
             if (hasRent) {
-                incomeDocs.push('Registered Rent Agreement (50% - 80% rent consideration) + 6 Months Bank Credit Statement');
+                salariedItems.push('<strong>Rental Income Add-back:</strong> Registered Rent Agreement + Latest Light Bill of rented property + 6-12 months bank credit proof (50% - 80% considered)');
             }
-            docs.push({
-                category: 'Income Verification (Salaried Profile)',
-                items: incomeDocs
+            sections.push({
+                title: '2. Salaried Income & Banking Verification',
+                badge: 'Salary Underwriting',
+                badgeBg: '#eff6ff',
+                badgeColor: '#1e3a8a',
+                items: salariedItems
             });
         } else if (isTurnover) {
-            const turnoverDocs = [
-                'Latest 12 Months GST Returns (GSTR-3B & GSTR-1 filings)',
-                'Latest 12 Months Current Bank Account Statements (All operational banks)',
-                'Business PAN Card & Udyam / MSME Registration Certificate',
-                'GST Registration Certificate & Shop Act / Trade License'
+            const turnoverItems = [
+                '<strong>GST Filings:</strong> Latest 12 Months GST Returns (GSTR-3B & GSTR-1 filings with challans)',
+                '<strong>Current Bank Accounts:</strong> Latest 12 Months Current Account Bank Statements for all active business accounts',
+                '<strong>Business Registrations:</strong> Business PAN, Udyam / MSME Registration, GST Certificate & Shop Act License'
             ];
             if (isDoctor) {
-                turnoverDocs.push('Medical Degree Certificate (MBBS / MD / MS) & State Council Registration');
-                turnoverDocs.push('Form 26AS (for Professional Gross Receipts credit verification)');
+                turnoverItems.push('<strong>Doctor Professional Proof:</strong> MBBS / MD / MS Degree Certificate, State Medical Council Registration & Form 26AS receipts');
             } else if (empVal.includes('ca') || empVal.includes('cs')) {
-                turnoverDocs.push('COP / ICAI / ICSI Membership Certificate & Form 26AS receipts');
+                turnoverItems.push('<strong>Professional Credentials:</strong> ICAI / ICSI COP Certificate, Membership Proof & Form 26AS professional receipts');
             }
             if (hasRent) {
-                turnoverDocs.push('Registered Rent Agreement (50% - 80% rent consideration) + 6 Months Bank Statements');
+                turnoverItems.push('<strong>Rental Income:</strong> Registered Rent Agreement + Latest Light Bill + 12 Months Bank Statements (50% - 80% considered)');
             }
-            docs.push({
-                category: 'Gross Turnover / Banking Underwriting Documents',
-                items: turnoverDocs
+            sections.push({
+                title: '2. Gross Turnover / Professional Banking Verification',
+                badge: 'Banking Norms',
+                badgeBg: '#f0fdf4',
+                badgeColor: '#166534',
+                items: turnoverItems
             });
         } else {
             // Net Profit / 2-Year ITR Program
-            const itrDocs = [
-                'Last 2 to 3 Years Audited Balance Sheet & Profit & Loss (P&L) Accounts with CA Audit Report',
-                'Last 2 Years Complete ITR Computation & Acknowledgement Verification',
-                'Latest 12 Months Current Account Bank Statements',
-                'Business PAN, GST Certificate & Partnership Deed / MOA & AOA / COI'
+            const itrItems = [
+                '<strong>Audited Financials:</strong> Last 2 to 3 Years Audited Balance Sheet & Profit & Loss (P&L) Accounts with CA Tax Audit Report',
+                '<strong>ITR Verification:</strong> Last 2 to 3 Years Complete ITR Computation sheet & Acknowledgement Verification',
+                '<strong>Current Account Banking:</strong> Latest 12 Months Current Bank Account Statements (all operational accounts)',
+                '<strong>Constitution Proof:</strong> Business PAN, Partnership Deed / MOA & AOA / Certificate of Incorporation (COI)'
             ];
             if (hasDepr) {
-                itrDocs.push('Depreciation Schedule as per Companies Act / IT Act (for 100% add-back to cash profit)');
+                itrItems.push('<strong>Depreciation Schedule:</strong> Fixed Assets & Depreciation Schedule as per IT Act (for 100% add-back to cash profit)');
             }
             if (hasRemun) {
-                itrDocs.push('Form 16 / Partner Salary Ledger Copy (for 100% add-back)');
+                itrItems.push('<strong>Director / Partner Salary:</strong> Form 16 / Partner Salary Ledger Copy (for 100% add-back)');
             }
             if (hasRent) {
-                itrDocs.push('Registered Rent Agreement (50% - 80% consideration) + 6 Months Bank Statement proof');
+                itrItems.push('<strong>Rental Income:</strong> Registered Rent Agreement + Latest Light Bill + 12 Months Bank Statements (50% - 80% considered)');
             }
-            docs.push({
-                category: isBizEntity ? 'Entity & 2-Year ITR Documents (Proprietor / Firm / Pvt Ltd)' : 'Business 2-Year ITR Documents',
-                items: itrDocs
+            sections.push({
+                title: isBizEntity ? '2. Entity & Audited 2-Year ITR Documents' : '2. Business Audited 2-Year ITR Documents',
+                badge: '2-Year ITR Audited',
+                badgeBg: '#fef2f2',
+                badgeColor: '#991b1b',
+                items: itrItems
             });
         }
 
-        // 3. Property / Security Documents (For Home Loan & LAP)
-        const loanTypeLower = String(payload.loanType || '').toLowerCase();
-        if (loanTypeLower.includes('home') || loanTypeLower.includes('lap') || loanTypeLower.includes('property') || loanTypeLower.includes('mortgage')) {
-            docs.push({
-                category: 'Property Documents (For Sanction & Disbursement)',
+        // 3. Existing Loans & Ongoing EMIs Track (If existing obligations entered)
+        if (hasExistingEmi) {
+            sections.push({
+                title: '3. Running Loan Obligations Track Sheet',
+                badge: 'Track Required',
+                badgeBg: '#f3e8ff',
+                badgeColor: '#6b21a8',
                 items: [
-                    'Registered Agreement for Sale / Registered Sale Deed with all chain documents',
-                    'Allotment Letter / NOC from Builder or Society',
-                    'Approved Building Sanction Plan, IOD & Completion / Occupancy Certificate (OC)',
-                    'Latest Property Tax Receipt & Society Share Certificate'
+                    '<strong>Running Loan Details Sheet:</strong> List of all ongoing personal, car, business, or home loans',
+                    '<strong>Bank Sanction Letters:</strong> Sanction letters of all running loans showing loan amount, tenure & ROI',
+                    '<strong>Statement of Account (SOA):</strong> Latest Statement of Account / Repayment track record for each running loan (no default)'
                 ]
             });
         }
 
-        // Render clean HTML
+        // 4. Property Documents (For Home Loan & LAP)
+        if (isPropertyLoan) {
+            sections.push({
+                title: '4. Property Documentation (Residential / Commercial / Industrial)',
+                badge: 'Sanction & Title',
+                badgeBg: '#ecfdf5',
+                badgeColor: '#065f46',
+                items: [
+                    '<strong>Property Classification:</strong> Residential / Commercial / Industrial &mdash; Resale or Direct Builder &mdash; Ready Possession or Under Construction',
+                    '<strong>Agreement Copy:</strong> Registered Agreement for Sale / Registered Sale Deed with all prior chain agreements',
+                    '<strong>Builder / Society Documents:</strong> Allotment Letter / NOC from Builder or Co-operative Housing Society',
+                    '<strong>Approval Sanctions:</strong> Approved Building Sanction Plan, IOD & Completion / Occupancy Certificate (OC)',
+                    '<strong>Tax & Share:</strong> Latest Property Tax Paid Receipt & Society Share Certificate copy'
+                ]
+            });
+        }
+
         return `
             <div style="margin-top: 14px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 8px;">
-                    <span style="font-size: 0.85rem; font-weight: 800; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
-                        <span>📋</span> Required List of Documents (As Per Your Income Submission)
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 8px;">
+                    <span style="font-size: 0.88rem; font-weight: 800; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                        <span>📋</span> Complete Bank Underwriting Checklist (Mukesh Tiwari Standard File Kit)
                     </span>
                     <span style="font-size: 0.7rem; color: #1e3a8a; font-weight: 700; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">
-                        ${isSalaried ? 'Salaried KYC & Income' : (isTurnover ? 'Turnover Banking Norms' : 'Audited 2-Yr ITR Norms')}
+                        Direct Bank Login Ready
                     </span>
                 </div>
-                <p style="font-size: 0.74rem; color: #64748b; margin-top: 0; margin-bottom: 10px;">
-                    Bank underwriting will verify the exact income figures entered in your eligibility test. Keep the following checklist ready for rapid sanction:
+                <p style="font-size: 0.74rem; color: #64748b; margin-top: 0; margin-bottom: 12px; line-height: 1.45;">
+                    Lending bank underwriting strictly verifies the submitted income parameters. Keep these exact documents ready for immediate sanction processing:
                 </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
-                    ${docs.map(cat => `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+                    ${sections.map(sec => `
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
-                            <strong style="color: var(--color-navy); font-size: 0.78rem; display: block; margin-bottom: 6px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
-                                ${cat.category}
-                            </strong>
-                            <ul style="margin: 0; padding-left: 16px; font-size: 0.73rem; color: #334155; line-height: 1.5;">
-                                ${cat.items.map(it => `<li style="margin-bottom: 4px;">${it}</li>`).join('')}
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                                <strong style="color: var(--color-navy); font-size: 0.76rem;">${sec.title}</strong>
+                                <span style="font-size: 0.65rem; font-weight: 700; background: ${sec.badgeBg}; color: ${sec.badgeColor}; padding: 1px 6px; border-radius: 3px;">${sec.badge}</span>
+                            </div>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 0.72rem; color: #334155; line-height: 1.5;">
+                                ${sec.items.map(it => `<li style="margin-bottom: 5px;">${it}</li>`).join('')}
                             </ul>
                         </div>
                     `).join('')}
                 </div>
-                <div style="margin-top: 10px; padding: 6px 10px; background: #ecfdf5; border-radius: 6px; border: 1px solid #a7f3d0; font-size: 0.72rem; color: #065f46; font-weight: 600;">
-                    💡 <strong>Doorstep Pickup Available:</strong> Senior Advisor Mukesh Tiwari & team arrange doorstep document collection & direct bank coordination across 25+ lenders.
+                <div style="margin-top: 12px; padding: 8px 12px; background: #ecfdf5; border-radius: 6px; border: 1.5px solid #86efac; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="font-size: 0.73rem; color: #065f46; font-weight: 600;">
+                        🚚 <strong>Doorstep File Pickup & Bank Coordination:</strong> Senior Advisor Mukesh Tiwari & team collect your prepared physical document kit directly from your home or office.
+                    </div>
                 </div>
             </div>
         `;
@@ -3094,6 +3128,7 @@ function initLoanForm() {
                    `*Existing EMIs:* ₹${formatIndianNumber(originalPayload.loanExistingEmi)}/mo\n` +
                    `*Preferred Tenure:* ${originalPayload.loanTenure}\n` +
                    `*Applicant Notes:* ${leadMessage && leadMessage.value.trim() ? leadMessage.value.trim() : 'None'}\n` +
+                   `*Document Readiness:* KYC, Bank statements & Form 16 / ITR ready as per Mukesh Tiwari File Checklist.\n` +
                    `----------------------------------------\n` +
                    `Advisor: Mukesh Tiwari (+91 95947 36833)`;
         }
