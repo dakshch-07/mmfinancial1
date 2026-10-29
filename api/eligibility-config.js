@@ -13,7 +13,7 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'Home Loan': 8.50,
         'Home Loan Balance Transfer': 8.50,
         'Mortgage Loan Against Property (LAP)': 9.50,
-        'Personal Loan': 11.50,
+        'Personal Loan': 12.50,
         'Business Loan / Working Capital': 12.00,
         'Commercial & Industrial Property Loan': 9.75,
         'Loan Against Mutual Funds (LAMF)': 10.00,

@@ -1440,7 +1440,7 @@ const LOAN_ELIGIBILITY_CONFIG = {
         'Home Loan': 8.50,
         'Home Loan Balance Transfer': 8.50,
         'Mortgage Loan Against Property (LAP)': 9.50,
-        'Personal Loan': 11.50,
+        'Personal Loan': 12.50,
         'Business Loan / Working Capital': 12.00,
         'Commercial & Industrial Property Loan': 9.75,
         'Loan Against Mutual Funds (LAMF)': 10.00,
@@ -2208,7 +2208,114 @@ function initLoanForm() {
     }
 
     if (loanType) {
-        loanType.addEventListener('change', updateBenchmarkRoi);
+        loanType.addEventListener('change', () => {
+            updateBenchmarkRoi();
+            applyLoanCategoryRestrictions();
+        });
+    }
+
+    /* Personal Loan — restrict tenure to 12-84 months only, ROI range 10.99%-48%
+       LAMF — redirect to dedicated portfolio-based calculator */
+    function applyLoanCategoryRestrictions() {
+        const selType = loanType ? loanType.value : '';
+        const isPersonalLoan = selType === 'Personal Loan';
+        const isLAMF = selType === 'Loan Against Mutual Funds (LAMF)';
+        const loanRoiInput = document.getElementById('loanRoi');
+        const optgroupMonths = document.getElementById('optgroupMonths');
+        const optgroupYears = document.getElementById('optgroupYears');
+        const tenureSelect = document.getElementById('loanTenure');
+        const tenureFilterBtns = document.querySelectorAll('.tenure-filter-btn');
+        const chipsGroup = tenureSelect ? tenureSelect.closest('.form-field').querySelector('.form-chips-group') : null;
+
+        if (isPersonalLoan) {
+            // ROI range for Personal Loan: 10.99% - 48%
+            if (loanRoiInput) {
+                loanRoiInput.min = '10.99';
+                loanRoiInput.max = '48';
+            }
+            // Hide Years optgroup, show only months 12-84
+            if (optgroupYears) optgroupYears.style.display = 'none';
+            if (optgroupMonths) {
+                optgroupMonths.style.display = '';
+                Array.from(optgroupMonths.options).forEach(opt => {
+                    const months = parseInt(opt.value);
+                    opt.style.display = (months >= 12 && months <= 84) ? '' : 'none';
+                    opt.disabled = (months < 12 || months > 84);
+                });
+            }
+            // Auto-select "In Months" filter and hide Years/All tabs
+            tenureFilterBtns.forEach(btn => {
+                if (btn.dataset.filter === 'months') btn.classList.add('active');
+                else btn.classList.remove('active');
+                if (btn.dataset.filter === 'years' || btn.dataset.filter === 'all') btn.style.display = 'none';
+            });
+            // Set default tenure to 36 Months
+            if (tenureSelect) tenureSelect.value = '36 Months';
+            // Replace quick chips for Personal Loan
+            if (chipsGroup) {
+                chipsGroup.innerHTML = '<span class="form-chip-label">Quick:</span>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="12 Months">12 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="24 Months">24 Mo</button>' +
+                    '<button type="button" class="form-chip-pill active" data-target="loanTenure" data-val="36 Months">36 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="48 Months">48 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="60 Months">60 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="72 Months">72 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="84 Months">84 Mo</button>';
+                rebindChipEvents(chipsGroup);
+            }
+        } else if (isLAMF) {
+            // LAMF — redirect to dedicated portfolio-based calculator
+            const goToCalc = confirm('Loan Against Mutual Funds (LAMF) uses a portfolio-based eligibility calculator.\n\nWould you like to open the LAMF Calculator?');
+            if (goToCalc) {
+                window.location.href = '/calculators/loan-against-mutual-funds-calculator';
+            } else {
+                loanType.value = 'Home Loan';
+                updateBenchmarkRoi();
+                applyLoanCategoryRestrictions();
+            }
+        } else {
+            // Reset defaults for all other loan types
+            if (loanRoiInput) {
+                loanRoiInput.min = '6.0';
+                loanRoiInput.max = '24.0';
+            }
+            if (optgroupYears) optgroupYears.style.display = '';
+            if (optgroupMonths) {
+                Array.from(optgroupMonths.options).forEach(opt => {
+                    opt.style.display = '';
+                    opt.disabled = false;
+                });
+            }
+            tenureFilterBtns.forEach(btn => {
+                btn.style.display = '';
+                if (btn.dataset.filter === 'all') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            if (tenureSelect) tenureSelect.value = '20 Years';
+            if (chipsGroup) {
+                chipsGroup.innerHTML = '<span class="form-chip-label">Quick:</span>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="12 Months">12 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="24 Months">24 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="36 Months">36 Mo</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="5 Years">5 Yrs</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="10 Years">10 Yrs</button>' +
+                    '<button type="button" class="form-chip-pill active" data-target="loanTenure" data-val="20 Years">20 Yrs</button>' +
+                    '<button type="button" class="form-chip-pill" data-target="loanTenure" data-val="30 Years">30 Yrs</button>';
+                rebindChipEvents(chipsGroup);
+            }
+        }
+    }
+
+    function rebindChipEvents(container) {
+        container.querySelectorAll('.form-chip-pill').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.getElementById(chip.dataset.target);
+                if (target) { target.value = chip.dataset.val; target.dispatchEvent(new Event('change')); }
+                container.querySelectorAll('.form-chip-pill').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            });
+        });
     }
 
     if (cibilSelect) {
