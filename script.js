@@ -2239,26 +2239,27 @@ function initLoanForm() {
     });
 
     // Dynamic Live Rental Income Hint Update on Typing
-    function updateRentHint(input, hintId) {
+    function updateRentHint(input, hintId, foirInput) {
         if (!input) return;
         const hintEl = document.getElementById(hintId);
         if (!hintEl) return;
         const handler = () => {
             const clean = input.value.replace(/[^0-9]/g, '');
             const rentVal = clean ? parseInt(clean, 10) : 0;
+            const foirVal = foirInput ? (parseFloat(foirInput.value) || 75) : 75;
             if (rentVal > 0) {
-                const counted = Math.round(rentVal * 0.65);
-                hintEl.innerHTML = `<span style="color: #15803d; font-weight: 700;">✓ Counted: ₹${formatIndianNumber(counted)}/mo (65% benchmark with registered agreement)</span>`;
+                const counted = Math.round(rentVal * (foirVal / 100));
+                hintEl.innerHTML = `<span style="color: #15803d; font-weight: 700;">✓ Counted: ₹${formatIndianNumber(counted)}/mo (${foirVal}% benchmark with registered agreement)</span>`;
             } else {
-                hintEl.textContent = '50% - 80% (65% benchmark) considered with registered rent agreement';
+                hintEl.textContent = `50% - 100% (${foirVal}% auto fix benchmark) considered with registered rent agreement`;
             }
         };
         input.addEventListener('input', handler);
         input.addEventListener('change', handler);
         handler();
     }
-    updateRentHint(loanRentIncome, 'loanRentIncomeHint');
-    updateRentHint(loanBizRentIncome, 'loanBizRentIncomeHint');
+    updateRentHint(loanRentIncome, 'loanRentIncomeHint', loanSalRentFoir);
+    updateRentHint(loanBizRentIncome, 'loanBizRentIncomeHint', loanBizRentFoir);
 
     // Tenure chip and optgroup sync
     function syncTenureChips(selectedVal) {
