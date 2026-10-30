@@ -347,7 +347,37 @@
                     </div>
                     
 
-                    <div class="input-group">
+                                        <!-- Co-Applicant Income Option (Optional Toggle) -->
+                    <div class="input-group" style="background: #f8fafc; border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="salCoAppToggle">
+                            <span style="font-size: 0.82rem; font-weight: 700; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                                <span>👥</span> + Add Co-Applicant Income (Optional)
+                            </span>
+                            <span id="salCoAppToggleBadge" style="font-size: 0.72rem; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">+ Open</span>
+                        </div>
+                        <div id="salCoAppFields" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                            <div class="input-header">
+                                <label for="salCoAppIncomeInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Monthly Net Income (₹)</label>
+                                <span class="input-badge" id="salCoAppIncomeBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="salCoAppIncomeInput" class="calc-input" value="" placeholder="e.g. 40,000" inputmode="numeric" aria-label="Co-Applicant Monthly Net Income">
+                            </div>
+                            <input type="range" id="salCoAppIncomeSlider" class="calc-slider" min="0" max="500000" step="1000" value="0">
+                            <div class="slider-limits"><span>₹0</span><span>₹5,00,000 (Spouse / Working Family / Partner)</span></div>
+
+                            <div class="input-header" style="margin-top: 10px;">
+                                <label for="salCoAppEmiInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Existing Monthly Obligations (₹)</label>
+                                <span class="input-badge" id="salCoAppEmiBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="salCoAppEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Co-Applicant Existing EMIs">
+                            </div>
+                        </div>
+                    </div>
+<div class="input-group">
                         <div class="input-header">
                             <label for="salEmiInput">Existing Monthly EMIs / Obligations</label>
                             <span class="input-badge" id="salEmiBadge">₹0</span>
@@ -569,9 +599,29 @@
                         <div class="slider-limits"><span>₹0</span><span>₹50 Lakh (drawn from firm)</span></div>
                     </div>
 
-                    <div class="input-group">
+                    <!-- Business Income FOIR (50% to 75% Manual, 70% Default) -->
+                    <div class="input-group" style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 12px; margin-top: 10px;">
                         <div class="input-header">
-                            <label for="bizRentInput">Monthly Rental Income</label>
+                            <label for="bizCustomFoirInput" style="color: #78350f; font-weight: 700; font-size: 0.82rem;">Business Income FOIR (%): (Editable 50% - 75%)</label>
+                            <span class="input-badge" id="bizCustomFoirBadge" style="background: #78350f; color: #ffffff;">70% FOIR</span>
+                        </div>
+                        <div class="input-with-symbol" style="margin-top: 6px;">
+                            <span class="currency-prefix">%</span>
+                            <input type="number" id="bizCustomFoirInput" class="calc-input" value="70" min="50" max="75" step="1" style="border-color: #fcd34d; font-weight: 700; color: #78350f;" aria-label="Applied Business Income FOIR">
+                        </div>
+                        <input type="range" id="bizCustomFoirSlider" class="calc-slider" min="50" max="75" step="1" value="70" style="margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #78350f; font-weight: 700; margin-top: 3px;">
+                            <span>50% (Min)</span>
+                            <span>Default: 70%</span>
+                            <span>75% (Max)</span>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #78350f; margin-top: 4px; display: block; font-weight: 600;">Applies to 2-Yr Net Profit/24 + Depreciation/12 + Remuneration/12.</span>
+                    </div>
+
+                    <!-- Business Rental Income with dedicated 50%-80% FOIR (75% Auto Fix) -->
+                    <div class="input-group" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                        <div class="input-header">
+                            <label for="bizRentInput" style="color: #166534; font-weight: 700; font-size: 0.82rem;">Monthly Rental Income (₹)</label>
                             <span class="input-badge" id="bizRentBadge">₹0</span>
                         </div>
                         <div class="input-with-symbol">
@@ -579,8 +629,59 @@
                             <input type="text" id="bizRentInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Monthly Rental Income">
                         </div>
                         <input type="range" id="bizRentSlider" class="calc-slider" min="0" max="500000" step="1000" value="0">
-                        <div class="slider-limits"><span>₹0</span><span>₹5,00,000 (50% - 80% considered with registered rent agreement)</span></div>
+                        <div class="slider-limits"><span>₹0</span><span>₹5,00,000</span></div>
+
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #86efac;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <label for="bizRentFoirInput" style="font-size: 0.76rem; font-weight: 700; color: #166534;">Rental FOIR / Discounting Factor (%):</label>
+                                <span id="bizRentFoirBadge" style="font-size: 0.72rem; font-weight: 700; color: #ffffff; background: #15803d; padding: 2px 6px; border-radius: 4px;">75% Auto Fix</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="position: relative; width: 90px; flex-shrink: 0;">
+                                    <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #166534; font-size: 0.8rem; pointer-events: none;">%</span>
+                                    <input type="number" id="bizRentFoirInput" class="calc-input" value="75" min="50" max="80" step="1" style="height: 32px; padding: 4px 20px 4px 8px; font-size: 0.8rem; font-weight: 700; border-color: #86efac; color: #166534;" aria-label="Rental FOIR percentage">
+                                </div>
+                                <input type="range" id="bizRentFoirSlider" min="50" max="80" step="1" value="75" style="flex: 1; accent-color: #15803d; cursor: pointer;">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: #166534; font-weight: 700; margin-top: 2px;">
+                                <span>50% (Min)</span>
+                                <span>75% (Auto Fix Benchmark)</span>
+                                <span>80% (Max)</span>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Co-Applicant Income Option for Business (Optional Toggle) -->
+                    <div class="input-group" style="background: #f8fafc; border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="bizCoAppToggle">
+                            <span style="font-size: 0.82rem; font-weight: 700; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                                <span>👥</span> + Add Co-Applicant Income (Optional)
+                            </span>
+                            <span id="bizCoAppToggleBadge" style="font-size: 0.72rem; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">+ Open</span>
+                        </div>
+                        <div id="bizCoAppFields" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                            <div class="input-header">
+                                <label for="bizCoAppIncomeInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Monthly Net Income (₹)</label>
+                                <span class="input-badge" id="bizCoAppIncomeBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizCoAppIncomeInput" class="calc-input" value="" placeholder="e.g. 50,000" inputmode="numeric" aria-label="Co-Applicant Monthly Net Income">
+                            </div>
+                            <input type="range" id="bizCoAppIncomeSlider" class="calc-slider" min="0" max="1000000" step="2000" value="0">
+                            <div class="slider-limits"><span>₹0</span><span>₹10,00,000 (Spouse / Director / Partner)</span></div>
+
+                            <div class="input-header" style="margin-top: 10px;">
+                                <label for="bizCoAppEmiInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Existing Monthly Obligations (₹)</label>
+                                <span class="input-badge" id="bizCoAppEmiBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="bizCoAppEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Co-Applicant Existing EMIs">
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="input-group">
                         <div class="input-header">

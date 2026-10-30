@@ -436,7 +436,37 @@
                     </div>
                 </div>
 
-                <div class="input-group">
+                                <!-- Co-Applicant Income Option (Optional Toggle for LAP) -->
+                <div class="input-group" style="background: #f8fafc; border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="lapCoAppToggle">
+                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                            <span>👥</span> + Add Co-Applicant Income (Optional)
+                        </span>
+                        <span id="lapCoAppToggleBadge" style="font-size: 0.72rem; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">+ Open</span>
+                    </div>
+                    <div id="lapCoAppFields" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                        <div class="input-header">
+                            <label for="lapCoAppIncomeInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Monthly Net Income (₹)</label>
+                            <span class="input-badge" id="lapCoAppIncomeBadge">₹0</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">₹</span>
+                            <input type="text" id="lapCoAppIncomeInput" class="calc-input" value="" placeholder="e.g. 50,000" inputmode="numeric" aria-label="Co-Applicant Monthly Net Income">
+                        </div>
+                        <input type="range" id="lapCoAppIncomeSlider" class="calc-slider" min="0" max="1000000" step="2000" value="0">
+                        <div class="slider-limits"><span>₹0</span><span>₹10,00,000 (Spouse / Co-Owner / Director)</span></div>
+
+                        <div class="input-header" style="margin-top: 10px;">
+                            <label for="lapCoAppEmiInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Existing Monthly Obligations (₹)</label>
+                            <span class="input-badge" id="lapCoAppEmiBadge">₹0</span>
+                        </div>
+                        <div class="input-with-symbol">
+                            <span class="currency-prefix">₹</span>
+                            <input type="text" id="lapCoAppEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Co-Applicant Existing EMIs">
+                        </div>
+                    </div>
+                </div>
+<div class="input-group">
                     <label for="lapEmiInput" style="font-size:0.78rem; font-weight:700;">Existing Monthly EMI Obligations (₹)</label>
                     <input type="text" id="lapEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric">
                 </div>

@@ -880,6 +880,95 @@ function parseNumber(val) {
     bindSync(document.getElementById('bizRentInput'), document.getElementById('bizRentSlider'), 0, 500000, 1000, recalc);
     bindSync(document.getElementById('bizEmiInput'), document.getElementById('bizEmiSlider'), 0, 1000000, 1000, recalc);
 
+    // Co-Applicant Toggles (Salaried & Business)
+    const salCoAppToggle = document.getElementById('salCoAppToggle');
+    const salCoAppFields = document.getElementById('salCoAppFields');
+    const salCoAppToggleBadge = document.getElementById('salCoAppToggleBadge');
+    if (salCoAppToggle && salCoAppFields) {
+      salCoAppToggle.addEventListener('click', () => {
+        const isOpen = salCoAppFields.style.display === 'block';
+        salCoAppFields.style.display = isOpen ? 'none' : 'block';
+        if (salCoAppToggleBadge) salCoAppToggleBadge.textContent = isOpen ? '+ Open' : '✕ Close';
+      });
+    }
+
+    const bizCoAppToggle = document.getElementById('bizCoAppToggle');
+    const bizCoAppFields = document.getElementById('bizCoAppFields');
+    const bizCoAppToggleBadge = document.getElementById('bizCoAppToggleBadge');
+    if (bizCoAppToggle && bizCoAppFields) {
+      bizCoAppToggle.addEventListener('click', () => {
+        const isOpen = bizCoAppFields.style.display === 'block';
+        bizCoAppFields.style.display = isOpen ? 'none' : 'block';
+        if (bizCoAppToggleBadge) bizCoAppToggleBadge.textContent = isOpen ? '+ Open' : '✕ Close';
+      });
+    }
+
+    // Co-Applicant Inputs Synchronization
+    bindSync(document.getElementById('salCoAppIncomeInput'), document.getElementById('salCoAppIncomeSlider'), 0, 500000, 1000, recalc);
+    const salCoAppEmiIn = document.getElementById('salCoAppEmiInput');
+    if (salCoAppEmiIn) salCoAppEmiIn.addEventListener('input', recalc);
+
+    bindSync(document.getElementById('bizCoAppIncomeInput'), document.getElementById('bizCoAppIncomeSlider'), 0, 1000000, 2000, recalc);
+    const bizCoAppEmiIn = document.getElementById('bizCoAppEmiInput');
+    if (bizCoAppEmiIn) bizCoAppEmiIn.addEventListener('input', recalc);
+
+    // Business Income FOIR (50% to 75%, Default 70%)
+    const bizCustomFoirIn = document.getElementById('bizCustomFoirInput');
+    const bizCustomFoirSl = document.getElementById('bizCustomFoirSlider');
+    const bizCustomFoirBadge = document.getElementById('bizCustomFoirBadge');
+    if (bizCustomFoirIn && bizCustomFoirSl) {
+      bindSync(bizCustomFoirIn, bizCustomFoirSl, 50, 75, 1, recalc, true);
+      bizCustomFoirIn.addEventListener('input', () => {
+        let v = parseFloat(bizCustomFoirIn.value);
+        if (!isNaN(v) && bizCustomFoirBadge) {
+          if (v > 75) v = 75;
+          bizCustomFoirBadge.textContent = v + '% FOIR';
+        }
+        recalc();
+      });
+      bizCustomFoirIn.addEventListener('blur', () => {
+        let v = parseFloat(bizCustomFoirIn.value);
+        if (isNaN(v) || v < 50) v = 50;
+        if (v > 75) v = 75;
+        bizCustomFoirIn.value = v;
+        if (bizCustomFoirSl) {
+          bizCustomFoirSl.value = v;
+          updateSliderFill(bizCustomFoirSl);
+        }
+        if (bizCustomFoirBadge) bizCustomFoirBadge.textContent = v + '% FOIR';
+        recalc();
+      });
+    }
+
+    // Business Rental FOIR (50% to 80%, Default 75% Auto Fix)
+    const bizRentFoirIn = document.getElementById('bizRentFoirInput');
+    const bizRentFoirSl = document.getElementById('bizRentFoirSlider');
+    const bizRentFoirBadge = document.getElementById('bizRentFoirBadge');
+    if (bizRentFoirIn && bizRentFoirSl) {
+      bindSync(bizRentFoirIn, bizRentFoirSl, 50, 80, 1, recalc, true);
+      bizRentFoirIn.addEventListener('input', () => {
+        let v = parseFloat(bizRentFoirIn.value);
+        if (!isNaN(v) && bizRentFoirBadge) {
+          if (v > 80) v = 80;
+          bizRentFoirBadge.textContent = v + '% FOIR';
+        }
+        recalc();
+      });
+      bizRentFoirIn.addEventListener('blur', () => {
+        let v = parseFloat(bizRentFoirIn.value);
+        if (isNaN(v) || v < 50) v = 50;
+        if (v > 80) v = 80;
+        bizRentFoirIn.value = v;
+        if (bizRentFoirSl) {
+          bizRentFoirSl.value = v;
+          updateSliderFill(bizRentFoirSl);
+        }
+        if (bizRentFoirBadge) bizRentFoirBadge.textContent = v + '% FOIR';
+        recalc();
+      });
+    }
+
+
     // Business Turnover Program (2% to 7% Multiplier)
     const bizProgSel = document.getElementById('bizProgramSelect');
     const turnoverFields = document.getElementById('turnoverProgramFields');
@@ -1128,9 +1217,18 @@ function parseNumber(val) {
 
         appliedFoir = salFoir;
 
-        // Salaried: FOIR applied to net monthly salary + 50% bonus/12 + 65% rent (50% - 80% with registered rent agreement)
-        const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.75);
-        eligibleIncome = monthlyEquivalent * appliedFoir;
+        // Salaried: Net Monthly Salary x FOIR + 50% Bonus/12 + Rent x Rental FOIR + Co-Applicant Income x FOIR
+        const salRentFoir = 0.75;
+        const salCoAppInc = parseNumber((document.getElementById('salCoAppIncomeInput') || {}).value);
+        const salCoAppEmi = parseNumber((document.getElementById('salCoAppEmiInput') || {}).value);
+        
+        const salMainEligible = salary * appliedFoir;
+        const salBonusEligible = (bonus / 12 * 0.5) * appliedFoir;
+        const salRentEligible = rent * salRentFoir;
+        const salCoAppEligible = salCoAppInc * appliedFoir;
+
+        eligibleIncome = salMainEligible + salBonusEligible + salRentEligible + salCoAppEligible;
+        existingEmi += salCoAppEmi;
       } else {
         // Business / Self-Employed Assessment: Net Profit (ITR) OR Turnover Program (2% - 7%)
         const isTurnoverProg = (bizProgSel && bizProgSel.value === 'turnover');
@@ -1138,6 +1236,9 @@ function parseNumber(val) {
 
         const isLrdProg = (bizProgSel && bizProgSel.value === 'lrd');
         const isLrdIndustry = (bizProgSel && bizProgSel.value === 'turnover' && bizIndustrySel && bizIndustrySel.value === 'lrd');
+
+        const bizCoAppInc = parseNumber((document.getElementById('bizCoAppIncomeInput') || {}).value);
+        const bizCoAppEmi = parseNumber((document.getElementById('bizCoAppEmiInput') || {}).value);
 
         if (isLrdProg || isLrdIndustry) {
           // Rental Program LRD (Lease Rental Discounting)
@@ -1148,6 +1249,7 @@ function parseNumber(val) {
 
           totalMonthlyBusinessIncome = discountedRent;
           appliedFoir = 1.0;
+          eligibleIncome = discountedRent + (bizCoAppInc * 0.70);
 
           const lrdRentB = document.getElementById('lrdRentBadge'); if (lrdRentB) lrdRentB.textContent = badgeWordINR(rentVal);
           const lrdFoirB = document.getElementById('lrdFoirBadge'); if (lrdFoirB) lrdFoirB.textContent = lrdFoir + '% FOIR';
@@ -1162,48 +1264,77 @@ function parseNumber(val) {
 
           let annualDerivedIncome = 0;
           if (isMultiplier) {
-            // Doctor / Professional: 3x Gross Receipts
             annualDerivedIncome = avgTurnover * turnoverPct;
             totalMonthlyBusinessIncome = Math.round(annualDerivedIncome / 12);
-            appliedFoir = 1.0; // Monthly income directly available for EMI capacity
+            appliedFoir = 1.0;
           } else {
-            // Manufacturing / Services / Trader: Turnover * Margin %
             annualDerivedIncome = avgTurnover * (turnoverPct / 100);
-            appliedFoir = 0.85; // 85% FOIR as specified
+            appliedFoir = 0.85;
             totalMonthlyBusinessIncome = Math.round((annualDerivedIncome * appliedFoir) / 12);
           }
 
-          // Add-backs: Rent & Remuneration (Rent at 50% - 80% benchmark 65%)
           const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
-          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.75);
+          const rentFoirVal = (parseFloat((document.getElementById('bizRentFoirInput') || {}).value) || 75) / 100;
+
+          totalMonthlyBusinessIncome += (remun / 12) + (rent * rentFoirVal);
+          eligibleIncome = (isMultiplier ? totalMonthlyBusinessIncome : (totalMonthlyBusinessIncome * appliedFoir)) + (bizCoAppInc * 0.70);
 
           const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = badgeWordINR(turnover1);
           const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = badgeWordINR(turnover2);
           const bAvg = document.getElementById('bizAvgTurnoverBadge'); if (bAvg) bAvg.textContent = badgeWordINR(avgTurnover);
           const bTP = document.getElementById('bizTurnoverPctBadge'); if (bTP) bTP.textContent = isMultiplier ? turnoverPct + 'x' : turnoverPct.toFixed(1) + '%';
           const bMon = document.getElementById('bizMonthlyIncomeBadge'); if (bMon) bMon.textContent = '₹' + fmtINR(Math.round(totalMonthlyBusinessIncome)) + ' / mo';
-          // formula text removed as per user instruction
         } else {
           // 2-Year ITR assessment (24 Months / 12 Months)
+          // EXACT USER FORMULA:
+          // Two years net profit/24 + Depreciation/12 + Partner & director salary/12 x (50% To 75% FOIR)
+          // + Rental monthly x (50% - 80% Rental FOIR, 75% Auto Fix)
+          // + Co-App income x FOIR
+          // = PER month income - obligation / Per LAKHS Emi
           const profit1 = parseNumber((document.getElementById('bizProfitInput') || {}).value);
           const profit2 = parseNumber((document.getElementById('bizProfit2Input') || {}).value);
           const depr = parseNumber((document.getElementById('bizDepreciationInput') || {}).value);
           const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
 
-          // 2 Years Income Average: (Year 1 + Year 2) / 24 months = Monthly Profit
           const total2YrProfit = profit1 + profit2;
           const avgAnnualProfit = total2YrProfit / 2;
           const monthlyProfit = total2YrProfit / 24;
 
-          // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent (50% - 80% benchmark 65%)
           const monthlyDepr = depr / 12;
           const monthlyRemun = remun / 12;
-          const monthlyRent = rent * 0.75;
 
-          // Total Monthly Cash Flow for Business Underwriting
-          totalMonthlyBusinessIncome = monthlyProfit + monthlyDepr + monthlyRemun + monthlyRent;
+          // Business Income FOIR (50% to 75%, Default 70%)
+          const bizCustomFoirVal = parseFloat((document.getElementById('bizCustomFoirInput') || {}).value);
+          let bizIncomeFoir = 0.70;
+          if (!isNaN(bizCustomFoirVal) && bizCustomFoirVal >= 50 && bizCustomFoirVal <= 75) {
+            bizIncomeFoir = bizCustomFoirVal / 100;
+          }
+
+          // Rental FOIR (50% to 80%, Default 75% Auto Fix)
+          const bizRentFoirVal = parseFloat((document.getElementById('bizRentFoirInput') || {}).value);
+          let bizRentalFoir = 0.75;
+          if (!isNaN(bizRentFoirVal) && bizRentFoirVal >= 50 && bizRentFoirVal <= 80) {
+            bizRentalFoir = bizRentFoirVal / 100;
+          }
+
+          appliedFoir = bizIncomeFoir;
+
+          // Core business cash flow: 2-Yr Net Profit/24 + Depreciation/12 + Remuneration/12
+          const coreMonthlyBusinessCashFlow = monthlyProfit + monthlyDepr + monthlyRemun;
+          const coreBusinessEligible = coreMonthlyBusinessCashFlow * bizIncomeFoir;
+
+          // Rental income counted separately with Rental FOIR (50% to 80%, 75% auto fix)
+          const rentalEligible = rent * bizRentalFoir;
+
+          // Co-Applicant Income addition
+          const coAppEligible = bizCoAppInc * bizIncomeFoir;
+
+          // Total Monthly Gross Available EMI Capacity (all FOIRs applied and added together)
+          eligibleIncome = coreBusinessEligible + rentalEligible + coAppEligible;
+
+          totalMonthlyBusinessIncome = coreMonthlyBusinessCashFlow + (rent * bizRentalFoir) + bizCoAppInc;
 
           // Update Business calculation summary badges
           const elAvgP = document.getElementById('bizAvgAnnualProfit');
@@ -1213,10 +1344,7 @@ function parseNumber(val) {
           if (elMonP) elMonP.textContent = '₹' + fmtINR(monthlyProfit);
         }
 
-        existingEmi = parseNumber((document.getElementById('bizEmiInput') || {}).value);
-
-        // Applied FOIR: Already integrated in turnover program (85% or 100% for Doctor)
-        eligibleIncome = (isTurnoverProg || isLrdProg || isLrdIndustry) ? totalMonthlyBusinessIncome : (totalMonthlyBusinessIncome * appliedFoir);
+        existingEmi = parseNumber((document.getElementById('bizEmiInput') || {}).value) + bizCoAppEmi;
 
         const elTotInc = document.getElementById('bizTotalMonthlyIncome');
         if (elTotInc) elTotInc.textContent = '₹' + fmtINR(totalMonthlyBusinessIncome);
@@ -1242,6 +1370,11 @@ function parseNumber(val) {
       const salBonB = document.getElementById('salBonusBadge'); if (salBonB) salBonB.textContent = badgeWordINR(parseNumber((document.getElementById('salBonusInput') || {}).value));
       const salRentB = document.getElementById('salRentBadge'); if (salRentB) salRentB.textContent = badgeWordINR(parseNumber((document.getElementById('salRentInput') || {}).value));
       const salEmiB = document.getElementById('salEmiBadge'); if (salEmiB) salEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('salEmiInput') || {}).value));
+      const salCoAppIncB = document.getElementById('salCoAppIncomeBadge'); if (salCoAppIncB) salCoAppIncB.textContent = badgeWordINR(parseNumber((document.getElementById('salCoAppIncomeInput') || {}).value));
+      const salCoAppEmiB = document.getElementById('salCoAppEmiBadge'); if (salCoAppEmiB) salCoAppEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('salCoAppEmiInput') || {}).value));
+      const bizCoAppIncB = document.getElementById('bizCoAppIncomeBadge'); if (bizCoAppIncB) bizCoAppIncB.textContent = badgeWordINR(parseNumber((document.getElementById('bizCoAppIncomeInput') || {}).value));
+      const bizCoAppEmiB = document.getElementById('bizCoAppEmiBadge'); if (bizCoAppEmiB) bizCoAppEmiB.textContent = badgeWordINR(parseNumber((document.getElementById('bizCoAppEmiInput') || {}).value));
+
 
       const bizProfB = document.getElementById('bizProfitBadge'); if (bizProfB) bizProfB.textContent = badgeWordINR(parseNumber((document.getElementById('bizProfitInput') || {}).value));
       const bizProf2B = document.getElementById('bizProfit2Badge'); if (bizProf2B) bizProf2B.textContent = badgeWordINR(parseNumber((document.getElementById('bizProfit2Input') || {}).value));
@@ -1819,6 +1952,20 @@ function parseNumber(val) {
 
     bindSync(propIn, propSl, 2000000, 100000000, 100000, recalc);
     bindSync(incIn, incSl, 30000, 2000000, 5000, recalc);
+    const lapCoAppToggle = document.getElementById('lapCoAppToggle');
+    const lapCoAppFields = document.getElementById('lapCoAppFields');
+    const lapCoAppToggleBadge = document.getElementById('lapCoAppToggleBadge');
+    if (lapCoAppToggle && lapCoAppFields) {
+      lapCoAppToggle.addEventListener('click', () => {
+        const isOpen = lapCoAppFields.style.display === 'block';
+        lapCoAppFields.style.display = isOpen ? 'none' : 'block';
+        if (lapCoAppToggleBadge) lapCoAppToggleBadge.textContent = isOpen ? '+ Open' : '✕ Close';
+      });
+    }
+    bindSync(document.getElementById('lapCoAppIncomeInput'), document.getElementById('lapCoAppIncomeSlider'), 0, 1000000, 2000, recalc);
+    const lapCoAppEmiIn = document.getElementById('lapCoAppEmiInput');
+    if (lapCoAppEmiIn) lapCoAppEmiIn.addEventListener('input', recalc);
+
 
     // MV LTV Slider & Input Synchronization (Housing: 50-98%, Commercial: 60-90%, Industrial: 45-80%)
     if (mvLtvIn && mvLtvSl) {
@@ -2098,9 +2245,14 @@ function parseNumber(val) {
       // Effective Collateral Limit: If agreement value is entered, banks limit to min(MV limit, Agreement limit)
       const effectiveCollateralLimit = agreeVal > 0 ? Math.min(mvCollateralLimit, agreeCollateralLimit) : mvCollateralLimit;
 
-      // 3. Income Limit (FOIR capacity)
-      const foir = isTurnover ? appliedFoirLap : 0.60;
-      const maxEmiCapacity = Math.max(0, (netInc * foir) - existingEmi);
+      // 3. Income Limit (FOIR capacity with Co-Applicant)
+      const lapCoAppInc = parseNumber((document.getElementById('lapCoAppIncomeInput') || {}).value);
+      const lapCoAppEmi = parseNumber((document.getElementById('lapCoAppEmiInput') || {}).value);
+      const totalLapEmi = existingEmi + lapCoAppEmi;
+
+      const foir = isTurnover ? appliedFoirLap : 0.70;
+      const totalEligibleCashFlow = (netInc * foir) + (lapCoAppInc * foir);
+      const maxEmiCapacity = Math.max(0, totalEligibleCashFlow - totalLapEmi);
 
       let incomeLimit = 0;
       if (maxEmiCapacity > 0 && rate > 0 && tenure > 0) {

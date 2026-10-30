@@ -1560,7 +1560,7 @@ function computeLocalEligibility(params) {
     let consideredDeprMonthly = 0;
     let consideredRemunMonthly = 0;
 
-    // Rental FOIR / Discounting Factor: Default 75% auto fix benchmark, bounded strictly between 50% and 100%
+    // Rental FOIR: Default 75% auto fix benchmark, bounded strictly between 50% and 80% (or up to 100% if entered)
     let rentFoirFactor = 0.75;
     const customRentFoirParam = parseFloat(params.rentalFoir || params.rentalIncomePercent || params.rentalIncomeFactor);
     if (!isNaN(customRentFoirParam) && customRentFoirParam >= 0.50 && customRentFoirParam <= 1.00) {
@@ -1568,6 +1568,11 @@ function computeLocalEligibility(params) {
     } else if (!isNaN(customRentFoirParam) && customRentFoirParam >= 50 && customRentFoirParam <= 100) {
         rentFoirFactor = customRentFoirParam / 100;
     }
+
+    // Co-Applicant Income and Obligations
+    const coAppIncome = Math.max(0, parseFloat(params.coAppIncome) || 0);
+    const coAppEmi = Math.max(0, parseFloat(params.coAppEmi) || 0);
+    existingEmi += coAppEmi;
 
     if (isSalaried) {
         const baseSalary = Math.max(0, parseFloat(params.loanIncome) || 0);
@@ -1610,18 +1615,18 @@ function computeLocalEligibility(params) {
         const loanInterest = Math.max(0, parseFloat(params.termLoanInterest) || 0);
         const rent = Math.max(0, parseFloat(params.rentalIncome) || 0);
 
-        const annualCashProfit = netProfit + 
-            (depr * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.depreciationFactor) +
-            (directorSalary * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.directorRemunerationFactor) +
-            (loanInterest * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.termLoanInterestFactor) +
-            (rent * rentFoirFactor);
+        // Exact Business Underwriting Formula:
+        // Monthly Core Cash Flow = 2-Yr Net Profit/24 + Depreciation/12 + Partner/Director Remuneration/12
+        // Core Cash Flow x (50% To 75% Income FOIR)
+        // + Monthly Rent x (50% To 80% Rental FOIR, 75% Auto Fix)
+        // + Co-App Income x FOIR
+        const monthlyProfit = netProfit / (params.isTwoYearProfit ? 24 : 12);
+        const monthlyDepr = depr / 12;
+        const monthlyRemun = directorSalary / 12;
+        const monthlyInterest = loanInterest / 12;
 
-        grossMonthlyIncome = Math.round(annualCashProfit / 12);
-        baseMonthlyIncome = Math.round(netProfit / 12);
-        consideredDeprMonthly = Math.round(depr / 12);
-        consideredRemunMonthly = Math.round(directorSalary / 12);
-        consideredRentMonthly = Math.round(rent * rentFoirFactor);
-        
+        const coreMonthlyCashFlow = monthlyProfit + monthlyDepr + monthlyRemun + monthlyInterest;
+
         const customFoir = parseFloat(params.customFoir || params.businessFoir);
         if (!isNaN(customFoir) && customFoir >= 0.50 && customFoir <= 1.00) {
             appliedFoir = customFoir;
@@ -1630,16 +1635,27 @@ function computeLocalEligibility(params) {
             appliedFoir = customFoir / 100;
             foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
         } else if (isTurnoverProg) {
-            // Business Turnover program uses 85% FOIR benchmarking
             appliedFoir = 0.85;
             foirLabel = '85% FOIR (Turnover Cash Flow Norm)';
         } else {
-            appliedFoir = 0.75;
-            foirLabel = '75% FOIR (Standard Auto Fix)';
+            appliedFoir = 0.70;
+            foirLabel = '70% FOIR (Standard Business Benchmark)';
         }
+
+        const consideredRentalMonthly = Math.round(rent * rentFoirFactor);
+        const consideredCoreMonthlyEligible = Math.round(coreMonthlyCashFlow * appliedFoir);
+        const consideredCoAppEligible = Math.round(coAppIncome * appliedFoir);
+
+        grossMonthlyIncome = Math.round(coreMonthlyCashFlow + (rent * rentFoirFactor) + coAppIncome);
+        baseMonthlyIncome = Math.round(monthlyProfit);
+        consideredDeprMonthly = Math.round(monthlyDepr);
+        consideredRemunMonthly = Math.round(monthlyRemun);
+        consideredRentMonthly = consideredRentalMonthly;
+
+        var businessMaxAllowableEmi = consideredCoreMonthlyEligible + consideredRentalMonthly + consideredCoAppEligible;
     }
 
-    const maxAllowableEmi = Math.round(grossMonthlyIncome * appliedFoir);
+    const maxAllowableEmi = isSalaried ? Math.round((grossMonthlyIncome + (coAppIncome * appliedFoir)) * appliedFoir) : businessMaxAllowableEmi;
     const eligibleEmiCapacity = Math.max(0, maxAllowableEmi - existingEmi);
     const emiPerLakh = calculateEmiPerLakhLocal(tenureMonths, roi);
 
@@ -2679,7 +2695,13 @@ function initLoanForm() {
         try {
             const rentFoirEl = isSalaried ? loanSalRentFoir : loanBizRentFoir;
             const chosenRentFoir = rentFoirEl ? (parseFloat(rentFoirEl.value) / 100) : 0.75;
-            const chosenOverallFoir = (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : 0.75;
+            const loanBizCustomFoir = document.getElementById('loanBizCustomFoir');
+            const chosenOverallFoir = isSalaried 
+                ? (loanSalariedCustomFoir ? (parseFloat(loanSalariedCustomFoir.value) / 100) : 0.75)
+                : (loanBizCustomFoir ? (parseFloat(loanBizCustomFoir.value) / 100) : 0.70);
+
+            const loanCoAppIncVal = parseFloat(String((document.getElementById('loanCoAppIncome') || {}).value || '').replace(/[^0-9.]/g, '')) || 0;
+            const loanCoAppEmiVal = parseFloat(String((document.getElementById('loanCoAppEmi') || {}).value || '').replace(/[^0-9.]/g, '')) || 0;
 
             const payload = {
                 loanEmpType: empType ? empType.value : '',
@@ -2698,6 +2720,8 @@ function initLoanForm() {
                 rentalFoir: chosenRentFoir,
                 depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
                 directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
+                coAppIncome: loanCoAppIncVal,
+                coAppEmi: loanCoAppEmiVal,
                 companyCategory: 'super_a',
                 customFoir: chosenOverallFoir,
                 formStartTime: userStartTime
@@ -2737,7 +2761,9 @@ function initLoanForm() {
                     bonusIncome: payload.bonusIncome,
                     rentalIncome: payload.rentalIncome,
                     depreciation: payload.depreciation,
-                    directorSalary: payload.directorSalary
+                    directorSalary: payload.directorSalary,
+                    coAppIncome: payload.coAppIncome,
+                    coAppEmi: payload.coAppEmi
                 });
                 resultData = {
                     isEligible: localCalc.isEligible,

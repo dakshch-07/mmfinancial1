@@ -107,7 +107,9 @@ module.exports = async (req, res) => {
             rentalIncome: parseFloat(String(body.rentalIncome || '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(body.depreciation || '').replace(/[^0-9.]/g, '')) || 0,
             directorSalary: parseFloat(String(body.directorSalary || '').replace(/[^0-9.]/g, '')) || 0,
-            termLoanInterest: parseFloat(String(body.termLoanInterest || '').replace(/[^0-9.]/g, '')) || 0
+            termLoanInterest: parseFloat(String(body.termLoanInterest || '').replace(/[^0-9.]/g, '')) || 0,
+            coAppIncome: parseFloat(String(body.coAppIncome || '').replace(/[^0-9.]/g, '')) || 0,
+            coAppEmi: parseFloat(String(body.coAppEmi || '').replace(/[^0-9.]/g, '')) || 0
         });
 
         const timestamp = Date.now();

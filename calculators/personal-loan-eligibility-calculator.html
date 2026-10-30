@@ -312,7 +312,37 @@
 
                     
 
-                    <div class="input-group">
+                                        <!-- Co-Applicant Income Option (Optional Toggle) -->
+                    <div class="input-group" style="background: #f8fafc; border: 1.5px dashed #94a3b8; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="salCoAppToggle">
+                            <span style="font-size: 0.82rem; font-weight: 700; color: var(--color-navy); display: flex; align-items: center; gap: 6px;">
+                                <span>👥</span> + Add Co-Applicant Income (Optional)
+                            </span>
+                            <span id="salCoAppToggleBadge" style="font-size: 0.72rem; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">+ Open</span>
+                        </div>
+                        <div id="salCoAppFields" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                            <div class="input-header">
+                                <label for="salCoAppIncomeInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Monthly Net Income (₹)</label>
+                                <span class="input-badge" id="salCoAppIncomeBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="salCoAppIncomeInput" class="calc-input" value="" placeholder="e.g. 35,000" inputmode="numeric" aria-label="Co-Applicant Monthly Net Income">
+                            </div>
+                            <input type="range" id="salCoAppIncomeSlider" class="calc-slider" min="0" max="500000" step="1000" value="0">
+                            <div class="slider-limits"><span>₹0</span><span>₹5,00,000 (Spouse / Family Member)</span></div>
+
+                            <div class="input-header" style="margin-top: 10px;">
+                                <label for="salCoAppEmiInput" style="font-size: 0.78rem; font-weight: 700;">Co-Applicant Existing Monthly Obligations (₹)</label>
+                                <span class="input-badge" id="salCoAppEmiBadge">₹0</span>
+                            </div>
+                            <div class="input-with-symbol">
+                                <span class="currency-prefix">₹</span>
+                                <input type="text" id="salCoAppEmiInput" class="calc-input" value="" placeholder="0" inputmode="numeric" aria-label="Co-Applicant Existing EMIs">
+                            </div>
+                        </div>
+                    </div>
+<div class="input-group">
                         <div class="input-header">
                             <label for="salEmiInput">Existing Monthly EMIs / Obligations</label>
                             <span class="input-badge" id="salEmiBadge">₹0</span>
