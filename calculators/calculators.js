@@ -35,10 +35,10 @@ const CONFIG = {
     foir: {
       bonusFactor: 0.5,
       rentFactor: 0.5,
-      homeLoanFoir: 0.60,
-      lapFoir: 0.60,
-      personalLoanFoir: 0.65,
-      businessFoir: 0.60
+      homeLoanFoir: 0.75,
+      lapFoir: 0.75,
+      personalLoanFoir: 0.75,
+      businessFoir: 0.75
     },
     charges: {
       stampDutyRate: 0.003,
@@ -841,21 +841,21 @@ function parseNumber(val) {
     let salFoirUserManual = false;
 
     if (salCustomFoirIn) {
-      if (salCustomFoirSl) bindSync(salCustomFoirIn, salCustomFoirSl, 60, 70, 1, recalc, true);
+      if (salCustomFoirSl) bindSync(salCustomFoirIn, salCustomFoirSl, 50, 100, 1, recalc, true);
 
       salCustomFoirIn.addEventListener('input', () => {
         salFoirUserManual = true;
         let v = parseFloat(salCustomFoirIn.value);
         if (!isNaN(v) && salCompFoirBadge) {
-          if (v > 70) v = 70;
+          if (v > 100) v = 100;
           salCompFoirBadge.textContent = v + '% FOIR';
         }
         recalc();
       });
       salCustomFoirIn.addEventListener('blur', () => {
         let v = parseFloat(salCustomFoirIn.value);
-        if (isNaN(v) || v < 60) v = 60;
-        if (v > 70) v = 70;
+        if (isNaN(v) || v < 50) v = 50;
+        if (v > 100) v = 100;
         salCustomFoirIn.value = v;
         if (salCustomFoirSl) {
           salCustomFoirSl.value = v;
@@ -1110,26 +1110,26 @@ function parseNumber(val) {
 
         // Salaried FOIR is fixed at 65% for ANY salary amount by default.
         // It ONLY changes if the user manually edits / moves the FOIR slider.
-        let salFoir = 0.65;
+        let salFoir = 0.75;
         const customVal = salCustomFoirIn ? parseFloat(salCustomFoirIn.value) : null;
         if (salFoirUserManual && customVal && !isNaN(customVal) && customVal >= 30 && customVal <= 85) {
           salFoir = customVal / 100;
         } else {
-          salFoir = 0.65;
-          if (salCustomFoirIn && salCustomFoirIn.value != 65) {
-            salCustomFoirIn.value = 65;
+          salFoir = 0.75;
+          if (salCustomFoirIn && salCustomFoirIn.value != 75) {
+            salCustomFoirIn.value = 75;
             if (salCustomFoirSl) {
-              salCustomFoirSl.value = 65;
+              salCustomFoirSl.value = 75;
               updateSliderFill(salCustomFoirSl);
             }
-            if (salCompFoirBadge) salCompFoirBadge.textContent = '65% FOIR';
+            if (salCompFoirBadge) salCompFoirBadge.textContent = '75% Auto Fix';
           }
         }
 
         appliedFoir = salFoir;
 
         // Salaried: FOIR applied to net monthly salary + 50% bonus/12 + 65% rent (50% - 80% with registered rent agreement)
-        const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.65);
+        const monthlyEquivalent = salary + (bonus / 12 * 0.5) + (rent * 0.75);
         eligibleIncome = monthlyEquivalent * appliedFoir;
       } else {
         // Business / Self-Employed Assessment: Net Profit (ITR) OR Turnover Program (2% - 7%)
@@ -1176,7 +1176,7 @@ function parseNumber(val) {
           // Add-backs: Rent & Remuneration (Rent at 50% - 80% benchmark 65%)
           const remun = parseNumber((document.getElementById('bizSalaryInput') || {}).value);
           const rent = parseNumber((document.getElementById('bizRentInput') || {}).value);
-          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.65);
+          totalMonthlyBusinessIncome += (remun / 12) + (rent * 0.75);
 
           const bT = document.getElementById('bizTurnoverBadge'); if (bT) bT.textContent = badgeWordINR(turnover1);
           const bT2 = document.getElementById('bizTurnoverYear2Badge'); if (bT2) bT2.textContent = badgeWordINR(turnover2);
@@ -1200,7 +1200,7 @@ function parseNumber(val) {
           // Add-backs: Annual Depreciation / 12, Annual Salary/Remuneration / 12, Monthly Rent (50% - 80% benchmark 65%)
           const monthlyDepr = depr / 12;
           const monthlyRemun = remun / 12;
-          const monthlyRent = rent * 0.65;
+          const monthlyRent = rent * 0.75;
 
           // Total Monthly Cash Flow for Business Underwriting
           totalMonthlyBusinessIncome = monthlyProfit + monthlyDepr + monthlyRemun + monthlyRent;

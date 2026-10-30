@@ -294,20 +294,20 @@
                     <!-- Net Salary FOIR Fit Option (Manual FOIR 65% Editable: 50% - 70%) -->
                     <div class="input-group" id="salCompCatGroup" style="display: block; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px;">
                         <div class="input-header">
-                            <label for="salCustomFoirInput" style="color: #1e3a8a; font-weight: 700;">Manual FOIR (%): (Editable 60% - 70%)</label>
-                            <span class="input-badge" id="salCompFoirBadge" style="background: #1e3a8a; color: #ffffff;">65% FOIR</span>
+                            <label for="salCustomFoirInput" style="color: #1e3a8a; font-weight: 700;">Manual FOIR (%): (Editable 50% - 100%, 75% Auto Fix)</label>
+                            <span class="input-badge" id="salCompFoirBadge" style="background: #1e3a8a; color: #ffffff;">75% Auto Fix</span>
                         </div>
                         <div class="input-with-symbol" style="margin-top: 6px;">
                             <span class="currency-prefix">%</span>
-                            <input type="number" id="salCustomFoirInput" class="calc-input" value="65" min="60" max="70" step="1" style="border-color: #93c5fd; font-weight: 700; color: #1e3a8a;" aria-label="Applied Salaried FOIR">
+                            <input type="number" id="salCustomFoirInput" class="calc-input" value="75" min="50" max="100" step="1" style="border-color: #93c5fd; font-weight: 700; color: #1e3a8a;" aria-label="Applied Salaried FOIR">
                         </div>
-                        <input type="range" id="salCustomFoirSlider" class="calc-slider" min="60" max="70" step="1" value="65" style="margin-top: 8px;">
+                        <input type="range" id="salCustomFoirSlider" class="calc-slider" min="50" max="100" step="1" value="75" style="margin-top: 8px;">
                         <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 3px;">
-                            <span>60% (Min)</span>
-                            <span>Default: 65%</span>
-                            <span>70% (Max)</span>
+                            <span>50% (Min)</span>
+                            <span>75% (Auto Fix Benchmark)</span>
+                            <span>100% (Max)</span>
                         </div>
-                        <span id="salFoirAutoHint" style="font-size: 0.72rem; color: #1e3a8a; margin-top: 4px; display: block; font-weight: 600;">Default benchmark is 65% FOIR for any salary amount. You can manually adjust between 50% and 70% as needed.</span>
+                        <span id="salFoirAutoHint" style="font-size: 0.72rem; color: #1e3a8a; margin-top: 4px; display: block; font-weight: 600;">Default benchmark is 75% Auto Fix. You can manually adjust between 50% and 100% depending on bank policy.</span>
                     </div>
 
                     
@@ -409,7 +409,7 @@
                         <span class="metric-val">₹<span id="eligEstimatedEmi">0</span></span>
                     </div>
                     <div class="metric-box">
-                        <span class="metric-title">Applicable FOIR (60-70%)</span>
+                        <span class="metric-title">Applicable FOIR (50-100%)</span>
                         <span class="metric-val"><span id="eligFoirApplied">65</span>%</span>
                     </div>
                     <div class="metric-box">
