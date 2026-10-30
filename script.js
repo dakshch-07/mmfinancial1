@@ -1554,6 +1554,11 @@ function computeLocalEligibility(params) {
     let grossMonthlyIncome = 0;
     let appliedFoir = 0.50;
     let foirLabel = '';
+    let baseMonthlyIncome = 0;
+    let consideredRentMonthly = 0;
+    let consideredBonusMonthly = 0;
+    let consideredDeprMonthly = 0;
+    let consideredRemunMonthly = 0;
 
     if (isSalaried) {
         const baseSalary = Math.max(0, parseFloat(params.loanIncome) || 0);
@@ -1562,6 +1567,10 @@ function computeLocalEligibility(params) {
         const monthlyBonus = (bonus / 12) * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.annualBonusPercent;
         const monthlyRent = rent * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.rentalIncomePercent;
         grossMonthlyIncome = baseSalary + monthlyBonus + monthlyRent;
+
+        baseMonthlyIncome = baseSalary;
+        consideredBonusMonthly = Math.round(monthlyBonus);
+        consideredRentMonthly = Math.round(monthlyRent);
 
         const slab = LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.find(
             s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
@@ -1596,6 +1605,10 @@ function computeLocalEligibility(params) {
             (rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
 
         grossMonthlyIncome = Math.round(annualCashProfit / 12);
+        baseMonthlyIncome = Math.round(netProfit / 12);
+        consideredDeprMonthly = Math.round(depr / 12);
+        consideredRemunMonthly = Math.round(directorSalary / 12);
+        consideredRentMonthly = Math.round(rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
         
         if (isTurnoverProg) {
             // Business Turnover program uses 85% FOIR benchmarking
@@ -1650,6 +1663,12 @@ function computeLocalEligibility(params) {
         appliedFoir,
         foirPercentText: `${Math.round(appliedFoir * 100)}%`,
         foirLabel,
+        baseMonthlyIncome,
+        consideredRentMonthly,
+        consideredBonusMonthly,
+        consideredDeprMonthly,
+        consideredRemunMonthly,
+        existingEmi,
         eligibleEmiCapacity,
         maxEligibleLoan,
         reqAmount,
@@ -2135,6 +2154,28 @@ function initLoanForm() {
         }
     });
 
+    // Dynamic Live Rental Income Hint Update on Typing
+    function updateRentHint(input, hintId) {
+        if (!input) return;
+        const hintEl = document.getElementById(hintId);
+        if (!hintEl) return;
+        const handler = () => {
+            const clean = input.value.replace(/[^0-9]/g, '');
+            const rentVal = clean ? parseInt(clean, 10) : 0;
+            if (rentVal > 0) {
+                const counted = Math.round(rentVal * 0.65);
+                hintEl.innerHTML = `<span style="color: #15803d; font-weight: 700;">✓ Counted: ₹${formatIndianNumber(counted)}/mo (65% benchmark with registered agreement)</span>`;
+            } else {
+                hintEl.textContent = '50% - 80% (65% benchmark) considered with registered rent agreement';
+            }
+        };
+        input.addEventListener('input', handler);
+        input.addEventListener('change', handler);
+        handler();
+    }
+    updateRentHint(loanRentIncome, 'loanRentIncomeHint');
+    updateRentHint(loanBizRentIncome, 'loanBizRentIncomeHint');
+
     // Tenure chip and optgroup sync
     function syncTenureChips(selectedVal) {
         tenureChips.forEach(chip => {
@@ -2609,6 +2650,12 @@ function initLoanForm() {
                 resultData = {
                     isEligible: localCalc.isEligible,
                     isSalaried: localCalc.isSalaried,
+                    baseMonthlyIncome: localCalc.baseMonthlyIncome || 0,
+                    consideredRentMonthly: localCalc.consideredRentMonthly || 0,
+                    consideredBonusMonthly: localCalc.consideredBonusMonthly || 0,
+                    consideredDeprMonthly: localCalc.consideredDeprMonthly || 0,
+                    consideredRemunMonthly: localCalc.consideredRemunMonthly || 0,
+                    existingEmi: localCalc.existingEmi || 0,
                     grossMonthlyIncome: localCalc.grossMonthlyIncome,
                     formattedGrossIncome: `₹${formatIndianNumber(localCalc.grossMonthlyIncome)}`,
                     foirUsed: localCalc.foirPercentText,
@@ -2844,6 +2891,97 @@ function initLoanForm() {
             badgeStep2.classList.add('active');
         }
 
+        // Helper: Generate Underwriting & FOIR Breakdown Card
+        const isSalaried = (originalPayload.loanEmpType || "").toLowerCase().includes("salaried");
+        const enteredRent = parseFloat(originalPayload.rentalIncome) || 0;
+        const countedRent = data.consideredRentMonthly || (enteredRent > 0 ? Math.round(enteredRent * 0.65) : 0);
+        const enteredBonus = parseFloat(originalPayload.bonusIncome) || 0;
+        const countedBonus = data.consideredBonusMonthly || (enteredBonus > 0 ? Math.round((enteredBonus / 12) * 0.5) : 0);
+        const enteredDepr = parseFloat(originalPayload.depreciation) || 0;
+        const countedDepr = data.consideredDeprMonthly || (enteredDepr > 0 ? Math.round(enteredDepr / 12) : 0);
+        const enteredRemun = parseFloat(originalPayload.directorSalary) || 0;
+        const countedRemun = data.consideredRemunMonthly || (enteredRemun > 0 ? Math.round(enteredRemun / 12) : 0);
+        const existingObligation = parseFloat(originalPayload.loanExistingEmi) || 0;
+        const totalGross = data.grossMonthlyIncome || 0;
+        const foirPct = data.foirUsed || "65%";
+        const foirDecimal = (parseFloat(foirPct) / 100) || 0.65;
+        const allowableEmi = Math.round(totalGross * foirDecimal);
+        const netCapacity = data.eligibleEmiCapacity || Math.max(0, allowableEmi - existingObligation);
+
+        const underwritingBreakdownHtml = `
+            <div class="underwriting-breakdown-card" style="margin-top: 14px; background: #ffffff; border: 1.5px solid #86efac; border-radius: 8px; padding: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                    <span style="font-size: 0.82rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
+                        📊 Bank Underwriting &amp; FOIR Assessment Breakdown
+                    </span>
+                    <span style="font-size: 0.72rem; color: #15803d; font-weight: 700; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">
+                        Applied FOIR: ${foirPct}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 0.76rem; color: #374151;">
+                    <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                        <span style="color: #64748b; font-size: 0.7rem; display: block; font-weight: 600;">Base Income (${isSalaried ? 'In-Hand Salary' : 'Net ITR Profit / 12'}):</span>
+                        <strong style="color: var(--color-navy); font-size: 0.88rem;">₹${formatIndianNumber(data.baseMonthlyIncome || Math.max(0, totalGross - countedRent - countedBonus - countedDepr - countedRemun))}/mo</strong>
+                    </div>
+
+                    ${enteredRent > 0 ? `
+                        <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1px solid #86efac;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #166534; font-size: 0.7rem; font-weight: 700;">🏠 Rental Income (50%-80% norm):</span>
+                                <span style="font-size: 0.68rem; color: #15803d; font-weight: 700; background: #bbf7d0; padding: 1px 5px; border-radius: 3px;">65% Counted</span>
+                            </div>
+                            <strong style="color: #15803d; font-size: 0.88rem; display: block; margin-top: 2px;">+ ₹${formatIndianNumber(countedRent)}/mo</strong>
+                            <span style="font-size: 0.68rem; color: #64748b; display: block;">From ₹${formatIndianNumber(enteredRent)}/mo registered rent</span>
+                        </div>
+                    ` : ''}
+
+                    ${isSalaried && enteredBonus > 0 ? `
+                        <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="color: #64748b; font-size: 0.7rem; display: block; font-weight: 600;">Bonus Add-back (50% / 12):</span>
+                            <strong style="color: var(--color-navy); font-size: 0.88rem;">+ ₹${formatIndianNumber(countedBonus)}/mo</strong>
+                        </div>
+                    ` : ''}
+
+                    ${!isSalaried && (enteredDepr > 0 || enteredRemun > 0) ? `
+                        <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="color: #64748b; font-size: 0.7rem; display: block; font-weight: 600;">Depreciation &amp; Remun / 12:</span>
+                            <strong style="color: var(--color-navy); font-size: 0.88rem;">+ ₹${formatIndianNumber(countedDepr + countedRemun)}/mo</strong>
+                        </div>
+                    ` : ''}
+
+                    <div style="background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <span style="color: #64748b; font-size: 0.7rem; display: block; font-weight: 600;">Total Evaluated Gross Income:</span>
+                        <strong style="color: var(--color-navy); font-size: 0.88rem;">= ₹${formatIndianNumber(totalGross)}/mo</strong>
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <span style="color: #64748b; font-size: 0.7rem; display: block; font-weight: 600;">Allowable EMI at ${foirPct} FOIR:</span>
+                        <strong style="color: #166534; font-size: 0.88rem;">₹${formatIndianNumber(allowableEmi)}/mo</strong>
+                    </div>
+
+                    <div style="background: #fef2f2; padding: 8px 10px; border-radius: 6px; border: 1px solid #fecaca;">
+                        <span style="color: #991b1b; font-size: 0.7rem; display: block; font-weight: 600;">Less Existing EMIs / Obligations:</span>
+                        <strong style="color: #b91c1c; font-size: 0.88rem;">- ₹${formatIndianNumber(existingObligation)}/mo</strong>
+                    </div>
+
+                    <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1.5px solid #16a34a; grid-column: 1 / -1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+                            <span style="color: #166534; font-size: 0.74rem; font-weight: 700;">
+                                🎯 Net Available EMI Capacity for Loan:
+                            </span>
+                            <strong style="color: #15803d; font-size: 0.95rem;">
+                                ₹${formatIndianNumber(netCapacity)} / month
+                            </strong>
+                        </div>
+                        <span style="font-size: 0.68rem; color: #475569; display: block; margin-top: 3px;">
+                            Formula: (Total Income ₹${formatIndianNumber(totalGross)} × ${foirPct} FOIR) − Existing EMI ₹${formatIndianNumber(existingObligation)} = <strong>₹${formatIndianNumber(netCapacity)}/mo net capacity</strong> &rarr; Sanction Eligibility: <strong>${data.formattedMaxLoan}</strong>.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
         // 1. Render Green Result Card
         if (resultContainer) {
             resultContainer.style.display = 'block';
@@ -2870,6 +3008,9 @@ function initLoanForm() {
                             <span class="stat-val">${data.foirUsed} Capacity</span>
                         </div>
                     </div>
+
+                    <!-- Underwriting & FOIR Assessment Breakdown Box -->
+                    ${underwritingBreakdownHtml}
 
                     <!-- Statutory Govt. & Bank Charges Breakdown Strip -->
                     <div class="statutory-charges-accordion" style="margin-top: 14px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 14px;">
@@ -3058,7 +3199,8 @@ function initLoanForm() {
                     <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid #fde68a; border-radius: 6px; padding: 12px; margin-bottom: 12px; font-size: 0.88rem; color: #78350f;">
                         <strong>Current Capacity:</strong> You qualify for approximately <strong>${data.formattedMaxLoan}</strong> (Requested: <strong>₹${formatIndianNumber(originalPayload.loanAmount)}</strong>).
                     </div>
-                    <p style="font-size: 0.84rem; font-weight: 700; color: #92400e; margin-bottom: 6px;">How you can qualify for this loan:</p>
+                    ${underwritingBreakdownHtml}
+                    <p style="font-size: 0.84rem; font-weight: 700; color: #92400e; margin-bottom: 6px; margin-top: 10px;">How you can qualify for this loan:</p>
                     <ul class="advisory-tips-list">
                         ${tipsHtml}
                     </ul>

@@ -133,6 +133,12 @@ module.exports = async (req, res) => {
             data: {
                 isEligible: result.isEligible,
                 isSalaried: result.isSalaried,
+                baseMonthlyIncome: result.baseMonthlyIncome || 0,
+                consideredRentMonthly: result.consideredRentMonthly || 0,
+                consideredBonusMonthly: result.consideredBonusMonthly || 0,
+                consideredDeprMonthly: result.consideredDeprMonthly || 0,
+                consideredRemunMonthly: result.consideredRemunMonthly || 0,
+                existingEmi: result.existingEmi || 0,
                 grossMonthlyIncome: result.grossMonthlyIncome,
                 formattedGrossIncome: `₹${formatIndianCurrencyNoSymbol(result.grossMonthlyIncome)}`,
                 foirUsed: result.foirPercentText,

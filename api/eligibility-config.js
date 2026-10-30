@@ -177,6 +177,11 @@ function computeLoanEligibility(params) {
     let grossMonthlyIncome = 0;
     let appliedFoir = 0.50;
     let foirLabel = '';
+    let baseMonthlyIncome = 0;
+    let consideredRentMonthly = 0;
+    let consideredBonusMonthly = 0;
+    let consideredDeprMonthly = 0;
+    let consideredRemunMonthly = 0;
 
     if (isSalaried) {
         const baseSalary = Math.max(0, parseFloat(params.loanIncome) || 0);
@@ -186,6 +191,10 @@ function computeLoanEligibility(params) {
         const monthlyBonus = (bonus / 12) * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.annualBonusPercent;
         const monthlyRent = rent * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.rentalIncomePercent;
         grossMonthlyIncome = baseSalary + monthlyBonus + monthlyRent;
+
+        baseMonthlyIncome = baseSalary;
+        consideredBonusMonthly = Math.round(monthlyBonus);
+        consideredRentMonthly = Math.round(monthlyRent);
 
         // Determine FOIR slab
         const slab = LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.find(
@@ -208,6 +217,7 @@ function computeLoanEligibility(params) {
         }
     } else {
         // Business / Self-Employed
+        const isTurnoverProg = (params.businessProgram === 'turnover');
         const netProfit = Math.max(0, parseFloat(params.loanIncome) || 0);
         const depr = Math.max(0, parseFloat(params.depreciation) || 0);
         const directorSalary = Math.max(0, parseFloat(params.directorSalary) || 0);
@@ -221,14 +231,23 @@ function computeLoanEligibility(params) {
             (rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
 
         grossMonthlyIncome = Math.round(annualCashProfit / 12);
+        baseMonthlyIncome = Math.round(netProfit / 12);
+        consideredDeprMonthly = Math.round(depr / 12);
+        consideredRemunMonthly = Math.round(directorSalary / 12);
+        consideredRentMonthly = Math.round(rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
 
-        // Determine FOIR slab
-        const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
-            s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
-        ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
+        if (isTurnoverProg) {
+            appliedFoir = 0.85;
+            foirLabel = '85% FOIR (Turnover Cash Flow Norm)';
+        } else {
+            // Determine FOIR slab
+            const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
+                s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
+            ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
 
-        appliedFoir = slab.foir;
-        foirLabel = slab.label;
+            appliedFoir = slab.foir;
+            foirLabel = slab.label;
+        }
     }
 
     // Eligible EMI Capacity = (Monthly Income * FOIR) - Existing Obligations
@@ -280,6 +299,11 @@ function computeLoanEligibility(params) {
         appliedFoir,
         foirPercentText: `${Math.round(appliedFoir * 100)}%`,
         foirLabel,
+        baseMonthlyIncome,
+        consideredRentMonthly,
+        consideredBonusMonthly,
+        consideredDeprMonthly,
+        consideredRemunMonthly,
         existingEmi,
         eligibleEmiCapacity,
         maxEligibleLoan,
