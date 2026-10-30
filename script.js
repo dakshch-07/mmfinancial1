@@ -2969,21 +2969,8 @@ function initLoanForm() {
         `;
     }
 
-    // STEP 2A: RENDER ELIGIBLE RESULT & DYNAMICALLY MOUNT LEAD FORM (ANTI-BYPASS)
-    function renderEligibleSuccess(data, originalPayload) {
-        const isPersonalLoan = (originalPayload.loanType || "").toLowerCase().includes("personal");
-        const prefillName = step1ApplicantName ? step1ApplicantName.value.trim() : '';
-        const prefillPhone = step1ApplicantPhone ? step1ApplicantPhone.value.replace(/[^0-9]/g, '') : '';
-        if (badgeStep1) {
-            badgeStep1.classList.remove('active');
-            badgeStep1.classList.add('completed');
-            badgeStep1.textContent = '✓ 1. Eligible';
-        }
-        if (badgeStep2) {
-            badgeStep2.classList.add('active');
-        }
-
-        // Helper: Generate Underwriting & FOIR Breakdown Card
+    // Helper: Generate Underwriting & FOIR Breakdown Card HTML (Reusable across Eligible & Advisory)
+    function generateUnderwritingBreakdownHtml(data, originalPayload) {
         const isSalaried = (originalPayload.loanEmpType || "").toLowerCase().includes("salaried");
         const rentFoirFactorVal = originalPayload.rentalFoir ? Math.round(originalPayload.rentalFoir * 100) : 75;
         const enteredRent = parseFloat(originalPayload.rentalIncome) || 0;
@@ -3001,7 +2988,7 @@ function initLoanForm() {
         const allowableEmi = Math.round(totalGross * foirDecimal);
         const netCapacity = data.eligibleEmiCapacity || Math.max(0, allowableEmi - existingObligation);
 
-        const underwritingBreakdownHtml = `
+        return `
             <div class="underwriting-breakdown-card" style="margin-top: 14px; background: #ffffff; border: 1.5px solid #86efac; border-radius: 8px; padding: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                     <span style="font-size: 0.82rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
@@ -3074,6 +3061,23 @@ function initLoanForm() {
                 </div>
             </div>
         `;
+    }
+
+    // STEP 2A: RENDER ELIGIBLE RESULT & DYNAMICALLY MOUNT LEAD FORM (ANTI-BYPASS)
+    function renderEligibleSuccess(data, originalPayload) {
+        const isPersonalLoan = (originalPayload.loanType || "").toLowerCase().includes("personal");
+        const prefillName = step1ApplicantName ? step1ApplicantName.value.trim() : '';
+        const prefillPhone = step1ApplicantPhone ? step1ApplicantPhone.value.replace(/[^0-9]/g, '') : '';
+        if (badgeStep1) {
+            badgeStep1.classList.remove('active');
+            badgeStep1.classList.add('completed');
+            badgeStep1.textContent = '✓ 1. Eligible';
+        }
+        if (badgeStep2) {
+            badgeStep2.classList.add('active');
+        }
+
+        const underwritingBreakdownHtml = generateUnderwritingBreakdownHtml(data, originalPayload);
 
         // 1. Render Green Result Card
         if (resultContainer) {
@@ -3292,7 +3296,7 @@ function initLoanForm() {
                     <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid #fde68a; border-radius: 6px; padding: 12px; margin-bottom: 12px; font-size: 0.88rem; color: #78350f;">
                         <strong>Current Capacity:</strong> You qualify for approximately <strong>${data.formattedMaxLoan}</strong> (Requested: <strong>₹${formatIndianNumber(originalPayload.loanAmount)}</strong>).
                     </div>
-                    ${underwritingBreakdownHtml}
+                    ${generateUnderwritingBreakdownHtml(data, originalPayload)}
                     <p style="font-size: 0.84rem; font-weight: 700; color: #92400e; margin-bottom: 6px; margin-top: 10px;">How you can qualify for this loan:</p>
                     <ul class="advisory-tips-list">
                         ${tipsHtml}
