@@ -469,23 +469,26 @@
                                 </div>
                             </div>
 
-                            <!-- Salaried Net Salary FOIR Fit Option (Manual FOIR 65% Editable: 50% - 70%) -->
+                            <!-- Salaried Net Salary FOIR Fit Option (Manual FOIR 75% Auto Fix, Editable: 50% - 100%) -->
                             <div class="form-row" id="salariedCompanyCatRow" style="display: grid; margin-bottom: 16px;">
                                 <div class="form-field" style="grid-column: 1 / -1; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 14px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                        <label for="loanSalariedCustomFoir" style="font-size: 0.85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0;">Manual FOIR (%): (Editable 50% - 70%)</label>
-                                        <span id="loanSalariedFoirBadge" style="font-size: 0.76rem; font-weight: 700; color: #ffffff; background: #1e3a8a; padding: 3px 10px; border-radius: 4px;">65% FOIR</span>
+                                        <label for="loanSalariedCustomFoir" style="font-size: 0.85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0;">Bank Eligibility FOIR (%): (Manually 50% to 100%, 75% Auto Fix)</label>
+                                        <span id="loanSalariedFoirBadge" style="font-size: 0.76rem; font-weight: 700; color: #ffffff; background: #1e3a8a; padding: 3px 10px; border-radius: 4px;">75% Auto Fix</span>
                                     </div>
-                                    <div style="position: relative; display: flex; align-items: center;">
-                                        <span style="position: absolute; right: 12px; font-weight: 700; color: #1e3a8a; pointer-events: none;">%</span>
-                                        <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="65" min="50" max="70" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="position: relative; width: 110px; flex-shrink: 0;">
+                                            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #1e3a8a; pointer-events: none;">%</span>
+                                            <input type="number" id="loanSalariedCustomFoir" name="loanSalariedCustomFoir" value="75" min="50" max="100" step="1" class="form-input" style="border-color: #93c5fd; padding-right: 32px; font-weight: 700; color: var(--color-navy);" aria-label="Applied Salaried FOIR">
+                                        </div>
+                                        <input type="range" id="loanSalariedCustomFoirSlider" min="50" max="100" step="1" value="75" style="flex: 1; accent-color: #1e3a8a; cursor: pointer;">
                                     </div>
                                     <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #1e3a8a; font-weight: 700; margin-top: 4px;">
                                         <span>50% (Min)</span>
-                                        <span>Default: 65%</span>
-                                        <span>70% (Max)</span>
+                                        <span>75% (Auto Fix Benchmark)</span>
+                                        <span>100% (Max)</span>
                                     </div>
-                                    <span class="field-hint" style="color: #1e3a8a; font-weight: 600; margin-top: 4px;">Default is 65% FOIR. You can manually adjust between 50% and 70% to increase or decrease eligibility.</span>
+                                    <span class="field-hint" style="color: #1e3a8a; font-weight: 600; margin-top: 4px;">75% auto fix benchmark hai. Bank norm ke mutabiq aap ise 50% ke niche aur 100% ke upar nahi jaate huye beech me manually kam ya jyada kar sakte hain.</span>
                                 </div>
                             </div>
 
@@ -512,7 +515,28 @@
                                                 <span class="input-badge" id="loanRentIncomeBadge">₹0</span>
                                             </div>
                                             <input type="text" id="loanRentIncome" name="loanRentIncome" placeholder="e.g. ₹20,000 / month" class="form-input" inputmode="numeric">
-                                            <span class="field-hint" id="loanRentIncomeHint">50% - 80% (65% benchmark) considered with registered rent agreement</span>
+                                            <span class="field-hint" id="loanRentIncomeHint">50% - 100% (75% auto fix benchmark) considered with registered rent agreement</span>
+                                            
+                                            <!-- Rental FOIR / Discounting % Manual Option (50% to 100%, 75% Auto Fix) -->
+                                            <div class="rental-foir-control-box" style="margin-top: 8px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 6px; padding: 10px;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                                    <label for="loanSalRentFoir" style="font-size: 0.78rem; font-weight: 700; color: #166534; margin-bottom: 0;">Rental FOIR / Discounting Factor (%):</label>
+                                                    <span id="loanSalRentFoirBadge" style="font-size: 0.74rem; font-weight: 700; color: #ffffff; background: #15803d; padding: 2px 8px; border-radius: 4px;">75% Auto Fix</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="position: relative; width: 95px; flex-shrink: 0;">
+                                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #166534; pointer-events: none; font-size: 0.82rem;">%</span>
+                                                        <input type="number" id="loanSalRentFoir" name="loanSalRentFoir" value="75" min="50" max="100" step="1" class="form-input" style="height: 34px; padding: 4px 22px 4px 8px; font-size: 0.82rem; font-weight: 700; border-color: #86efac; color: #166534;" aria-label="Salaried Rental FOIR percentage">
+                                                    </div>
+                                                    <input type="range" id="loanSalRentFoirSlider" min="50" max="100" step="1" value="75" style="flex: 1; accent-color: #15803d; cursor: pointer;">
+                                                </div>
+                                                <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: #166534; font-weight: 700; margin-top: 3px;">
+                                                    <span>50% (Min)</span>
+                                                    <span>75% (Auto Fix Benchmark)</span>
+                                                    <span>100% (Max)</span>
+                                                </div>
+                                                <span style="font-size: 0.68rem; color: #475569; display: block; margin-top: 2px;">Bank norm ke mutabiq 50% se 100% ke beech manually adjust karein.</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Business Additional ITR Add-backs -->
@@ -539,7 +563,28 @@
                                                 <span class="input-badge" id="loanBizRentIncomeBadge">₹0</span>
                                             </div>
                                             <input type="text" id="loanBizRentIncome" name="loanBizRentIncome" placeholder="e.g. ₹50,000 / month" class="form-input" inputmode="numeric">
-                                            <span class="field-hint" id="loanBizRentIncomeHint">50% - 80% (65% benchmark) considered with registered rent agreement</span>
+                                            <span class="field-hint" id="loanBizRentIncomeHint">50% - 100% (75% auto fix benchmark) considered with registered rent agreement</span>
+                                            
+                                            <!-- Rental FOIR / Discounting % Manual Option for Business (50% to 100%, 75% Auto Fix) -->
+                                            <div class="rental-foir-control-box" style="margin-top: 8px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 6px; padding: 10px;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                                    <label for="loanBizRentFoir" style="font-size: 0.78rem; font-weight: 700; color: #166534; margin-bottom: 0;">Rental FOIR / Discounting Factor (%):</label>
+                                                    <span id="loanBizRentFoirBadge" style="font-size: 0.74rem; font-weight: 700; color: #ffffff; background: #15803d; padding: 2px 8px; border-radius: 4px;">75% Auto Fix</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="position: relative; width: 95px; flex-shrink: 0;">
+                                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #166534; pointer-events: none; font-size: 0.82rem;">%</span>
+                                                        <input type="number" id="loanBizRentFoir" name="loanBizRentFoir" value="75" min="50" max="100" step="1" class="form-input" style="height: 34px; padding: 4px 22px 4px 8px; font-size: 0.82rem; font-weight: 700; border-color: #86efac; color: #166534;" aria-label="Business Rental FOIR percentage">
+                                                    </div>
+                                                    <input type="range" id="loanBizRentFoirSlider" min="50" max="100" step="1" value="75" style="flex: 1; accent-color: #15803d; cursor: pointer;">
+                                                </div>
+                                                <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: #166534; font-weight: 700; margin-top: 3px;">
+                                                    <span>50% (Min)</span>
+                                                    <span>75% (Auto Fix Benchmark)</span>
+                                                    <span>100% (Max)</span>
+                                                </div>
+                                                <span style="font-size: 0.68rem; color: #475569; display: block; margin-top: 2px;">Bank norm ke mutabiq 50% se 100% ke beech manually adjust karein.</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

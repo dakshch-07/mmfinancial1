@@ -831,7 +831,7 @@ function parseNumber(val) {
       });
     }
     if (lrdFoirIn && lrdFoirSl) {
-      bindSync(lrdFoirIn, lrdFoirSl, 65, 85, 1, recalc, true);
+      bindSync(lrdFoirIn, lrdFoirSl, 50, 100, 1, recalc, true);
     }
 
     const salCompCatGroup = document.getElementById('salCompCatGroup');
@@ -1997,7 +1997,7 @@ function parseNumber(val) {
       });
     }
     if (lapLrdFoirIn && lapLrdFoirSl) {
-      bindSync(lapLrdFoirIn, lapLrdFoirSl, 65, 85, 1, recalc, true);
+      bindSync(lapLrdFoirIn, lapLrdFoirSl, 50, 100, 1, recalc, true);
     }
 
     const lapReqAmtInSetup = document.getElementById('lapReqLoanInput');

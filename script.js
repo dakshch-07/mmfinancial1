@@ -1552,7 +1552,7 @@ function computeLocalEligibility(params) {
     const isSalaried = empType.toLowerCase().includes('salaried');
 
     let grossMonthlyIncome = 0;
-    let appliedFoir = 0.50;
+    let appliedFoir = 0.75;
     let foirLabel = '';
     let baseMonthlyIncome = 0;
     let consideredRentMonthly = 0;
@@ -1560,12 +1560,21 @@ function computeLocalEligibility(params) {
     let consideredDeprMonthly = 0;
     let consideredRemunMonthly = 0;
 
+    // Rental FOIR / Discounting Factor: Default 75% auto fix benchmark, bounded strictly between 50% and 100%
+    let rentFoirFactor = 0.75;
+    const customRentFoirParam = parseFloat(params.rentalFoir || params.rentalIncomePercent || params.rentalIncomeFactor);
+    if (!isNaN(customRentFoirParam) && customRentFoirParam >= 0.50 && customRentFoirParam <= 1.00) {
+        rentFoirFactor = customRentFoirParam;
+    } else if (!isNaN(customRentFoirParam) && customRentFoirParam >= 50 && customRentFoirParam <= 100) {
+        rentFoirFactor = customRentFoirParam / 100;
+    }
+
     if (isSalaried) {
         const baseSalary = Math.max(0, parseFloat(params.loanIncome) || 0);
         const bonus = Math.max(0, parseFloat(params.bonusIncome) || 0);
         const rent = Math.max(0, parseFloat(params.rentalIncome) || 0);
         const monthlyBonus = (bonus / 12) * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.annualBonusPercent;
-        const monthlyRent = rent * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.rentalIncomePercent;
+        const monthlyRent = rent * rentFoirFactor;
         grossMonthlyIncome = baseSalary + monthlyBonus + monthlyRent;
 
         baseMonthlyIncome = baseSalary;
@@ -1576,19 +1585,22 @@ function computeLocalEligibility(params) {
             s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
         ) || LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs[LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.length - 1];
 
-        // Check if custom / manual company category FOIR is passed
+        // Check if custom / manual FOIR is passed (bounded strictly 50% to 100%, 75% auto fix default)
         const customFoir = parseFloat(params.customFoir || params.salariedFoir);
         const compCat = String(params.companyCategory || params.employerCategory || '').toLowerCase();
 
-        if (!isNaN(customFoir) && customFoir >= 0.40 && customFoir <= 0.75) {
+        if (!isNaN(customFoir) && customFoir >= 0.50 && customFoir <= 1.00) {
             appliedFoir = customFoir;
-            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Custom Benchmarked)`;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (!isNaN(customFoir) && customFoir >= 50 && customFoir <= 100) {
+            appliedFoir = customFoir / 100;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
         } else if (grossMonthlyIncome > 100000 && compCat && LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat]) {
             appliedFoir = LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].foir;
             foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (${LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].label})`;
         } else {
-            appliedFoir = slab.foir;
-            foirLabel = slab.label;
+            appliedFoir = 0.75;
+            foirLabel = '75% FOIR (Standard Auto Fix)';
         }
     } else {
         const isTurnoverProg = (params.businessProgram === 'turnover');
@@ -1602,24 +1614,28 @@ function computeLocalEligibility(params) {
             (depr * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.depreciationFactor) +
             (directorSalary * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.directorRemunerationFactor) +
             (loanInterest * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.termLoanInterestFactor) +
-            (rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
+            (rent * rentFoirFactor);
 
         grossMonthlyIncome = Math.round(annualCashProfit / 12);
         baseMonthlyIncome = Math.round(netProfit / 12);
         consideredDeprMonthly = Math.round(depr / 12);
         consideredRemunMonthly = Math.round(directorSalary / 12);
-        consideredRentMonthly = Math.round(rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
+        consideredRentMonthly = Math.round(rent * rentFoirFactor);
         
-        if (isTurnoverProg) {
+        const customFoir = parseFloat(params.customFoir || params.businessFoir);
+        if (!isNaN(customFoir) && customFoir >= 0.50 && customFoir <= 1.00) {
+            appliedFoir = customFoir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (!isNaN(customFoir) && customFoir >= 50 && customFoir <= 100) {
+            appliedFoir = customFoir / 100;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (isTurnoverProg) {
             // Business Turnover program uses 85% FOIR benchmarking
             appliedFoir = 0.85;
             foirLabel = '85% FOIR (Turnover Cash Flow Norm)';
         } else {
-            const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
-                s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
-            ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
-            appliedFoir = slab.foir;
-            foirLabel = slab.label;
+            appliedFoir = 0.75;
+            foirLabel = '75% FOIR (Standard Auto Fix)';
         }
     }
 
@@ -1856,6 +1872,7 @@ function initLoanForm() {
 
     const salariedCompanyCatRow = document.getElementById('salariedCompanyCatRow');
     const loanSalariedCustomFoir = document.getElementById('loanSalariedCustomFoir');
+    const loanSalariedCustomFoirSlider = document.getElementById('loanSalariedCustomFoirSlider');
     const loanSalariedFoirBadge = document.getElementById('loanSalariedFoirBadge');
     let loanSalariedFoirManual = false;
 
@@ -1869,16 +1886,12 @@ function initLoanForm() {
         if (isSalaried && !isTurnover) {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'grid';
 
-            // Auto-select 50% - 70% FOIR on salary typing if user hasn't typed manually
-            if (!loanSalariedFoirManual && numIncome > 0) {
-                let autoF = 65;
-                if (numIncome >= 100000) autoF = 70;
-                else if (numIncome >= 50000) autoF = 65;
-                else if (numIncome >= 30000) autoF = 50;
-                else autoF = 45;
-
+            // Auto-select 75% Auto Fix benchmark unless user has manually customized
+            if (!loanSalariedFoirManual) {
+                const autoF = 75;
                 if (loanSalariedCustomFoir) loanSalariedCustomFoir.value = autoF;
-                if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${autoF}% FOIR`;
+                if (loanSalariedCustomFoirSlider) loanSalariedCustomFoirSlider.value = autoF;
+                if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${autoF}% Auto Fix`;
             }
         } else {
             if (salariedCompanyCatRow) salariedCompanyCatRow.style.display = 'none';
@@ -1886,22 +1899,93 @@ function initLoanForm() {
     }
 
     if (loanSalariedCustomFoir) {
+        const syncSalFoir = (val, isManual = true) => {
+            if (isManual) loanSalariedFoirManual = true;
+            let v = parseFloat(val);
+            if (isNaN(v)) v = 75;
+            if (v < 50) v = 50;
+            if (v > 100) v = 100;
+            loanSalariedCustomFoir.value = v;
+            if (loanSalariedCustomFoirSlider) loanSalariedCustomFoirSlider.value = v;
+            if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${v}% FOIR`;
+        };
+
         loanSalariedCustomFoir.addEventListener('input', () => {
             loanSalariedFoirManual = true;
             let v = parseFloat(loanSalariedCustomFoir.value);
             if (!isNaN(v) && loanSalariedFoirBadge) {
-                if (v > 70) v = 70;
+                if (v < 50) v = 50;
+                if (v > 100) v = 100;
                 loanSalariedFoirBadge.textContent = `${v}% FOIR`;
+                if (loanSalariedCustomFoirSlider) loanSalariedCustomFoirSlider.value = v;
             }
         });
         loanSalariedCustomFoir.addEventListener('blur', () => {
-            let v = parseFloat(loanSalariedCustomFoir.value);
-            if (isNaN(v) || v < 45) v = 45;
-            if (v > 70) v = 70;
-            loanSalariedCustomFoir.value = v;
-            if (loanSalariedFoirBadge) loanSalariedFoirBadge.textContent = `${v}% FOIR`;
+            syncSalFoir(loanSalariedCustomFoir.value, true);
         });
+
+        if (loanSalariedCustomFoirSlider) {
+            loanSalariedCustomFoirSlider.addEventListener('input', () => {
+                syncSalFoir(loanSalariedCustomFoirSlider.value, true);
+            });
+        }
     }
+
+    // Rental FOIR Controls for Salaried & Business (50% to 100%, 75% Auto Fix)
+    const loanSalRentFoir = document.getElementById('loanSalRentFoir');
+    const loanSalRentFoirSlider = document.getElementById('loanSalRentFoirSlider');
+    const loanSalRentFoirBadge = document.getElementById('loanSalRentFoirBadge');
+
+    const loanBizRentFoir = document.getElementById('loanBizRentFoir');
+    const loanBizRentFoirSlider = document.getElementById('loanBizRentFoirSlider');
+    const loanBizRentFoirBadge = document.getElementById('loanBizRentFoirBadge');
+
+    function bindRentalFoirControl(numberInput, sliderInput, badgeEl, rentTextInput, hintElId) {
+        if (!numberInput) return;
+        const syncVal = (val) => {
+            let v = parseFloat(val);
+            if (isNaN(v)) v = 75;
+            if (v < 50) v = 50;
+            if (v > 100) v = 100;
+            numberInput.value = v;
+            if (sliderInput) sliderInput.value = v;
+            if (badgeEl) badgeEl.textContent = `${v}% FOIR`;
+
+            // Update live hint
+            if (rentTextInput) {
+                const clean = rentTextInput.value.replace(/[^0-9]/g, '');
+                const rentVal = clean ? parseInt(clean, 10) : 0;
+                const hintEl = document.getElementById(hintElId);
+                if (hintEl) {
+                    if (rentVal > 0) {
+                        const counted = Math.round(rentVal * (v / 100));
+                        hintEl.innerHTML = `<span style="color: #15803d; font-weight: 700;">✓ Counted: ₹${formatIndianNumber(counted)}/mo (${v}% FOIR with registered agreement)</span>`;
+                    } else {
+                        hintEl.textContent = `50% - 100% (${v}% auto fix) considered with registered rent agreement`;
+                    }
+                }
+            }
+        };
+
+        numberInput.addEventListener('input', () => {
+            let v = parseFloat(numberInput.value);
+            if (!isNaN(v)) {
+                if (v < 50) v = 50;
+                if (v > 100) v = 100;
+                if (badgeEl) badgeEl.textContent = `${v}% FOIR`;
+                if (sliderInput) sliderInput.value = v;
+                syncVal(v);
+            }
+        });
+        numberInput.addEventListener('blur', () => syncVal(numberInput.value));
+
+        if (sliderInput) {
+            sliderInput.addEventListener('input', () => syncVal(sliderInput.value));
+        }
+    }
+
+    bindRentalFoirControl(loanSalRentFoir, loanSalRentFoirSlider, loanSalRentFoirBadge, loanRentIncome, 'loanRentIncomeHint');
+    bindRentalFoirControl(loanBizRentFoir, loanBizRentFoirSlider, loanBizRentFoirBadge, loanBizRentIncome, 'loanBizRentIncomeHint');
 
     if (income) {
         income.addEventListener('input', () => {
@@ -2592,6 +2676,10 @@ function initLoanForm() {
         if (btnCheck) btnCheck.disabled = true;
 
         try {
+            const rentFoirEl = isSalaried ? loanSalRentFoir : loanBizRentFoir;
+            const chosenRentFoir = rentFoirEl ? (parseFloat(rentFoirEl.value) / 100) : 0.75;
+            const chosenOverallFoir = (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : 0.75;
+
             const payload = {
                 loanEmpType: empType ? empType.value : '',
                 loanType: loanType ? loanType.value : '',
@@ -2606,10 +2694,11 @@ function initLoanForm() {
                 loanRoi: parseFloat(loanRoiInput ? loanRoiInput.value : 8.5),
                 bonusIncome: parseFloat(String(loanBonus ? loanBonus.value : '').replace(/[^0-9.]/g, '')) || 0,
                 rentalIncome: parseFloat(String((isSalaried ? loanRentIncome : loanBizRentIncome) ? (isSalaried ? loanRentIncome : loanBizRentIncome).value : (loanRentIncome ? loanRentIncome.value : '')).replace(/[^0-9.]/g, '')) || 0,
+                rentalFoir: chosenRentFoir,
                 depreciation: parseFloat(String(loanDepreciation ? loanDepreciation.value : '').replace(/[^0-9.]/g, '')) || 0,
                 directorSalary: parseFloat(String(loanDirectorSalary ? loanDirectorSalary.value : '').replace(/[^0-9.]/g, '')) || 0,
                 companyCategory: 'super_a',
-                customFoir: (isSalaried && loanSalariedCustomFoir) ? (parseFloat(loanSalariedCustomFoir.value) / 100) : null,
+                customFoir: chosenOverallFoir,
                 formStartTime: userStartTime
             };
 
@@ -2642,6 +2731,8 @@ function initLoanForm() {
                     loanTenure: payload.loanTenure,
                     cibilScore: payload.loanCibil,
                     loanRoi: payload.loanRoi,
+                    customFoir: payload.customFoir,
+                    rentalFoir: payload.rentalFoir,
                     bonusIncome: payload.bonusIncome,
                     rentalIncome: payload.rentalIncome,
                     depreciation: payload.depreciation,
@@ -2893,8 +2984,9 @@ function initLoanForm() {
 
         // Helper: Generate Underwriting & FOIR Breakdown Card
         const isSalaried = (originalPayload.loanEmpType || "").toLowerCase().includes("salaried");
+        const rentFoirFactorVal = originalPayload.rentalFoir ? Math.round(originalPayload.rentalFoir * 100) : 75;
         const enteredRent = parseFloat(originalPayload.rentalIncome) || 0;
-        const countedRent = data.consideredRentMonthly || (enteredRent > 0 ? Math.round(enteredRent * 0.65) : 0);
+        const countedRent = data.consideredRentMonthly || (enteredRent > 0 ? Math.round(enteredRent * (rentFoirFactorVal / 100)) : 0);
         const enteredBonus = parseFloat(originalPayload.bonusIncome) || 0;
         const countedBonus = data.consideredBonusMonthly || (enteredBonus > 0 ? Math.round((enteredBonus / 12) * 0.5) : 0);
         const enteredDepr = parseFloat(originalPayload.depreciation) || 0;
@@ -2903,8 +2995,8 @@ function initLoanForm() {
         const countedRemun = data.consideredRemunMonthly || (enteredRemun > 0 ? Math.round(enteredRemun / 12) : 0);
         const existingObligation = parseFloat(originalPayload.loanExistingEmi) || 0;
         const totalGross = data.grossMonthlyIncome || 0;
-        const foirPct = data.foirUsed || "65%";
-        const foirDecimal = (parseFloat(foirPct) / 100) || 0.65;
+        const foirPct = data.foirUsed || "75%";
+        const foirDecimal = (parseFloat(foirPct) / 100) || 0.75;
         const allowableEmi = Math.round(totalGross * foirDecimal);
         const netCapacity = data.eligibleEmiCapacity || Math.max(0, allowableEmi - existingObligation);
 
@@ -2915,7 +3007,7 @@ function initLoanForm() {
                         📊 Bank Underwriting &amp; FOIR Assessment Breakdown
                     </span>
                     <span style="font-size: 0.72rem; color: #15803d; font-weight: 700; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">
-                        Applied FOIR: ${foirPct}
+                        Applied Bank FOIR: ${foirPct}
                     </span>
                 </div>
 
@@ -2928,11 +3020,11 @@ function initLoanForm() {
                     ${enteredRent > 0 ? `
                         <div style="background: #f0fdf4; padding: 8px 10px; border-radius: 6px; border: 1px solid #86efac;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: #166534; font-size: 0.7rem; font-weight: 700;">🏠 Rental Income (50%-80% norm):</span>
-                                <span style="font-size: 0.68rem; color: #15803d; font-weight: 700; background: #bbf7d0; padding: 1px 5px; border-radius: 3px;">65% Counted</span>
+                                <span style="color: #166534; font-size: 0.7rem; font-weight: 700;">🏠 Rental Income (50%-100% norm):</span>
+                                <span style="font-size: 0.68rem; color: #15803d; font-weight: 700; background: #bbf7d0; padding: 1px 5px; border-radius: 3px;">${rentFoirFactorVal}% Counted</span>
                             </div>
                             <strong style="color: #15803d; font-size: 0.88rem; display: block; margin-top: 2px;">+ ₹${formatIndianNumber(countedRent)}/mo</strong>
-                            <span style="font-size: 0.68rem; color: #64748b; display: block;">From ₹${formatIndianNumber(enteredRent)}/mo registered rent</span>
+                            <span style="font-size: 0.68rem; color: #64748b; display: block;">From ₹${formatIndianNumber(enteredRent)}/mo registered rent (at ${rentFoirFactorVal}%)</span>
                         </div>
                     ` : ''}
 

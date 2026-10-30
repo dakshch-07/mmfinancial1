@@ -101,6 +101,8 @@ module.exports = async (req, res) => {
             loanTenure,
             cibilScore: loanCibil,
             customRoi: !isNaN(customRoi) ? customRoi : undefined,
+            customFoir: body.customFoir !== undefined ? parseFloat(body.customFoir) : undefined,
+            rentalFoir: body.rentalFoir !== undefined ? parseFloat(body.rentalFoir) : undefined,
             bonusIncome: parseFloat(String(body.bonusIncome || '').replace(/[^0-9.]/g, '')) || 0,
             rentalIncome: parseFloat(String(body.rentalIncome || '').replace(/[^0-9.]/g, '')) || 0,
             depreciation: parseFloat(String(body.depreciation || '').replace(/[^0-9.]/g, '')) || 0,

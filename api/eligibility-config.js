@@ -175,7 +175,7 @@ function computeLoanEligibility(params) {
     const isSalaried = empType.toLowerCase().includes('salaried');
 
     let grossMonthlyIncome = 0;
-    let appliedFoir = 0.50;
+    let appliedFoir = 0.75;
     let foirLabel = '';
     let baseMonthlyIncome = 0;
     let consideredRentMonthly = 0;
@@ -183,13 +183,22 @@ function computeLoanEligibility(params) {
     let consideredDeprMonthly = 0;
     let consideredRemunMonthly = 0;
 
+    // Rental FOIR / Discounting Factor: Default 75% auto fix benchmark, bounded strictly between 50% and 100%
+    let rentFoirFactor = 0.75;
+    const customRentFoirParam = parseFloat(params.rentalFoir || params.rentalIncomePercent || params.rentalIncomeFactor);
+    if (!isNaN(customRentFoirParam) && customRentFoirParam >= 0.50 && customRentFoirParam <= 1.00) {
+        rentFoirFactor = customRentFoirParam;
+    } else if (!isNaN(customRentFoirParam) && customRentFoirParam >= 50 && customRentFoirParam <= 100) {
+        rentFoirFactor = customRentFoirParam / 100;
+    }
+
     if (isSalaried) {
         const baseSalary = Math.max(0, parseFloat(params.loanIncome) || 0);
         const bonus = Math.max(0, parseFloat(params.bonusIncome) || 0);
         const rent = Math.max(0, parseFloat(params.rentalIncome) || 0);
 
         const monthlyBonus = (bonus / 12) * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.annualBonusPercent;
-        const monthlyRent = rent * LOAN_ELIGIBILITY_CONFIG.salariedAddBacks.rentalIncomePercent;
+        const monthlyRent = rent * rentFoirFactor;
         grossMonthlyIncome = baseSalary + monthlyBonus + monthlyRent;
 
         baseMonthlyIncome = baseSalary;
@@ -201,19 +210,22 @@ function computeLoanEligibility(params) {
             s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
         ) || LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs[LOAN_ELIGIBILITY_CONFIG.salariedFoirSlabs.length - 1];
 
-        // Check if custom / manual company category FOIR is passed
+        // Check if custom / manual FOIR is passed (bounded strictly 50% to 100%, 75% auto fix default)
         const customFoir = parseFloat(params.customFoir || params.salariedFoir);
         const compCat = String(params.companyCategory || params.employerCategory || '').toLowerCase();
 
-        if (!isNaN(customFoir) && customFoir >= 0.40 && customFoir <= 0.75) {
+        if (!isNaN(customFoir) && customFoir >= 0.50 && customFoir <= 1.00) {
             appliedFoir = customFoir;
-            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Custom Benchmarked)`;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (!isNaN(customFoir) && customFoir >= 50 && customFoir <= 100) {
+            appliedFoir = customFoir / 100;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
         } else if (grossMonthlyIncome > 100000 && compCat && LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat]) {
             appliedFoir = LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].foir;
             foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (${LOAN_ELIGIBILITY_CONFIG.companyCategories[compCat].label})`;
         } else {
-            appliedFoir = slab.foir;
-            foirLabel = slab.label;
+            appliedFoir = 0.75;
+            foirLabel = '75% FOIR (Standard Auto Fix)';
         }
     } else {
         // Business / Self-Employed
@@ -228,25 +240,27 @@ function computeLoanEligibility(params) {
             (depr * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.depreciationFactor) +
             (directorSalary * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.directorRemunerationFactor) +
             (loanInterest * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.termLoanInterestFactor) +
-            (rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
+            (rent * rentFoirFactor);
 
         grossMonthlyIncome = Math.round(annualCashProfit / 12);
         baseMonthlyIncome = Math.round(netProfit / 12);
         consideredDeprMonthly = Math.round(depr / 12);
         consideredRemunMonthly = Math.round(directorSalary / 12);
-        consideredRentMonthly = Math.round(rent * LOAN_ELIGIBILITY_CONFIG.businessAddBacks.rentalIncomeFactor);
+        consideredRentMonthly = Math.round(rent * rentFoirFactor);
 
-        if (isTurnoverProg) {
+        const customFoir = parseFloat(params.customFoir || params.businessFoir);
+        if (!isNaN(customFoir) && customFoir >= 0.50 && customFoir <= 1.00) {
+            appliedFoir = customFoir;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (!isNaN(customFoir) && customFoir >= 50 && customFoir <= 100) {
+            appliedFoir = customFoir / 100;
+            foirLabel = `${Math.round(appliedFoir * 100)}% FOIR (Manual Custom)`;
+        } else if (isTurnoverProg) {
             appliedFoir = 0.85;
             foirLabel = '85% FOIR (Turnover Cash Flow Norm)';
         } else {
-            // Determine FOIR slab
-            const slab = LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.find(
-                s => grossMonthlyIncome >= s.min && grossMonthlyIncome <= s.max
-            ) || LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs[LOAN_ELIGIBILITY_CONFIG.businessFoirSlabs.length - 1];
-
-            appliedFoir = slab.foir;
-            foirLabel = slab.label;
+            appliedFoir = 0.75;
+            foirLabel = '75% FOIR (Standard Auto Fix)';
         }
     }
 
