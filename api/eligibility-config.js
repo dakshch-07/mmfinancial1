@@ -159,7 +159,7 @@ function computeLoanEligibility(params) {
     const empType = String(params.empType || '').trim();
     const loanType = String(params.loanType || 'Home Loan').trim();
     const reqAmount = Math.max(0, parseFloat(params.loanAmount) || 0);
-    const existingEmi = Math.max(0, parseFloat(params.loanExistingEmi) || 0);
+    let existingEmi = Math.max(0, parseFloat(params.loanExistingEmi) || 0);
     const tenureMonths = parseTenureToMonths(params.loanTenure);
     const cibil = String(params.cibilScore || params.cibil || '750+').trim();
     
